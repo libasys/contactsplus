@@ -1,0 +1,16 @@
+/**
+ * Copyright (c) 2012 Georg Ehrke <ownclouddev at georgswebsite dot de>
+ * This file is licensed under the Affero General Public License version 3 or
+ * later.
+ * See the COPYING-README file.
+ */
+#contacts_import_newaddrform, #contacts_import_mergewarning, #contacts_import_process, #contacts_import_done{display:none;}
+#contacts_import_process_message, #contacts_import_status, #contacts_import_form_message, #contacts_import_mergewarning{text-align:center;}
+#contacts_import_form_message{font-weight: bold;}
+#contacts_import_newaddressbook{width:415px;float:right;}
+#contacts_import_mergewarning{clear: both;}
+.contacts_import_warning{border-color: #fc3333;}
+#contacts_import_dialog{
+	padding:0;
+	margin:0;
+}

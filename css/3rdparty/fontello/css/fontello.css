@@ -1,0 +1,120 @@
+@font-face {
+  font-family: 'fontello';
+  src: url('../font/fontello.eot?33738297');
+  src: url('../font/fontello.eot?33738297#iefix') format('embedded-opentype'),
+       url('../font/fontello.woff?33738297') format('woff'),
+       url('../font/fontello.ttf?33738297') format('truetype'),
+       url('../font/fontello.svg?33738297#fontello') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'fontello';
+    src: url('../font/fontello.svg?33738297#fontello') format('svg');
+  }
+}
+*/
+ 
+ [class^="ioc-"]:before, [class*=" ioc-"]:before {
+  font-family: "fontello";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+ margin:0;
+  text-align: center;
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+ 
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+ 
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+ 
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+
+ .ioc {
+  display: inline-block;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
+}
+
+.ioc-rotate-90 {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+  -webkit-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+.ioc-rotate-180{
+filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+  -webkit-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  transform: rotate(180deg);	
+}
+.ioc-rotate-270 {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+  -webkit-transform: rotate(270deg);
+  -ms-transform: rotate(270deg);
+  transform: rotate(270deg);
+}
+
+:root .ioc-rotate-90,
+:root .ioc-rotate-270
+{
+  filter: none;
+}
+ 
+.ioc-book:before { content: '\e800'; } /* '' */
+.ioc-th-list:before { content: '\e801'; } /* '' */
+.ioc-th-large:before { content: '\e802'; } /* '' */
+.ioc-cog:before { content: '\e803'; } /* '' */
+.ioc-star:before { content: '\e804'; } /* '' */
+.ioc-close:before { content: '\e805'; } /* '' */
+.ioc-refresh:before { content: '\e806'; } /* '' */
+.ioc-user:before { content: '\e807'; } /* '' */
+.ioc-users:before { content: '\e808'; } /* '' */
+.ioc-spinner:before { content: '\e809'; } /* '' */
+.ioc-sort:before { content: '\e80a'; } /* '' */
+.ioc-delete:before { content: '\e80b'; } /* '' */
+.ioc-edit:before { content: '\e80c'; } /* '' */
+.ioc-share:before { content: '\e80d'; } /* '' */
+.ioc-add:before { content: '\e80e'; } /* '' */
+.ioc-upload:before { content: '\e80f'; } /* '' */
+.ioc-publiclink:before { content: '\e810'; } /* '' */
+.ioc-info:before { content: '\e811'; } /* '' */
+.ioc-upload-cloud:before { content: '\e812'; } /* '' */
+.ioc-download-cloud:before { content: '\e813'; } /* '' */
+.ioc-export:before { content: '\e814'; } /* '' */
+.ioc-search:before { content: '\e815'; } /* '' */
+.ioc-mobile:before { content: '\e816'; } /* '' */
+.ioc-phone:before { content: '\e817'; } /* '' */
+.ioc-mail:before { content: '\e818'; } /* '' */
+.ioc-address:before { content: '\e819'; } /* '' */
+.ioc-down-open:before { content: '\e81a'; } /* '' */
+.ioc-left-open:before { content: '\e81b'; } /* '' */
+.ioc-right-open:before { content: '\e81c'; } /* '' */
+.ioc-up-open:before { content: '\e81d'; } /* '' */
+.ioc-checkmark:before { content: '\e81f'; } /* '' */
