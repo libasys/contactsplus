@@ -11,7 +11,7 @@ Version Info:
 
 Setup Info:
 ===========
-This version of the calendar app is only compatible with upcoming ownCloud Version 8.1 or later!
+This version of the contacts app is only compatible with upcoming ownCloud Version 8.1 or later!
 
 
 Installation:
