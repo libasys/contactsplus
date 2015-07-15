@@ -10,6 +10,7 @@
  */
  namespace OCA\ContactsPlus;
  
+
 class Import{
 	/*
 	 * @brief counts the absolute number of parsed elements
@@ -127,6 +128,9 @@ class Import{
 	 * @return boolean
 	 */
 	public function import() {
+		if (is_null($this->userid)) {
+			throw new \Exception('No user id set');
+		}
 		if(!$this->isValid()) {
 			return false;
 		}
