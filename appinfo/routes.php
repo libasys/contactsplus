@@ -15,7 +15,8 @@ $application->registerRoutes($this, ['routes' => [
 	['name' => 'contacts#newContactSave', 'url' => '/newcontactsave', 'verb' => 'POST'],
 	['name' => 'contacts#getEditFormContact', 'url' => '/geteditformcontact', 'verb' => 'POST'],
 	['name' => 'contacts#editContactSave', 'url' => '/editcontactsave', 'verb' => 'POST'],
-	['name' => 'contacts#showContact', 'url' => '/showcontact', 'verb' => 'POST'],	
+//	['name' => 'contacts#showContact', 'url' => '/showcontact', 'verb' => 'POST'],	
+	['name' => 'contacts#showContact', 'url' => '/showcontact/{id}', 'verb' => 'GET'],	
 	['name' => 'contacts#deleteContact', 'url' => '/deletecontact', 'verb' => 'POST'],	
 	['name' => 'contacts#deleteContactFromGroup', 'url' => '/deletecontactfromgroup', 'verb' => 'POST'],
 	['name' => 'contacts#addProbertyToContact', 'url' => '/addprobertytocontact', 'verb' => 'POST'],
@@ -35,15 +36,24 @@ $application->registerRoutes($this, ['routes' => [
 	['name' => 'addressbook#getCategories', 'url' => '/getcategoriesaddrbook', 'verb' => 'POST'],
 	['name' => 'addressbook#addIosGroupsSupport', 'url' => '/addiosgroupssupport', 'verb' => 'POST'],
 	['name' => 'addressbook#prepareIosGroups', 'url' => '/prepareiosgroups', 'verb' => 'POST'],	
-	['name' => 'addressbook#saveSortOrderGroups', 'url' => '/savesortordergroups', 'verb' => 'POST'],			
+	['name' => 'addressbook#saveSortOrderGroups', 'url' => '/savesortordergroups', 'verb' => 'POST'],
+	//Appi 1.0
+	['name' => 'contacts_api#version', 'url' => '/api/1.0/version', 'verb' => 'GET'],
+	['name' => 'contacts_api#contact', 'url' => '/api/1.0/contact/{id}', 'verb' => 'GET'],
+	array('name' => 'contacts_api#preflighted_cors',
+    'url' => '/api/1.0/{path}',
+    'verb' => 'OPTIONS',
+    'requirements' => array('path' => '.+'))
 	]]);
 
 
+
 \OCP\API::register('get',
-		'/apps/kontakte/api/v1/shares',
+		'/apps/contactsplus/api/v1/shares',
 		array('\OCA\ContactsPlus\API\Local', 'getAllShares'),
 		'contactsplus');
 \OCP\API::register('get',
-		'/apps/kontakte/api/v1/shares/{id}',
+		'/apps/contactsplus/api/v1/shares/{id}',
 		array('\OCA\ContactsPlus\API\Local', 'getShare'),
 		'contactsplus');	
+//\OCP\API::register('get','/apps/contactsplus/api/v1/contact/{id}',array('\OCA\ContactsPlus\API\Contact', 'getContact'),'contactsplus');			

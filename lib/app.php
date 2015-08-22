@@ -39,20 +39,21 @@ class App{
 	public static function searchProperties($searchquery){
 		
 		
-		$ids=AddressBook::activeIds(\OCP\USER::getUser());
+		$ids = AddressBook::activeIds(\OCP\USER::getUser());
+		
 		$id_sql = join(',', array_fill(0, count($ids), '?'));
 		
-		$SQL="SELECT  `c`.`id`,`c`.`fullname` FROM `".self::ContactsTable."` c
+		$SQL="SELECT  `c`.`id`,`c`.`fullname`,`cp`.`name`,`cp`.`value` FROM `".self::ContactsTable."` c
 		           LEFT JOIN `".self::ContactsProbTable."` cp ON  `c`.`id`=`cp`.`contactid`
 		           WHERE  `c`.`addressbookid` IN (".$id_sql.")  AND `cp`.`value` LIKE '%".addslashes($searchquery)."%' AND `c`.`component`='VCARD' GROUP BY `c`.`id`";
-				   //\OCP\Util::writeLog(self::$appname,'SQL->:'.$SQL, \OCP\Util::DEBUG);
+				
 		 $stmt = \OCP\DB::prepare($SQL);
 		 //array_push($ids,$searchquery);
 		$result = $stmt->execute($ids);
 		$cards = array();
 		if(!is_null($result)) {
 			while( $row = $result->fetchRow()) {
-				
+				//if($row[''])
 				$cards[] = $row;
 			}
 		}
@@ -785,9 +786,10 @@ class App{
 				 	
 				$contacts = array();
 				$counterAlle=0;
-				$aLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
-				
+				//$aLetter=array('Ä','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+				$aLetter = [];
 				if($contacts_alphabet) {
+					$oldLetter = '';
 					foreach($contacts_alphabet as $contact) {
 						try {
 							$vcard = VObject\Reader::read($contact['carddata']);
@@ -800,7 +802,13 @@ class App{
 								 $imgSrc=$image->__toString();
 								 $imgBuild='data:'.$image->mimeType().';base64,' .$imgSrc;
 							}
-							$sLetter=strtoupper(substr($contact['fullname'],0,1));
+							$sLetter=strtoupper(mb_substr($contact['fullname'],0,1,"UTF-8"));
+							
+							
+							if($sLetter !== $oldLetter){
+								$aLetter[]=$sLetter;
+							}
+							
 							//\OCP\Util::writeLog(self::$appname,'LETTER: '. $sLetter.':'.$contact['fullname'], \OCP\Util::DEBUG);
 							$contacts[$sLetter][] = array(
 									'id' => $contact['id'],
@@ -813,6 +821,8 @@ class App{
 									'lastname' =>  $contact['lastname'],
 									'data' => $details,
 								);
+								
+								$oldLetter = $sLetter;
 								$counterAlle++;
 						} catch (Exception $e) {
 							continue;
@@ -821,11 +831,7 @@ class App{
 				
 				
 				  $oldLetter='';
-				  
-				 
-				 
-				   
-				   $buildingOutput='<ul>';
+				  $buildingOutput='<ul>';
 				  foreach($aLetter as $letterInfo){
 				  	
 					    $bFound = false;
@@ -845,6 +851,7 @@ class App{
 							$buildingOutput.='<li class="letter hidden" data-scroll="'.$letterInfo.'"><span>'.$letterInfo.'</span></li>';
 						}
 				  }
+				   $buildingOutput.='<li><span class="noitem hidden">'.(string)self::$l10n->t('No Cards found!').'</span></li>';
 				   $buildingOutput.='</ul>';
 				   }else{
 				   	$buildingOutput='<ul>';
@@ -862,14 +869,15 @@ class App{
    }
 
    public static function renderSingleCard($CONTACTDATA,$contactInfo, $addressBookPerm, $aFavourites){
-   		$catOutput='';
-		
+   		$catOutput = '';
+		$hiddenClass = 'hidden';
 		if(isset($CONTACTDATA['CATEGORIES'][0]['value']) && count($CONTACTDATA['CATEGORIES'][0]['value'])>0){
-			
+			$hiddenClass ='';
 			foreach($CONTACTDATA['CATEGORIES'][0]['value'] as $categories){
+				
 				$backgroundColor=	self::genColorCodeFromText(trim($categories),80);
 				$color=self::generateTextColor($backgroundColor);
-				$catOutput.='<span class="colorgroup" data-category="'.$categories.'"  style="background-color:'.$backgroundColor.';color:'.$color.';" title="'.$categories.'">'.substr($categories, 0,1).'</span> ';
+				$catOutput.='<span class="colorgroup" data-category="'.$categories.'"  style="background-color:'.$backgroundColor.';color:'.$color.';" title="'.$categories.'">'.mb_substr($categories, 0,1,"UTF-8").'</span> ';
 			}
 		}
 		
@@ -917,7 +925,7 @@ class App{
 			
 			unset($aNameOutput);
 		}
-		
+		/*
 		 $aDefOrgArray=array('0'=>'orgname','1'=>'abteilung');
 		if(isset($CONTACTDATA['ORG'][0]['value']) && count($CONTACTDATA['ORG'][0]['value'])>0){
 			foreach($CONTACTDATA['ORG'][0]['value'] as $key => $val){
@@ -932,7 +940,7 @@ class App{
 			
 			
 			unset($aNameOutput);
-		}
+		}*/
 		
 
 		$favLink='<a class="favourite"><i class="ioc ioc-star" title="add to favourite"></i></a>';
@@ -960,16 +968,16 @@ class App{
 		$DisplayName ='';
 		//\OCP\Util::writeLog(self::$appname,'LASTNAME: '.empty($contactInfo['lastname']), \OCP\Util::DEBUG);
 		
-		if(empty($contactInfo['surename']) && empty($contactInfo['lastname'])){
+		//if(empty($contactInfo['surename']) && empty($contactInfo['lastname'])){
 			$DisplayName = $contactInfo['fullname'];
-		}
+		//}
 		
 		if(!empty($contactInfo['surename'])){
-			$DisplayName = $contactInfo['surename'].' ';
+		//	$DisplayName = $contactInfo['surename'].' ';
 		}
 		
 		if(!empty($contactInfo['lastname'])){
-			$DisplayName .= $contactInfo['lastname'];
+			//$DisplayName .= $contactInfo['lastname'];
 		}
 		
 		
@@ -977,10 +985,10 @@ class App{
 		 <span class="rowHeader">
 		 	 <span class="head-picture">'.$thumbHead.'</span>
 			 <span class="fullname" data-id="'.$contactInfo['id'].'"><a>'.strip_tags($DisplayName).'</a></span>
-			  <span class="categories">'.$catOutput.'</span>
+			  <span class="categories '.$hiddenClass.'">'.$catOutput.'</span>
 			   <span class="option">'.$editLink.' '.$delLink.'</span>
 		   </span>
-		   <span class="rowBody">
+		   <span class="rowBody" data-id="'.$contactInfo['id'].'">
 			 <span class="picture">'.$thumb.'</span>
 			 <span class="name">'.$sNameOutput.'</span>
 			 <span class="address">'.$sAddrOutput.'</span>

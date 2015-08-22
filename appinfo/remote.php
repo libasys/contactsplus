@@ -8,7 +8,7 @@
 
 
 
-
+/*
 if(substr(OCP\Util::getRequestUri(),0,strlen(OC_App::getAppWebPath('contactsplus').'/carddav.php')) === OC_App::getAppWebPath('contactsplus'). '/carddav.php') {
 	$baseuri = OC_App::getAppWebPath('contactsplus').'/carddav.php';
 }
@@ -16,7 +16,7 @@ if(substr(OCP\Util::getRequestUri(),0,strlen(OC_App::getAppWebPath('contactsplus
 // only need authentication apps
 $RUNTIME_APPTYPES=array('authentication');
 OC_App::loadApps($RUNTIME_APPTYPES);
-
+*/
 // Backends
 $authBackend = new \OC\Connector\Sabre\Auth();
 $principalBackend = new \OC\Connector\Sabre\Principal(
@@ -47,13 +47,14 @@ $server->setBaseUri($baseuri);
 
 
 // Add plugins
-
+$defaults = new OC_Defaults();
 $server->addPlugin(new \OC\Connector\Sabre\MaintenancePlugin());
-$server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend,'ownCloud'));
+$server->addPlugin(new \OC\Connector\Sabre\DummyGetResponsePlugin());
+$server->addPlugin(new \Sabre\DAV\Auth\Plugin($authBackend,$defaults->getName()));
 $server->addPlugin(new \Sabre\CardDAV\Plugin());
 $server->addPlugin(new \Sabre\DAVACL\Plugin());
-//$server->addPlugin(new \Sabre\DAV\Browser\Plugin(true)); // Show something in the Browser, but no upload
 $server->addPlugin(new \Sabre\CardDAV\VCFExportPlugin());
+
 $server->addPlugin(new \OC\Connector\Sabre\ExceptionLoggerPlugin('carddav', \OC::$server->getLogger()));
 $server->addPlugin(new \OC\Connector\Sabre\AppEnabledPlugin(
 	'contactsplus',

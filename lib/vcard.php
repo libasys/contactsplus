@@ -101,13 +101,17 @@ class VCard {
 		$cards = array();
 		if(!is_null($result)) {
 			while( $row = $result->fetchRow()) {
-				
+				$row['sortFullname'] = mb_substr($row['fullname'],0,3,"UTF-8");
 				$cards[] = $row;
 				
 			}
 		}
-
+		usort($cards, array('\OCA\ContactsPlus\Vcard', 'compareContactsFullname'));
 		return $cards;
+	}
+
+	public static function compareContactsFullname($a, $b) {
+			return \OCP\Util::naturalSortCompare($a['sortFullname'], $b['sortFullname']);
 	}
 
   public static function allByFavourite(){
@@ -774,24 +778,25 @@ class VCard {
 		$surename = '';	
 	
 			
-			if(isset($card->N)){
-				$temp=explode(';',$card->N);
-				if(!empty($temp[0])){	
-					if($fn === ''){
-						$fn = $temp[0].' '.$temp[1];
-						$card->FN = $fn;
-					}
-					$lastname = $temp[0];
-					$surename = $temp[1];
-					$fn = $temp[0].' '.$temp[1];	
+		if(isset($card->N)){
+			$temp=explode(';',$card->N);
+			if(!empty($temp[0])){	
+				
+				$lastname = $temp[0];
+				$surename = $temp[1];
+				if($fn === ''){
+					$fn = $lastname.' '.$surename;
+					$card->FN = $fn;
 				}
+				
 			}
-	
-		if(isset($card->ORG) && $fn === '' && $lastname === ''){
+		}
+
+		if(isset($card->ORG)){
 			$temp=explode(';',$card->ORG);		
 			$fn = $temp[0];
 			if(!isset($card->FN)){
-				 $card->FN = $temp[0];
+				 $card->FN = $fn;
 			}
 		}
 		

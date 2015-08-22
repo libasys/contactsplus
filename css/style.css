@@ -9,7 +9,7 @@
 	margin-left:6px;
 	
 }
-.letter.hidden{
+.letter.hidden,.contactsrow.hidden, .noitem.hidden{
 	display:none;
 }
 #loading {
@@ -25,7 +25,7 @@
 	overflow: auto;
 	height:100%;
 	text-overflow: ellipsis;
-	width:300px;
+	width:600px;
 	right:0;
 	padding-top: 20px;
 	box-sizing: border-box;
@@ -469,16 +469,28 @@ li.contactsrow{
 	padding:5px 10px;;
 	border-radius:8px;
 }
-.dropHover{
-	padding-bottom:30px;
+#cgroups .dropcontainer.dropHover{
+	font-size:16px;
+	background:#fff;
 	font-weight:normal;
 }
-.activeHover{
+
+#cgroups .dropcontainer.activeHover{
 	color:#C24733;
-	font-size:14px;
+	
 }
 
+/*activeHoverAddr*/
+#cAddressbooks .dropcontainerAddressBook.activeHoverAddr{
+	color:#0098E4;
 
+}
+
+#cAddressbooks .dropcontainerAddressBook.dropHoverAddr{
+	font-size:16px;
+	background:#fff;
+	font-weight:normal;
+}
 
 li.contactsrow.listview{
 	width:98%;
@@ -514,19 +526,26 @@ li.contactsrow .rowHeader .head-picture{
 li.contactsrow .fullname{
 	background:transparent;
 	display:block;
-	text-decoration:underline;
+	
 	text-shadow:1px 1px 1px #fff;
 	padding-left:5px;
 	white-space: nowrap;
    text-overflow: ellipsis; 
    -o-text-overflow: ellipsis;
    overflow:hidden;
-	text-transform:uppercase;
-	color:#;
+	
 	float:left;
 	width:70%;
+	
+	cursor:move;
+	
+}
+li.contactsrow span.rowBody{
 	cursor:pointer;
 	
+	display:inline-block;
+	
+	width:100%;
 }
 
 li.contactsrow .categories{
@@ -564,7 +583,7 @@ li.contactsrow .picture{
 	text-align:center;
 	min-height:120px;
 	padding:1%;
-	
+
 }
 
 li.contactsrow i.ioc-star{

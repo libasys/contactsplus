@@ -43,18 +43,22 @@ class Provider extends \OCP\Search\Provider {
 		
 		foreach($results as $result) {
 			$vcard = VCard::find($result['id']);
-			$link = \OC::$server->getURLGenerator()->linkToRoute(ContactsApp::$appname.'.page.index').'#'.urlencode($vcard['id']);
+			
+			$link = '#contactsplus-'.intval($vcard['id']);
 		
-			$props = array();
-			foreach(array('EMAIL', 'NICKNAME', 'ORG') as $searchvar) {
-				if(isset($result[$searchvar]) && count($result[$searchvar]) > 0 && strlen($result[$searchvar][0]) > 3) {
-					$props = array_merge($props, $result[$searchvar]);
+			$props = '';
+			
+			
+			foreach(array('EMAIL', 'NICKNAME', 'ORG','TEL') as $searchvar) {
+				if(isset($result['name']) &&  $searchvar == $result['name']) {
+					//\OCP\Util::writeLog(ContactsApp::$appname,'FOUND id: ' . $result['value'], \OCP\Util::DEBUG);	
+					$props .= $searchvar.':'.$result['value'].' ';
 				}
 			}
-			$props = array_map($unescape, $props);
+			
 			
 			$returnData['id']=$vcard['id'];
-			$returnData['description']=$vcard['fullname'].' '.implode(', ', $props);
+			$returnData['description']=$vcard['fullname'].' '.$props;
 			$returnData['link']=$link;
 					
 		     $results[]=new Result($returnData);

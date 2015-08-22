@@ -7,10 +7,8 @@
 	<input id="contactphoto_fileupload" type="file" accept="image/*" name="imagefile" style="display:none;" />
 </form>
 <iframe name="file_upload_target" id='file_upload_target' src=""></iframe>
-<?php 
-$aLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
-?>
 
+<div id="searchresults" data-appfilter="contactsplus"></div>
 <div id="notification" style="display:none;"></div>
 <div id="loading">
 	<i style="margin-top:20%;" class=" ioc-spinner ioc-spin"></i>
@@ -67,7 +65,16 @@ $aLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','
 				data-uri="<?php p($addressbook['uri']) ?>"
 				data-owner="<?php p($addressbook['userid']) ?>"
 				>
-				
+				<?php
+						$checkBox = '';
+						if($addressbook['userid'] === OCP\USER::getUser()){
+							if($addressbook['active']){
+								 $checked = 'checked="checked"';
+							}
+							$checkBox='<input class="regular-checkbox isActiveAddressbook" data-id="'.$addressbook['id'].'" style="float:left;" id="active_aid_'.$addressbook['id'].'" type="checkbox" '.$checked.' /><label style="float:left;margin-top:4px;margin-right:5px;" for="active_aid_'.$addressbook['id'].'"></label>';
+						}
+				?>
+				<td class="activate" title=""><?php print_unescaped($checkBox); ?></td>
 				<td class="name" title="<?php p($addressbook['description']) ?>"><?php p($addressbook['displayname']) ?></td>
 				<td class="action">
 					<a title="<?php p($l->t('Show CardDav link')); ?>">
@@ -83,7 +90,7 @@ $aLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','
 				</td>
 				<?php } ?>
 				<td class="action">
-					<?php if($addressbook['permissions'] & OCP\PERMISSION_UPDATE) { ?>
+					<?php if($addressbook['userid'] === OCP\USER::getUser() && $addressbook['permissions'] & OCP\PERMISSION_UPDATE) { ?>
 					<a title="<?php p($l->t("Edit")); ?>">
 						<i class="ioc ioc-edit edit"></i>
 						
@@ -91,7 +98,7 @@ $aLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','
 					<?php } ?>
 				</td>
 				<td class="action">
-					<?php if($addressbook['permissions'] & OCP\PERMISSION_DELETE) { ?>
+					<?php if($addressbook['userid'] === OCP\USER::getUser() && $addressbook['permissions'] & OCP\PERMISSION_DELETE) { ?>
 					<a title="<?php p($l->t("Delete")); ?>">
 						<i class="ioc ioc-delete delete"></i>
 					</a>
@@ -140,11 +147,7 @@ $aLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','
 	</div>
 	<div id="rightcontentSideBar">
 			<ul id="alphaScroll">
-	<?php
-	 foreach($aLetter as $letter){
-	 	print_unescaped('<li data-letter="'.strtoupper($letter).'" style="text-align:center;">'.strtoupper($letter).'</li>');
-	 } 
-	 ?>
+
 	</ul>
 	</div>	
 </div>

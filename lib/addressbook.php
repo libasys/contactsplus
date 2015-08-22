@@ -131,6 +131,7 @@ class Addressbook {
 		foreach($activeaddressbooks as $addressbook) {
 			if($addressbook['active']) {
 				$ids[] = $addressbook['id'];
+				
 			}
 		}
 		return $ids;

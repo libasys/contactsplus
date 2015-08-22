@@ -52,10 +52,10 @@ class AddressbookController extends Controller {
 			
 		$active_addressbooks = array();
 
-		$active_addressbooks = Addressbook::all($this->userId);
+		$active_addressbooks = Addressbook::all($this->userId,true);
 		if(count($active_addressbooks) === 0) {
 			Addressbook::addDefault($this->userId);
-			$active_addressbooks = Addressbook::all($this->userId);
+			$active_addressbooks = Addressbook::all($this->userId,true);
 		}
 		
 		$countCardsAddressbooks = Addressbook::getCountCardsAddressbook($this->userId);
@@ -78,10 +78,10 @@ class AddressbookController extends Controller {
 			$rightsOutput='';
 		    $share = (string) $this->l10n->t('Share Addressbook');
 			$bShared = false;
-		 
+		 	/*
 			if($addressbookInfo['active']){
 				 $checked = 'checked="checked"';
-			}
+			}*/
 		 	if($idActiveAddressbook === $addressbookInfo['id']) {
 		 		$activeClass='isActiveABook';
 			}
@@ -105,7 +105,7 @@ class AddressbookController extends Controller {
   	          	$displayName='<span class="toolTip groupname" title="'.$notice.'('.$rightsOutput.')">'.$addressbookInfo['displayname'].' (' .(string) $this->l10n->t('by') . ' ' .$addressbookInfo['userid'].')</span>';
  		    }
 			 
-			$checkBox='<input class="regular-checkbox isActiveAddressbook" data-id="'.$addressbookInfo['id'].'" style="float:left;" id="edit_active_'.$addressbookInfo['id'].'" type="checkbox" '.$checked.' /><label style="float:left;margin-top:4px;margin-right:5px;" for="edit_active_'.$addressbookInfo['id'].'"></label>';
+			//$checkBox='<input class="regular-checkbox isActiveAddressbook" data-id="'.$addressbookInfo['id'].'" style="float:left;" id="edit_active_'.$addressbookInfo['id'].'" type="checkbox" '.$checked.' /><label style="float:left;margin-top:4px;margin-right:5px;" for="edit_active_'.$addressbookInfo['id'].'"></label>';
 			$shareLink='';
 		  
 		  if($addressbookInfo['permissions'] & \OCP\PERMISSION_SHARE && $bShareApi === 'yes') {
@@ -292,7 +292,7 @@ class AddressbookController extends Controller {
      */
     public function update() {
     	$pId = $this -> params('id');
-		$pActive = $this -> params('active');	
+		//$pActive = $this -> params('active');	
     	$pName = $this -> params('name');
 		$pDescription = $this -> params('description');
 		$pName = isset($pName)?trim(strip_tags($pName)) : null;
@@ -311,10 +311,10 @@ class AddressbookController extends Controller {
 		} catch(Exception $e) {
 			//bailOut($e->getMessage());
 		}
-		
+		/*
 		if(!Addressbook::setActive($pId,$pActive)) {
 			$msg= (string) $this->l10n->t('Error (de)activating addressbook.');	
-		}
+		}*/
 		
 		$addressbook = Addressbook::find($pId);
 		
@@ -359,7 +359,7 @@ class AddressbookController extends Controller {
      */
     public function getCategories() {
     		
-    	$aCountGroups=ContactsApp::getCounterGroups();
+    	//$aCountGroups=ContactsApp::getCounterGroups();
 		
 		 $checkCat=ContactsApp::loadTags();
 		 
@@ -372,28 +372,21 @@ class AddressbookController extends Controller {
 			if($sortOrderGroups = $this->configInfo->getUserValue($this->userId, $this->appName, 'sortorder')){
 				
 				$aSortOrderGroupsTmp=json_decode($sortOrderGroups, true);
-				$counter =0;
+				$counter = 0;
 				foreach($aSortOrderGroupsTmp as $sortInfo){
-				//	\OCP\Util::writeLog($this->appName,'SORT: '.$sortInfo, \OCP\Util::DEBUG);	
-					$aSortOrderGroups[$sortInfo]=$counter;
+					$aSortOrderGroups[$sortInfo] = $counter;
 					$counter++;
 				}
 			}
-			$counter=0;
+			
 			foreach($checkCat['tagslist'] as $tag){
-				$iCount=0;
-				if($aCountGroups != '' && array_key_exists((string)$tag['name'], $aCountGroups)){
-					$iCount=$aCountGroups[$tag['name']];
-				}	
-				if($tag['id'] === 'fav'){	
-					$iCount=isset($aCountGroups['favo'])?$aCountGroups['favo']:0;
-				}
+				
 				$sortOrder=$tag['id'];
-				if($aSortOrderGroups !='' && array_key_exists($tag['id'], $aSortOrderGroups)){
-					$sortOrder=$aSortOrderGroups[$tag['id']];
+				if($aSortOrderGroups !=='' && array_key_exists($tag['id'], $aSortOrderGroups)){
+					$sortOrder = $aSortOrderGroups[$tag['id']];
 				}	
-				$checkCatTagsList[$sortOrder]=array('id'=>$tag['id'],'name'=>$tag['name'],'color'=>$tag['color'],'bgcolor'=>$tag['bgcolor'],'icount'=>$iCount);
-			    $counter++;
+				$checkCatTagsList[$sortOrder]=array('id'=>$tag['id'],'name'=>$tag['name'],'color'=>$tag['color'],'bgcolor'=>$tag['bgcolor'],'icount'=>0);
+			   
 			}
 			
 			$params = [

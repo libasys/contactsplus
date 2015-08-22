@@ -30,6 +30,7 @@ OC.ContactsPlus.Settings = {
 				}
 				
 				if(tgt.is('#active_aid_'+id+':checkbox')) {
+					
 					OC.ContactsPlus.Settings.Addressbook.doActivate(id, tgt);
 					
 				} else if(tgt.is('i.ioc')) {
@@ -81,9 +82,9 @@ OC.ContactsPlus.Settings = {
 					});
 				
 				if(active === true){
-					$('#cAddressbooks').find('.dropcontainerAddressBook[data-adrbid="'+id+'"] input.regular-checkbox').attr('checked','checked');	
+					OC.ContactsPlus.getAddressBooks(id);
 				}else{
-					$('#cAddressbooks').find('.dropcontainerAddressBook[data-adrbid="'+id+'"] input.regular-checkbox').removeAttr('checked');	
+					$('#cAddressbooks .dropcontainerAddressBook[data-adrbid="'+id+'"]').remove();	
 				}	
 				
 				} else {
@@ -109,7 +110,7 @@ OC.ContactsPlus.Settings = {
 							row.remove();
 							OC.ContactsPlus.Settings.Addressbook.showActions(['new',]);
 							$('#cAddressbooks').find('.dropcontainerAddressBook[data-adrbid="'+id+'"]').remove();
-							OC.ContactsPlus.getAddressBooks();
+							OC.ContactsPlus.getAddressBooks(0);
 						} else {
 							OC.dialogs.alert(jsondata.data.message, t(OC.ContactsPlus.appname, 'Error'));
 						}
@@ -163,18 +164,23 @@ OC.ContactsPlus.Settings = {
 						self.adractions.removeData('id');
 						active = Boolean(Number(jsondata.data.addressbook.active));
 						if(id == 'new') {
+							
+							
+							
 							self.adrsettings.find('table')
 								.append('<tr class="addressbook" data-id="'+jsondata.data.addressbook.id+'" data-uri="'+jsondata.data.addressbook.uri+'" data-owner="'+jsondata.data.addressbook.userid+'">'
+									+ '<td class="activate"><input class="regular-checkbox isActiveAddressbook" data-id="'+jsondata.data.addressbook.id+'" style="float:left;" id="active_aid_'+jsondata.data.addressbook.id+'" type="checkbox" checked="checked" /><label style="float:left;margin-top:4px;margin-right:5px;" for="active_aid_'+jsondata.data.addressbook.id+'"></label></td>'
 									+ '<td class="name" title="'+jsondata.data.addressbook.description+'">'+jsondata.data.addressbook.displayname+'</td>'
 									+ '<td class="action"><a title="'+t(OC.ContactsPlus.appname,'Show CardDav link')+'"><i class="ioc ioc-publiclink globe"></i></a></td>'
 									+ '<td class="action"><a title="'+t(OC.ContactsPlus.appname,'Export Addressbook')+'"><i class="ioc ioc-export export"></i></a></td>'
 									+ '<td class="action"><a title="'+t(OC.ContactsPlus.appname,'Edit')+'"><i class="ioc ioc-edit edit"></i></td>'
-									+ '<td class="action"><a title="'+t(OC.ContactsPlus.appname,'Delete')+'"><i class="ioc ioc-delete"></i></td>'
+									+ '<td class="action"><a title="'+t(OC.ContactsPlus.appname,'Delete')+'"><i class="ioc ioc-delete delete"></i></td>'
 									+ '</tr>');
 								
-								OC.ContactsPlus.getAddressBooks();
-									
-									
+							OC.ContactsPlus.loadContacts(jsondata.data.addressbook.id,'',0,0);		
+							OC.ContactsPlus.getAddressBooks(jsondata.data.addressbook.id);
+							
+								
 						} else {
 						var row = self.adrsettings.find('tr[data-id="'+id+'"]');
 							row.find('td.name').text(jsondata.data.addressbook.displayname);

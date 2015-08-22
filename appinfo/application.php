@@ -34,7 +34,7 @@ use \OCA\ContactsPlus\Controller\ContactsController;
 use \OCA\ContactsPlus\Controller\ExportController;
 use \OCA\ContactsPlus\Controller\ImportController;
 use \OCA\ContactsPlus\Controller\AddressbookController;
-
+use \OCA\ContactsPlus\Controller\ContactsApiController;
 
 class Application extends App {
 	
@@ -103,8 +103,13 @@ class Application extends App {
 			$c->query('Settings')
 			);
 		});
-		
-	
+		/*
+		$container->registerService('ContactsApiController', function(IContainer $c) {
+			return new ContactsApiController(
+			$c->query('AppName'),
+			$c->query('Request')
+			);
+		});*/
 		
           /**
 		 * Core

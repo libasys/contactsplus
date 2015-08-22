@@ -436,7 +436,7 @@ class ContactsController extends Controller {
 					 $carddata['photo'] ='data:'.$image->mimeType().';base64,' .$imgSrc;
 				}
 				$fullname = strtoupper(substr($carddata['fullname'],0,1));
-				$newLetter= $fullname;
+				$newLetter = $fullname;
 				$carddata['letter'] = $newLetter;
 				
 				$details = VCard::structureContact($vcard);
@@ -471,10 +471,119 @@ class ContactsController extends Controller {
 		 }
     }
 	
+	  public function ApiContactData($id) {
+	  		
+	  	$vcard = ContactsApp::getContactVCard($id);
+		$oldaddressbookid = VCard::getAddressbookid($id);
+		$addressBookPerm = Addressbook::find($oldaddressbookid);
+		
+		$editInfoCard = VCard::structureContact($vcard);
+		
+		$TELTYPE = ContactsApp::getTypesOfProperty('TEL');
+		$EMAILTYPE = ContactsApp::getTypesOfProperty('EMAIL');	
+		$URLTYPE = ContactsApp::getTypesOfProperty('URL');
+		$ADRTYPE = ContactsApp::getTypesOfProperty('ADR');
+		
+		$aDefNArray=array('0'=>'lname','1'=>'fname','2'=>'anrede', '3'=>'title');
+		$aN='';
+		if(isset($editInfoCard['N'][0]['value']) && count($editInfoCard['N'][0]['value'])>0){
+			foreach($editInfoCard['N'][0]['value'] as $key => $val){
+				if($val!='') {	
+					$aN[$aDefNArray[$key]]=$val;
+				}
+			}
+		}
+		
+		 $aOrgDef=array('0'=>'firm','1'=>'department');
+		  $aOrg=array();
+		  if(isset($editInfoCard['ORG'][0]['value']) && count($editInfoCard['ORG'][0]['value'])>0){
+		  	foreach($editInfoCard['ORG'][0]['value'] as $key => $val){
+					if($val!='') {	
+						$aOrg[$aOrgDef[$key]]=$val;
+					}
+		     }
+		  }
+		  
+		 $sBday='';
+		 if(isset($editInfoCard['BDAY'][0]['value']) && !empty($editInfoCard['BDAY'][0]['value'])){
+		 	$sBday = $editInfoCard['BDAY'][0]['value'];
+			$date = New \DateTime($sBday);
+			$sBday = $date->format('d. M Y');
+		 }
+
+		 $sNotice='';
+		if(isset($editInfoCard['NOTE'][0]['value']) && !empty($editInfoCard['NOTE'][0]['value'])){
+		 	$sNotice = $editInfoCard['NOTE'][0]['value'];
+		 }
+
+		 $sNickname='';
+		 if(isset($editInfoCard['NICKNAME'][0]['value']) && !empty($editInfoCard['NICKNAME'][0]['value'])){
+		 	$sNickname = $editInfoCard['NICKNAME'][0]['value'];
+		 }
+		 
+		 $sPosition='';
+		 if(isset($editInfoCard['TITLE'][0]['value']) && !empty($editInfoCard['TITLE'][0]['value'])){
+		 	$sPosition = $editInfoCard['TITLE'][0]['value'];
+		 }
+		 
+		$aAddr = '';
+		if(array_key_exists('ADR', $editInfoCard)){
+			$aAddr = $this->getAddressInfo($editInfoCard['ADR'], $ADRTYPE);
+		}
+		$aTel = '';
+		if(array_key_exists('TEL', $editInfoCard)){
+			$aTel = $this->getPhoneInfo($editInfoCard['TEL'], $TELTYPE);
+		}
+		$aEmail = '';
+		if(array_key_exists('EMAIL', $editInfoCard)){
+	  		$aEmail = $this->getEmailInfo($editInfoCard['EMAIL'], $EMAILTYPE);
+		}
+		
+		$aUrl = '';
+		if(array_key_exists('URL', $editInfoCard)){
+			$aUrl = $this->getUrlInfo($editInfoCard['URL'], $URLTYPE);
+		}
+		
+		
+		 $imgSrc='';
+		 $imgMimeType='';
+		
+		 if (isset($vcard->PHOTO)){
+			 $image = new \OCP\Image();
+			 $image->loadFromData((string)$vcard->PHOTO);
+			 $imgSrc=$image->__toString();
+			 $imgMimeType=$image->mimeType();
+			 \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image -> data(), 600);
+		}
+		
+		$params = [
+			'id' => $id,
+			'tmpkey' => 'show-contacts-foto-' . $id,
+			'addressbookinfo' => $addressBookPerm,
+			'imgsrc' => $imgSrc,
+			'imgMimeType' => $imgMimeType,
+			'anrede' => isset($aN['title']) ? $aN['title'] : '',
+			'surename' => isset($aN['fname']) ? $aN['fname'] : '',
+			'lastname' => isset($aN['lname']) ? $aN['lname'] : '',
+			'firm' => isset($aOrg['firm']) ? $aOrg['firm'] : '',
+			'department' => isset($aOrg['department']) ? $aOrg['department'] : '',
+			'phone' => isset($aTel) ? $aTel : '',
+			'email' => isset($aEmail) ? $aEmail : '',
+			'address' => isset($aAddr) ? $aAddr : '',
+			'url' => isset($aUrl) ? $aUrl : '',
+			'birthday' =>  isset($sBday) ? $sBday : '',
+			'nickname' => isset($sNickname) ? $sNickname : '',
+			'position' => isset($sPosition) ? $sPosition : '',
+			'notice' => isset($sNotice) ? $sNotice : '',
+		];
+		
+		return $params;
+	  }
+	
 	  /**
      * @NoAdminRequired
      */
-    public function showContact() {
+    public function showContact($id) {
     	$id = $this -> params('id');
 		
 		$vcard = ContactsApp::getContactVCard($id);
@@ -744,10 +853,10 @@ class ContactsController extends Controller {
 		if(count($property) === 0) {
 			//Neu
 			$vcard->add($param,$value);
-			$iNumber=1;
+			$iNumber = 1;
 		} else {
 			$property = array_shift($property);
-			$oldValue=stripslashes($property->getValue());
+			$oldValue = stripslashes($property->getValue());
 			
 			if(!stristr($oldValue,$value)){
 				$newValue=(string) $oldValue.','.$value;
@@ -759,6 +868,7 @@ class ContactsController extends Controller {
 		}
 		
 		VCard::edit($cardId, $vcard);
+		
 
 		//IOS Support $vcardMember
 		$iosSupport = $this->configInfo->getUserValue($this->userId, $this->appName,'iossupport');
@@ -788,12 +898,19 @@ class ContactsController extends Controller {
 			
 			VCard::edit($cardId, $vcard);
 		}
-		
+		if($param === 'CATEGORIES'){
+			$backgroundColor=	ContactsApp::genColorCodeFromText(trim($value),80);
+			$color = ContactsApp::generateTextColor($backgroundColor);
+			$aCat['name'] = $value;
+			$aCat['color'] = $color;
+			$aCat['bgcolor'] = $backgroundColor;
+		}
 		$params = [
 		'status' => 'success',
 		'data' =>[
 			'cardid' => $cardId,
-			'iCounter'=>$iNumber
+			'iCounter'=>$iNumber,
+			'newcat' => $aCat
 		]];
 		
 		$response = new JSONResponse($params);

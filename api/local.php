@@ -32,7 +32,7 @@ class Local {
 	 */
 	
 	  private static $sItems = array();
-	  const ITEM_TYPE = 'addressbook';
+	  const ITEM_TYPE = 'cpladdrbook';
 	
 	public static function getAllShares($params) {
 		
