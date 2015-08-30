@@ -21,9 +21,12 @@
 	
  	
 
-<span class="labelFullname"><?php p($_['anrede']); ?> <?php p($_['fname']); ?> <?php p($_['lname']); ?></span>
+<span class="labelFullname"><?php p($_['anrede'].' '); ?><?php p($_['fname'].' '); ?><?php p($_['lname']); ?></span>
+
 <?php if($_['nickname']!=''){ ?>  
-	"<?php p($_['nickname']); ?>"
+	<span style="padding-left:10px;line-height:20px;">
+	<?php p('"'.$_['nickname'].'"'); ?>
+	</span>
 <?php } ?>
 <span class="labelFirm">
 	<?php 
@@ -72,9 +75,9 @@
 		   	?>
 	     	
 			<span class="labelLeft">&nbsp;
-				<i class="ioc ioc-mail"></i> <?php p($VALUE['type']); ?>
+				<a href="mailto:<?php p($VALUE['val']); ?>"><i class="ioc ioc-mail"></i></a> <?php p($VALUE['type']); ?>
 			</span>
-	      <?php p($VALUE['val']); ?> <?php print_unescaped($iPref); ?>
+	      <a href="mailto:<?php p($VALUE['val']); ?>"><?php p($VALUE['val']); ?></a> <?php print_unescaped($iPref); ?>
 	      <br style="clear:both;">
    <?php } ?>
  <span class="spacer">&nbsp;</span>
@@ -82,22 +85,60 @@
   
   
 <?php
-		if(is_array($_['aUrl']))	{
-	?>
- <span class="labelLeft">&nbsp;<i class="ioc ioc-publiclink"></i> <?php p($_['aUrl']['type']); ?></span><?php p($_['aUrl']['val']); ?>
-<br style="clear:both;">
+		 if(is_array($_['aUrl']))	{
+		 	foreach($_['aUrl'] as  $VALUE){ 
+				$iPref='';	 
+			   	if(array_key_exists('pref', $VALUE) && $VALUE['pref']=='1'){
+			   			$iPref='<i class="ioc ioc-checkmark"></i>';	
+			   	} 
+		   	?>
+			 <span class="labelLeft">&nbsp;<a href="<?php p($VALUE['val']); ?>" target="_blank"><i class="ioc ioc-publiclink"></i></a> <?php p($VALUE['type']); ?></span><a href="<?php p($VALUE['val']); ?>" target="_blank"><?php p($VALUE['val']); ?></a> <?php print_unescaped($iPref); ?>
+			<br style="clear:both;">
+		 <?php } ?>
 <span class="spacer">&nbsp;</span>
 <?php } ?>
-  
+ <?php
+		 if(is_array($_['aImpp']))	{
+		 	foreach($_['aImpp'] as  $VALUE){ 
+		 		$iPref='';	 
+			   	if(array_key_exists('pref', $VALUE) && $VALUE['pref']=='1'){
+			   			$iPref='<i class="ioc ioc-checkmark"></i>';	
+			   	} 
+		 ?> 
+			 <span class="labelLeft">&nbsp;<i class="ioc ioc-users"></i> <?php p($VALUE['type']); ?></span><?php p($VALUE['val']); ?> <?php print_unescaped($iPref); ?>
+			<br style="clear:both;">
+		 <?php } ?>
+<span class="spacer">&nbsp;</span>
+<?php } ?>
+ <?php
+		 if(is_array($_['aCloud']))	{
+		 	foreach($_['aCloud'] as  $VALUE){
+		 		$iPref='';	 
+			   	if(array_key_exists('pref', $VALUE) && $VALUE['pref']=='1'){
+			   			$iPref='<i class="ioc ioc-checkmark"></i>';	
+			   	} 
+			 ?> 
+			 <span class="labelLeft">&nbsp;<i class="ioc ioc-upload-cloud"></i> <?php p($VALUE['type']); ?></span><?php p($VALUE['val']); ?> <?php print_unescaped($iPref); ?>
+			<br style="clear:both;">
+		 <?php } ?>
+<span class="spacer">&nbsp;</span>
+<?php } ?>  
 <?php
    if(is_array($_['aAddr']))	{ 
-	foreach($_['aAddr'] as  $VALUE){ ?>
+	foreach($_['aAddr'] as  $VALUE){ 
+		$iPref='';	 
+	   	if(array_key_exists('pref', $VALUE) && $VALUE['pref']=='1'){
+	   			$iPref='<i class="ioc ioc-checkmark"></i>';	
+	   	} 
+		
+	?>
 			<span class="labelLeft" style="min-height:60px;">
+				<a title="<?php p($l->t('View location on open mapquest')); ?>" target="_blank" href="http://open.mapquest.com/?q=<?php p($VALUE['val']['street']); ?><?php p(','.$VALUE['val']['postalcode']); ?><?php p(','.$VALUE['val']['city']); ?><?php p(','.$VALUE['val']['state']); ?><?php p(','.$VALUE['val']['country']); ?>"><i style="font-size:18px;color:#999;" class="ioc ioc-search"></i></a>
 				<i class="ioc ioc-address"></i> <?php p($VALUE['type']); ?>
 			</span>
-	      <?php p($VALUE['val']['street']); ?><br />
-	      <?php p($VALUE['val']['postalcode']); ?>  <?php p($VALUE['val']['city']); ?></br>
-	      <?php p($VALUE['val']['country']); ?>
+	      <?php p($VALUE['val']['street']); ?> <?php print_unescaped($iPref); ?><br />
+	      <?php p($VALUE['val']['postalcode'].' '); ?><?php p($VALUE['val']['city']); ?></br>
+	      <?php p($VALUE['val']['state'].' '); ?><?php p($VALUE['val']['country']); ?>
           <br style="clear:both;">
   <?php } ?>
  <span class="spacer">&nbsp;</span>

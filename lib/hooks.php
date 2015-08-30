@@ -53,8 +53,7 @@ class Hooks{
 			    'owner'=>\OCP\USER::getUser(),
 			    'userid'=>\OCP\USER::getUser(),
 			    'issubscribe' => 1,
-			    'calendarcolor' => '#FFFF00',
-				'cache' => true,
+				'cache' => false,
 				'ctag'=>1,
 				'className' => 'birthday-calendar', 
 				'editable' => false,
@@ -67,24 +66,23 @@ class Hooks{
 	}
 	
 	public static function getCalenderSources($parameters) {
-
-			    $base_url = \OC::$server->getURLGenerator()->linkToRoute('calendarplus.event.getEvents').'?calendar_id=';
-			
-				$addSource= array(
-					'url' => $base_url.'birthday_'. \OCP\USER::getUser(),
-					'backgroundColor' => '#FFFF00',
-					'borderColor' => '#FFFF00',
-					 'id'=>'birthday_'. \OCP\USER::getUser(),
-					'textColor' => 'black',
-					'permissions'=>\OCP\PERMISSION_READ,
-					'cache' => false,
-					'ctag'=>2,
-					'editable' => false,
-					'startEditable' => false,
-					'issubscribe' => 1,
-				);
+				   
+				    $base_url = \OC::$server->getURLGenerator()->linkToRoute('calendarplus.event.getEvents').'?calendar_id=';
 				
-				$parameters['sources']=$addSource;
+					$addSource= array(
+						'url' => $base_url.'birthday_'. \OCP\USER::getUser(),
+						'id'=>'birthday_'. \OCP\USER::getUser(),
+						'className' => 'birthday-calendar', 
+						'permissions'=>\OCP\PERMISSION_READ,
+						'cache' => false,
+						'ctag'=>2,
+						'editable' => false,
+						'startEditable' => false,
+						'issubscribe' => 1,
+					);
+					
+					$parameters['sources'] = $addSource;
+				
 				
 		
 	}

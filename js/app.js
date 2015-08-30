@@ -396,7 +396,7 @@ OC.ContactsPlus ={
 						
 					$(cardDiv+" .fullname a, "+cardDiv+" .rowBody").on('click',function(){
 						$CardId=$(this).closest('.container').attr('data-contactid');
-						OC.ContactsPlus.showContact($CardId);
+						OC.ContactsPlus.showContact($CardId,null);
 					 });
 					 
 					
@@ -462,7 +462,9 @@ OC.ContactsPlus ={
 				if(grpId === '' ){
 					 $('#rightcontent').html('');
 				   $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/getcontactcards'),{ardbid:addrbkId,grpid:'all'},function(jsondata){
-				   	   $("#rightcontent").niceScroll();
+				   	   $("#rightcontent").niceScroll({
+				   	   		railpadding:{top:0,right:0,left:0,bottom:100},
+				   	   });
 				   	    $('#loading').hide();
 				   	     $('#rightcontent').html(jsondata);
 				   	    
@@ -503,7 +505,7 @@ OC.ContactsPlus ={
 							
 						$(".contactsrow .fullname a, .contactsrow .rowBody").on('click',function(){
 							$CardId=$(this).closest('.container').attr('data-contactid');
-							OC.ContactsPlus.showContact($CardId);
+							OC.ContactsPlus.showContact($CardId,null);
 						 });
 						 
 						 $(".contactsrow .option a.delete").on('click',function(){
@@ -637,13 +639,7 @@ OC.ContactsPlus ={
 	newContact:function(){
 			 $('#loading').show();
 			 
-			 if($('.webui-popover').length>0){
-				if(OC.ContactsPlus.popOverElem !== null){
-					OC.ContactsPlus.popOverElem.webuiPopover('destroy');
-					OC.ContactsPlus.popOverElem = null;
-					$('#show-contact').remove();
-				}
-			}
+			OC.ContactsPlus.destroyExisitingPopover();
 			
 			$.ajax({
 						type : 'POST',
@@ -685,12 +681,30 @@ OC.ContactsPlus ={
 							 	   }
 							 });
 							 
-							OC.ContactsPlus.generateSelectList('#sPhoneTypeSelect_0','#phonetype_0');
-							OC.ContactsPlus.generateSelectList('#sPhoneTypeSelect_1','#phonetype_1');
-							OC.ContactsPlus.generateSelectList('#sEmailTypeSelect_0','#emailtype_0');
-							OC.ContactsPlus.generateSelectList('#sEmailTypeSelect_1','#emailtype_1');
-							OC.ContactsPlus.generateSelectList('#sUrlTypeSelect','#urltype');
-							OC.ContactsPlus.generateSelectList('#sAddrTypeSelect_0','#addrtype_0');
+							OC.ContactsPlus.generateSelectList('#phone-typeselect-0','#phonetype-0');
+							OC.ContactsPlus.deletePropertyHandler('.delete-phone','#phone-container-');
+							OC.ContactsPlus.addPropertyHandler('.add-phone','phone');
+							
+							OC.ContactsPlus.generateSelectList('#email-typeselect-0','#emailtype-0');
+							OC.ContactsPlus.deletePropertyHandler('.delete-email','#email-container-');
+							OC.ContactsPlus.addPropertyHandler('.add-email','email');
+							
+							OC.ContactsPlus.generateSelectList('#url-typeselect-0','#urltype-0');
+							OC.ContactsPlus.deletePropertyHandler('.delete-url','#url-container-');
+							OC.ContactsPlus.addPropertyHandler('.add-url','url');
+							
+							OC.ContactsPlus.generateSelectList('#addr-typeselect-0','#addrtype-0');
+							OC.ContactsPlus.deletePropertyHandler('.delete-addr','#addr-container-');
+							OC.ContactsPlus.addPropertyHandler('.add-addr','addr');
+							
+							OC.ContactsPlus.generateSelectList('#im-typeselect-0','#imtype-0');
+							OC.ContactsPlus.deletePropertyHandler('.delete-im','#im-container-');
+							OC.ContactsPlus.addPropertyHandler('.add-im','im');
+							
+							OC.ContactsPlus.generateSelectList('#cloud-typeselect-0','#cloudtype-0');
+							OC.ContactsPlus.deletePropertyHandler('.delete-cloud','#cloud-container-');
+							OC.ContactsPlus.addPropertyHandler('.add-cloud','cloud');
+							
 							
 							$('#newContact-morefields').on('click',function(){
 							    $("#showAdditionalFieds").toggle('fast');
@@ -702,51 +716,127 @@ OC.ContactsPlus ={
 								}else{
 									OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Name is missing'));
 								}
+							
 						});
+						
 					   $('#newContact-cancel').on('click',function(){
-						$("#contact_details").html('');
-						$("#contact_details").removeClass('isOpenDialog');
-					   $("#contact_details").dialog('close');
+							$("#contact_details").html('');
+							$("#contact_details").removeClass('isOpenDialog');
+						   $("#contact_details").dialog('close');
 					  });
+					  
+					 
 					}
 			});
+			return false;
+		
+	},
+	deletePropertyHandler:function(buttonClass,containerId){
+		$(buttonClass).on('click',function(){
+		 	var iDelVal=$(this).attr('data-del');
+		 	$(containerId+iDelVal).remove();
+		 });
+	},
+	addPropertyHandler:function(buttonClass,propType){
+		
+		
+		$(buttonClass).on('click',function(){
+		 	var iAddNew = -1;
+			$('.'+propType+'-container').each(function(i,el){
+					var elVal = parseInt($(this).attr('data-id'));
+					if(elVal > iAddNew){
+						iAddNew = elVal;
+					}
+			});
+			iAddNew = iAddNew +1;
+		
+		 	var iAddVal=parseInt($(this).attr('data-add'));
+		 	
+		 	var myClone = $('#'+propType+'-container-'+iAddVal).clone();
+			 	
+			 	myClone.find('.'+propType+'-type').attr({
+			 		'name':propType+'type['+iAddNew+']',
+			 		'id':propType+'type-'+iAddNew,
+			 	});
+			 	
+			 	myClone.find('.'+propType+'-select').attr({
+			 		'id':propType+'-typeselect-'+iAddNew,
+			 	});
+			 	
+			 	if(propType !== 'addr'){
+				 	myClone.find('.'+propType+'-val').attr({
+				 		'name':propType+'['+iAddNew+']',
+				 		'id':propType+'-'+iAddNew,
+				 	}).val('');
+			 	}else{
+			 		myClone.find('.'+propType+'-val-street').attr({
+				 		'name':propType+'['+iAddNew+'][street]',
+				 	}).val('');
+				 	myClone.find('.'+propType+'-val-city').attr({
+				 		'name':propType+'['+iAddNew+'][city]',
+				 	}).val('');
+				 	myClone.find('.'+propType+'-val-postal').attr({
+				 		'name':propType+'['+iAddNew+'][postal]',
+				 	}).val('');
+				 	myClone.find('.'+propType+'-val-state').attr({
+				 		'name':propType+'['+iAddNew+'][state]',
+				 	}).val('');
+				 	myClone.find('.'+propType+'-val-country').attr({
+				 		'name':propType+'['+iAddNew+'][country]',
+				 	}).val('');
+			 	}
+			 	
+			 	myClone.find('.'+propType+'-pref').removeAttr('checked').attr({'id':propType+'Pref-'+iAddNew}).val('phone_'+iAddNew);
+			 	myClone.find('.'+propType+'-labelpref').removeAttr('for').attr({'for':propType+'Pref-'+iAddNew}); 
+			 	myClone.attr({'id':propType+'-container-'+iAddNew,'data-id':iAddNew});
+			 	myClone.find('.add-'+propType).remove();
+			 	myClone.find('.delete-'+propType).attr('data-del',iAddNew).on('click',function(){
+				 	var iDelVal=$(this).attr('data-del');
+				 	
+				 	$('#'+propType+'-container-'+iDelVal).remove();
+				 });
+			 	
+		 		$('#'+propType+'-container-'+iAddVal).after(myClone);
+		 		
+		 		OC.ContactsPlus.generateSelectList('#'+propType+'-typeselect-'+iAddNew,'#'+propType+'type-'+iAddNew);
+		 });
+							 
 		
 	},
 	editContact:function(iCard){
-			 $('#loading').show();
-			 
-			 if($('.webui-popover').length>0){
-				if(OC.ContactsPlus.popOverElem !== null){
-					OC.ContactsPlus.popOverElem.webuiPopover('destroy');
-					OC.ContactsPlus.popOverElem = null;
-					$('#show-contact').remove();
-				}
-			}
 			
-			$.ajax({
-						type : 'POST',
-						data:{'id':iCard},
-						url : OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/geteditformcontact'),
-						success : function(data) {
-							 $('#loading').hide();
-							$("#contact_details").html(data);
-								$("#contact_details").addClass('isOpenDialog');
-								$('#contact_details').dialog({
-								height:'auto',
-								width:450,
-								modal:true,
-								'title': "Kontakt bearbeiten",
-							});
-							
-							var winWidth=$(window).width();
-							
-							if(winWidth <= 480){
-								 winHeight=$(window).height();
-									$('#contact_details').dialog('option',{"width":(winWidth-40)});
-									
-							}
-							
-							  $(".innerContactontent").niceScroll();
+			 
+			OC.ContactsPlus.destroyExisitingPopover();
+			
+			var sPlacement = 'auto';
+			var defaultWidth = 480;
+			if($(window).width() < 480){
+				sPlacement = 'bottom';
+				 defaultWidth = $(window).width() - 10;
+			}
+			var sConstrain = 'vertical';
+			
+			
+			OC.ContactsPlus.popOverElem = $('.fullname[data-id="'+iCard+'"] a');
+			
+			OC.ContactsPlus.popOverElem.webuiPopover({
+				url : OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/geteditformcontact'),
+				multi:false,
+				closeable:false,
+				animation:'pop',
+				placement:sPlacement,
+				constrain:sConstrain,
+				cache:false,
+				width:defaultWidth,
+				type:'async',
+				trigger:'manual',
+				async:{
+					type:'POST',
+					data:{'id':iCard},
+					success:function(that,data){
+					  
+					   that.displayContent();
+					   $(".innerContactontent").niceScroll();
 							if ($('#imgsrc').val() != '') {
 								OC.ContactsPlus.imgSrc = $('#imgsrc').val();
 								OC.ContactsPlus.imgMimeType = $('#imgmimetype').val();
@@ -759,18 +849,19 @@ OC.ContactsPlus ={
 							
 							 $('.activeAddFieldEdit').show();
 							 
-							 $('.deleteEmail').on('click',function(){
-							 	var iDelVal=$(this).attr('data-del');
-							 	$('#email_container_'+iDelVal).remove();
-							 });
-							 $('.deleteTel').on('click',function(){
-							 	var iDelVal=$(this).attr('data-del');
-							 	$('#tel_container_'+iDelVal).remove();
-							 });
-							 $('.deleteAddr').on('click',function(){
-							 	var iDelVal=$(this).attr('data-del');
-							 	$('#addr_container_'+iDelVal).remove();
-							 });
+							 OC.ContactsPlus.deletePropertyHandler('.delete-phone','#phone-container-');
+							 OC.ContactsPlus.deletePropertyHandler('.delete-email','#email-container-');
+							 OC.ContactsPlus.deletePropertyHandler('.delete-url','#url-container-');
+							 OC.ContactsPlus.deletePropertyHandler('.delete-addr','#addr-container-');
+							 OC.ContactsPlus.deletePropertyHandler('.delete-im','#im-container-');
+							 OC.ContactsPlus.deletePropertyHandler('.delete-cloud','#cloud-container-');
+							 
+							 OC.ContactsPlus.addPropertyHandler('.add-phone','phone');
+							 OC.ContactsPlus.addPropertyHandler('.add-email','email');
+							 OC.ContactsPlus.addPropertyHandler('.add-url','url');
+							 OC.ContactsPlus.addPropertyHandler('.add-addr','addr');
+							 OC.ContactsPlus.addPropertyHandler('.add-im','im');
+							 OC.ContactsPlus.addPropertyHandler('.add-cloud','cloud');
 							 
 							 $('.additionalFieldsRow').on('click',function(){
 							 	   if( $(this).hasClass('activeAddField') ){
@@ -781,19 +872,40 @@ OC.ContactsPlus ={
 							 	      $('.additionalField[data-addfield="'+$(this).attr('data-id')+'"] ').show();
 							 	   }
 							 });
-							 var iPCount=$('.isPhone').length;
+							 //new
+							 var iPCount=$('.phone-container').length;
 							 for(var i=0;i<iPCount; i++){
-							 	OC.ContactsPlus.generateSelectList('#sPhoneTypeSelect_'+i,'#phonetype_'+i);
+							 	OC.ContactsPlus.generateSelectList('#phone-typeselect-'+i,'#phonetype-'+i);
 							 }
-							 var iECount=$('.isEmail').length;
+							 
+							
+							 var iECount=$('.email-container').length;
 							 for(var i=0;i<iECount; i++){
-							 	OC.ContactsPlus.generateSelectList('#sEmailTypeSelect_'+i,'#emailtype_'+i);
+							 	OC.ContactsPlus.generateSelectList('#email-typeselect-'+i,'#emailtype-'+i);
 							 }
-							var iACount=$('.isAddr').length;
+							 
+							 var iUrlCount=$('.url-container').length;
+							 for(var i=0;i<iUrlCount; i++){
+							 	OC.ContactsPlus.generateSelectList('#url-typeselect-'+i,'#urltype-'+i);
+							 }
+							 
+							 var iACount=$('.addr-container').length;
 							 for(var i=0;i<iACount; i++){
-							 	OC.ContactsPlus.generateSelectList('#sAddrTypeSelect_'+i,'#addrtype_'+i);
+							 	OC.ContactsPlus.generateSelectList('#addr-typeselect-'+i,'#addrtype-'+i);
 							 }
-							OC.ContactsPlus.generateSelectList('#sUrlTypeSelect','#urltype');
+							 
+							 var iMCount=$('.im-container').length;
+							 for(var i=0;i<iMCount; i++){
+							 	OC.ContactsPlus.generateSelectList('#im-typeselect-'+i,'#imtype-'+i);
+							 }
+							 
+							 var iClCount=$('.cloud-container').length;
+							 for(var i=0;i<iClCount; i++){
+							 	OC.ContactsPlus.generateSelectList('#cloud-typeselect-'+i,'#cloudtype-'+i);
+							 }
+							 
+							
+							
 							
 							
 							$('#editContact-morefields').on('click',function(){
@@ -808,9 +920,7 @@ OC.ContactsPlus ={
 								}
 						});
 					   $('#editContact-cancel').on('click',function(){
-						$("#contact_details").html('');
-						$("#contact_details").removeClass('isOpenDialog');
-					   $('#contact_details').dialog('close');
+							OC.ContactsPlus.destroyExisitingPopover();
 					  });
 					  
 					  		OC.ContactsPlus.ContactPhoto.loadActionPhotoHandlers();
@@ -836,9 +946,14 @@ OC.ContactsPlus ={
 										$(this).addClass('transparent');
 									}
 								);
-					  
-					}
-			});
+								
+							 that.reCalcPos();	
+					   
+					  }
+					 }
+			}
+				
+			).webuiPopover('show');
 		
 	},
 	deleteContact:function(iCardId){
@@ -1024,6 +1139,12 @@ OC.ContactsPlus ={
 							}
 							//isScrollTo
 							//OC.ContactsPlus.loadContacts($('#cAddressbooks li.isActiveABook').attr('data-adrbid'),activeGroup,2,jsondata.data.id);
+							$("#contact_details").dialog('close');
+							$("#contact_details").html('');
+							$("#contact_details").removeClass('isOpenDialog');
+							OC.ContactsPlus.destroyExisitingPopover();
+							
+							return false;	
 						}
 						if (VALUE == 'editContact') {
 					         OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contacts update success!'));
@@ -1066,31 +1187,45 @@ OC.ContactsPlus ={
 						  	  $('#cAddressbooks li[data-adrbid="'+jsondata.data.newAddrBookId+'"]').addClass('isActiveABook');
 					       	 OC.ContactsPlus.loadContacts(jsondata.data.newAddrBookId,'',1,jsondata.data.id);
 					       	}
+					       	OC.ContactsPlus.destroyExisitingPopover();
+					       	
 				         }
 				         
-				        $("#contact_details").dialog('close');
-						$("#contact_details").removeClass('isOpenDialog');
+				        return false;	
 				         
 						
 					}
 				});
-		
+				
 			
 		
 		},
-	showContact:function(iCard){
+	showContact:function(iCard,evt){
 			
-			// $('#loading').show();
+			OC.ContactsPlus.destroyExisitingPopover();
 			
-			if($('.webui-popover').length>0){
-				if(OC.ContactsPlus.popOverElem !== null){
-					OC.ContactsPlus.popOverElem.webuiPopover('destroy');
-					OC.ContactsPlus.popOverElem = null;
-					$('#show-contact').remove();
+			var sPlacement = 'auto';
+			var defaultWidth = 440;
+			if($(window).width() < 480){
+				sPlacement = 'bottom';
+				 defaultWidth = $(window).width() - 10;
+			}
+			var sConstrain = 'vertical';
+			
+			if(evt === null){
+				OC.ContactsPlus.popOverElem = $('.fullname[data-id="'+iCard+'"] a');
+			}else{
+				sPlacement = 'auto';
+				OC.ContactsPlus.popOverElem = $(evt.target);
+				defaultWidth = 440;
+				if($(window).width() < 768){
+					defaultWidth = 380;
+				}
+				if($(window).width() < 480){
+					defaultWidth = $('#searchresults').width()-40;
+				
 				}
 			}
-			
-			OC.ContactsPlus.popOverElem = $('.fullname[data-id="'+iCard+'"] a');
 			
 			OC.ContactsPlus.popOverElem.webuiPopover({
 				url: OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/showcontact/{id}',{id:iCard}),
@@ -1099,20 +1234,22 @@ OC.ContactsPlus ={
 					success:function(that,data){
 					  
 					   that.displayContent();
-					  // that.getContentElement().css('height','auto');
-					   
+					  
 						$(".innerContactontent").niceScroll();
-						if ($('#imgsrc').val() != '') {
-							OC.ContactsPlus.imgSrc = $('#imgsrc').val();
-							OC.ContactsPlus.imgMimeType = $('#imgmimetype').val();
 						
-							OC.ContactsPlus.ContactPhoto.loadPhoto();
-						}
 						
 						 $('#selectedContactgroup').val($('#cgroups li.isActiveGroup').attr('data-id'));
 						 
 						OC.ContactsPlus.ContactPhoto.loadActionPhotoHandlers();
 						OC.ContactsPlus.ContactPhoto.loadPhotoHandlers();
+						
+						if ($('#imgsrc').val() != '') {
+							
+							OC.ContactsPlus.imgSrc = $('#imgsrc').val();
+							OC.ContactsPlus.imgMimeType = $('#imgmimetype').val();
+						
+							OC.ContactsPlus.ContactPhoto.loadPhoto();
+						}
 						
 						$('#phototools li a').click(function() {
 							$(this).tipsy('hide');
@@ -1133,66 +1270,106 @@ OC.ContactsPlus ={
 								$(this).addClass('transparent');
 							}
 						);
+						if(evt === null){
+							$('#showContact-edit').on('click',function(){
+								OC.ContactsPlus.popOverElem.webuiPopover('destroy');
+								OC.ContactsPlus.popOverElem = null;
+								$('#show-contact').remove();
+						   		OC.ContactsPlus.editContact(iCard);
+						  	});
+						  	$('#showContact-delete').on('click',function(){
+								OC.ContactsPlus.deleteContact(iCard);
+								
+						  	});
+							$('#showContact-cancel').on('click',function(){
+								OC.ContactsPlus.destroyExisitingPopover();
+						  	});
+							$('#showContact-export').on('click',function(){
+								document.location.href = OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/exportcontacts') + '?contactid=' + $('#photoId').val();
+						  	});
+						}else{
+							$('#show-contact').find('#actions').remove();
+						}
 						
-						$('#showContact-edit').on('click',function(){
-							OC.ContactsPlus.popOverElem.webuiPopover('destroy');
-							OC.ContactsPlus.popOverElem = null;
-							$('#show-contact').remove();
-					   		OC.ContactsPlus.editContact(iCard);
-					  	});
-					  	$('#showContact-delete').on('click',function(){
-							OC.ContactsPlus.deleteContact(iCard);
-							
-					  	});
-						$('#showContact-cancel').on('click',function(){
-							OC.ContactsPlus.popOverElem.webuiPopover('destroy');
-							OC.ContactsPlus.popOverElem = null;
-							$('#show-contact').remove();
-					  	});
-						$('#showContact-export').on('click',function(){
-							document.location.href = OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/exportcontacts') + '?contactid=' + $('#photoId').val();
-					  	});
-						  	
+						 that.reCalcPos();
+						
 						return false;
 					}
 				},
 				multi:false,
-				closeable:false,
+				closeable:true,
 				animation:'pop',
-				placement:'auto',
+				placement:sPlacement,
+				constrain:sConstrain,
 				cache:false,
-				width:440,
+				width:defaultWidth,
 				type:'async',
 				trigger:'manual',
 			}).webuiPopover('show');
 			
 			
 	},
+	destroyExisitingPopover : function() {
+			if($('.webui-popover').length>0){
+				if(OC.ContactsPlus.popOverElem !== null){
+					OC.ContactsPlus.popOverElem.webuiPopover('destroy');
+					OC.ContactsPlus.popOverElem = null;
+					if($('#show-contact').length > 0){
+						$('#show-contact').remove();
+					}
+					if($('#edit-contact').length > 0){
+						$('#edit-contact').remove();
+					}
+					if($('#new-contact').length > 0){
+						$('#new-contact').remove();
+					}
+					$('.webui-popover').each(function(i,el){
+						var id = $(el).attr('id');
+						$('[data-target="'+id+'"]').removeAttr('data-target');
+						$(el).remove();
+					});
+				}
+			}
+		},
 	listView:function(){
 		$('#showCards i').removeClass('isActiveListView');
 		$('#showList i').addClass('isActiveListView');
 		$('.contactsrow').addClass('listview');
 		$('.letter').addClass('listview');
+		$('.listview-header').show();
 	},
 	cardsView:function(){
 		$('#showList i').removeClass('isActiveListView');
 		$('#showCards i').addClass('isActiveListView');
 		$('.contactsrow').removeClass('listview');
 		$('.letter').removeClass('listview');
+		$('.listview-header').hide();
 	},
 	generateSelectList:function(iSelectId,iReturnId){
-		 $(iSelectId+'.combobox ul').hide();
+		 $(iSelectId+'.combobox ul').removeClass('isOpen').hide();
 		 //INIT DEFAULT
 		  $(iSelectId+'.combobox li').removeClass('isSelected');
 		  $(iSelectId+'.combobox li').removeClass('isSelectedCheckbox');
 		  var defaultVal=$(iReturnId).val();
+		 
 		  $(iSelectId+'.combobox li[data-id="'+defaultVal+'"]').addClass('isSelected');
 		   $(iSelectId+'.combobox li[data-id="'+defaultVal+'"]').addClass('isSelectedCheckbox');
 		  $(iSelectId+'.combobox').find('.selector').html($(iSelectId+'.combobox li[data-id="'+defaultVal+'"]').text());
-		 
+		
 		 $(iSelectId+'.combobox .comboSelHolder').on('click', function() {
-			$(iSelectId+'.combobox ul').toggle();
+			 
+			if($(iSelectId+'.combobox ul').is(':visible')){
+				$(iSelectId+'.combobox ul').hide();
+				
+			}else{
+				$('.combobox ul').removeClass('isOpen').hide();
+				$(iSelectId+'.combobox ul').addClass('isOpen');
+				$(iSelectId+'.combobox ul').show();
+				
+			}
+			
 		 });
+		 
 		 $(iSelectId+'.combobox li').click(function() {
 		 	 $(iSelectId+'.combobox li').removeClass('isSelected');
 		 	 $(iSelectId+'.combobox li').removeClass('isSelectedCheckbox');
@@ -1200,7 +1377,7 @@ OC.ContactsPlus ={
 		 	 $(this).addClass('isSelected');
 		 	 $(this).addClass('isSelectedCheckbox');
 			 $(this).parents(iSelectId+'.combobox').find('.selector').html($(this).text());
-			 $(iSelectId+'.combobox ul').hide();
+			 $(iSelectId+'.combobox ul').removeClass('isOpen').hide();
 		 });
 	},
 	
@@ -1421,7 +1598,7 @@ OC.ContactsPlus ={
 		checkShowEventHash : function() {
 			var id = parseInt(window.location.hash.substr(1));
 			if (id) {
-				OC.ContactsPlus.showContact(id);
+				OC.ContactsPlus.showContact(id,null);
 			}
 		},
 		calcDimension:function(){
@@ -1476,15 +1653,25 @@ OC.ContactsPlus ={
 				  
 				$('#contactsearch').change( function () {
 		        var filterValue = $(this).val();
-		        var filterField='.'+$('#searchOpt option:selected').val();
-		        if(filterValue){	
-		          $('.letter').addClass('hidden');
-		          $('.contactsrow').find(filterField+":not(:Contains(" + filterValue + "))").parent().parent().parent().addClass('hidden');
-		          $('.contactsrow').find(filterField+":Contains(" + filterValue + ")").parent().parent().parent().removeClass('hidden');
-		        } else {
-		          $('.contactsrow').find(".rowHeader").parent().parent().removeClass('hidden');
-		           $('.letter').removeClass('hidden');
-		        }
+		        var aFilterField=['.telsearch','.emailsearch','.name','.fullname','.address','.hidden-category'];
+		        var saveVal = '';
+		         if(filterValue.length > 2){	
+			        $('.letter').addClass('hidden');
+				        $(aFilterField).each(function(i,el){
+					         if($('.contactsrow').find(el+":Contains(" + filterValue + ")").length > 0){
+					          	saveVal = el;
+					        }
+				      });
+				       if(saveVal !==''){ 	
+				      		$('.contactsrow').find(saveVal+":not(:Contains(" + filterValue + "))").parent().parent().parent().addClass('hidden');
+
+				      		$('.contactsrow').find(saveVal+":Contains(" + filterValue + ")").parent().parent().parent().removeClass('hidden');
+				      }
+				         
+		          } else {
+			          $('.contactsrow').find(".rowHeader").parent().parent().removeClass('hidden');
+			           $('.letter').removeClass('hidden');
+			        }
 		        return false;
 		      })
 		    .keyup( function (event) {
@@ -1520,6 +1707,16 @@ $(document).ready(function(){
 			return false;
 		});
 		
+		$(document).on('click','#searchresults .info a',function(event){
+			event.preventDefault();
+			event.stopPropagation();
+			
+			var tmp = $(this).attr('href').split('#');
+			var id = parseInt(tmp[1]);
+			
+			OC.ContactsPlus.showContact(id,event);
+			return false;
+		});
 		
 		$(document).on('click', 'a.share', function(event) {
 	//	if (!OC.Share.droppedDown) {
@@ -1687,8 +1884,19 @@ $(document).ready(function(){
 				click: function() { $(this).dialog('close'); }
 			}
 		] );
-		
-		
+		//FIXME
+		$(document).on('click', '#new-contact, #edit-contact', function(evt) {
+			
+			if(!$(evt.target).parent().hasClass('comboSelHolder')){
+				$('.combobox ul').removeClass('isOpen').hide();
+			}
+			
+			if(!$(evt.target).parent().hasClass('button-group')){
+				$('#showAdditionalFieds').hide();
+			}
+			
+		});
+					
 		 $(document).on('click', function(event) {
 			event.stopPropagation();
 			/*

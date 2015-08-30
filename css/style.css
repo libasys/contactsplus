@@ -25,15 +25,20 @@
 	overflow: auto;
 	height:100%;
 	text-overflow: ellipsis;
-	width:600px;
+	width:400px;
 	right:0;
 	padding-top: 20px;
+	z-index:190;
 	box-sizing: border-box;
-	z-index: 300;
 	/* account for margin-bottom in files list */
 	margin-top: 0px;
 	
 }
+.app-contactsplus #searchresults td.icon{
+		display:none;
+		width:0;
+	}
+
 
 .oc-dialog{
 	z-index:3700;
@@ -492,8 +497,16 @@ li.contactsrow{
 	font-weight:normal;
 }
 
-li.contactsrow.listview{
-	width:98%;
+.listview-header{
+	top:45px;
+	width:92%;
+	position:relative;
+	padding-left:40px;
+	float:left;
+	line-height:30px;
+	border-bottom:1px solid #ccc;
+	display:none;
+	color:#999;
 }
 
 
@@ -520,7 +533,23 @@ li.contactsrow .rowHeader,li.contactsrow.listview .rowHeader{
 	border-bottom:1px solid #ccc;
 	box-shadow:-1px 0px 2px #ccc;
 }
-li.contactsrow .rowHeader .head-picture{
+li.contactsrow .rowHeader .head-picture input.contact-select{
+	display:none;
+	position:relative;
+	z-index:4;
+	top:0px;
+	margin-top:-17px;
+	left:12px;
+}
+li.contactsrow .rowHeader .head-picture:hover .contact-select,
+li.contactsrow .rowHeader .head-picture input[checked="checked"]
+{
+	display:none;
+}
+li.contactsrow .rowHeader .head-picture,
+li.contactsrow .rowHeader .tel,
+li.contactsrow .rowHeader .email
+{
 	display:none;
 }
 li.contactsrow .fullname{
@@ -583,6 +612,7 @@ li.contactsrow .picture{
 	text-align:center;
 	min-height:120px;
 	padding:1%;
+	
 
 }
 
@@ -628,6 +658,7 @@ li.contactsrow .picture img{
 	overflow: hidden;
 	padding:2px;
 	width:80%;
+	
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
@@ -657,14 +688,33 @@ li.contactsrow .picture i{
 	box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
 }
 
-li.contactsrow .email,li.contactsrow .tel,li.contactsrow .address,li.contactsrow .name{
-	
+li.contactsrow .email,
+li.contactsrow .name,
+li.contactsrow .tel,
+li.contactsrow .address{
 	display:block;
 	float:left;
 	width:75%;
 	
 }
-li.contactsrow .email,li.contactsrow .tel,li.contactsrow .name{
+li.contactsrow .address{
+	padding-left:20px;
+	width:70%;
+}
+li.contactsrow .clouding,
+li.contactsrow .impp{
+	padding-left:10px;
+	display:block;
+	float:left;
+	width:47%;
+	
+}
+li.contactsrow .email,
+li.contactsrow .tel,
+li.contactsrow .name,
+li.contactsrow .url,
+li.contactsrow .impp,
+li.contactsrow .clouding{
 	white-space: nowrap;
    text-overflow: ellipsis; 
    -o-text-overflow: ellipsis;
@@ -674,10 +724,15 @@ li.contactsrow .address{
 	line-height:20px;
 	margin-bottom:5px;
 }
+li.contactsrow .address .ioc-address{
+	float:left;
+	margin-left:-20px;
+	font-size:16px;
+}
 li.contactsrow .address .addrStreet{
 	display:block;
 	float:left;
-	width:100%;
+	width:95%;
 	
 }
 
@@ -686,6 +741,29 @@ li.contactsrow .name{
 	
 }
 /*ADDING LISTVIEW*/
+.listview-header .fullname,
+.listview-header .tel,
+.listview-header .email,
+.listview-header .group{
+	float:left;
+	display:block;
+}
+.listview-header .fullname{
+	width:38%;
+}
+.listview-header .tel{
+	width:20%;
+}
+.listview-header .email{
+	width:34%;
+}
+.listview-header .group{
+	width:4%;
+}
+li.contactsrow.listview{
+	width:98%;
+}
+
 li.contactsrow.listview{
 	padding:0;
 	margin:0;
@@ -712,7 +790,8 @@ li.contactsrow.listview .rowBody{
 }
 
 li.contactsrow.listview .fullname{
-	width:90%;
+	width:35%;
+	
 }
 li.contactsrow.listview .option{
 	float:right;
@@ -736,11 +815,27 @@ li.contactsrow.listview .rowHeader .head-picture{
 	text-align:center;
 	
 	float:left;
+	
+}
+li.contactsrow.listview .rowHeader .tel,
+li.contactsrow.listview .rowHeader .email{
+	display:inline-block;
+	float:left;
+	width:33%;
+	
+}
+li.contactsrow.listview .name{
+	width:25%;
+}
+li.contactsrow.listview .rowHeader .tel{
+	width:20%;
+	
 }
 li.contactsrow.listview .rowHeader .head-picture img{
 	width:26px;
 	height:26px;
 	margin-top:2px;
+	border-radius:50%;
 }
 li.contactsrow.listview .rowHeader .head-picture .nopic-row{
 	width:26px;
@@ -760,9 +855,7 @@ li.contactsrow.listview .picture img,li.contactsrow.listview .picture i{
 li.contactsrow.listview .address{
 	width:38%;
 }
-li.contactsrow.listview .name, li.contactsrow.listview .tel, li.contactsrow.listview .email{
-	width:25%;
-}
+
 li.contactsrow.listview .tel{
 	display:none;
 }
@@ -883,13 +976,21 @@ z-index:44;
 #show-contact #actions button:hover i.ioc-delete{
 	color:#AD0D00;
 }
-
+#new-contact i.ioc-delete,
 #edit-contact i.ioc-delete{
 	font-size:18px;
 	color:#EEEEEE;
 	cursor:pointer;
 }
+#edit-contact i.ioc-add,
+#new-contact i.ioc-add{
+	
+	cursor:pointer;
+	font-size:18px;
+	width:20px;
+}
 
+#new-contact i.ioc-delete:hover,
 #edit-contact i.ioc-delete:hover{
 	color:#A81700;
 }
@@ -903,7 +1004,7 @@ z-index:44;
 
 #show-contact .innerContactontent{
 	height:auto;
-	max-height:350px;
+	max-height:250px;
 }
 
 
@@ -916,7 +1017,7 @@ z-index:44;
 
 /*CONTACTS DETAIL FORMATING*/
 #new-contact input[type="text"], #new-contact textarea,#edit-contact input[type="text"], #edit-contact textarea{
-	width:240px;
+	width:210px;
 	padding:3px 4px;
 	margin-left:5px;
 }
@@ -931,9 +1032,12 @@ z-index:44;
 #new-contact .labelLeft,#edit-contact .labelLeft,#show-contact  .labelLeft{
 	display:block;
 	float:left;
-	width:28%;
+	width:140px;
 	line-height:24px;
+	
 }
+
+
 
 #show-contact  .labelLeft{
 	text-align:right;
@@ -995,32 +1099,11 @@ z-index:44;
 	position:relative;
 	margin-top:16px;
 }
-#sPhoneTypeSelect_0.combobox {
-	z-index:24;
-}
-#sPhoneTypeSelect_1.combobox {
-	z-index:22;
-}
-#sPhoneTypeSelect_2.combobox {
-	z-index:20;
+
+.isOpen{
+	z-index:40;
 }
 
-#sEmailTypeSelect_0.combobox {
-	z-index:18;
-}
-#sEmailTypeSelect_1.combobox {
-	z-index:16;
-}
-#sEmailTypeSelect_2.combobox {
-	z-index:14;
-}
-
-#sUrlTypeSelect.combobox {
-	z-index:12;
-}
-#sAddrTypeSelect.combobox {
-	z-index:8;
-}
 .combobox .selector{
 	
 	
@@ -1051,6 +1134,10 @@ z-index:44;
 	margin-left:5px;
 	border-top:none;
 	background:#fff;
+	
+	overflow-x:hidden;
+	overflow-y:auto;
+	max-height:120px;
 }
 .combobox li {
 	margin:0;
@@ -1102,7 +1189,19 @@ z-index:44;
 	left:2px;
 	font-size:26px;
 }
-
+.fullWidth{
+	width:100%;
+	position:relative;
+	float:left;
+	display:block;
+}
+.icon-descr{
+	float:left;
+	line-height:24px;
+	position:relative;
+	top:4px;
+	color:#999999;
+}
 #showAdditionalFieds{
 	background:#f4f4f4;
 	position:absolute;
@@ -1125,6 +1224,11 @@ z-index:44;
 	top:0px;
 	left:2px;
 	font-size:26px;
+}
+
+.additionalField{
+	float:left;
+	width:100%;
 }
 
 #edit_photo_dialog_img { display: block; min-width: 150; min-height: 200; }
@@ -1305,16 +1409,13 @@ label {
 }
 input#contactsearch{
 	margin-left:5px;
-	width:160px;
+	width:300px;
 	padding:6px 8px;
 	margin-top:4px;
 }
-select#searchOpt{
-	margin-left:15px;
-	width:120px;
-	margin-top:-3px;
-	height:35px;
-	font-size:13px;
+
+.hidden-category{
+	display:none;
 }
 
 
@@ -1371,11 +1472,17 @@ table#allAddressbooks{
 		margin-bottom:5px;
 	}
 
-
+	input#contactsearch{
+		width:150px;
+	}
+	
 	#controls{
 		background-color:#fff;
 	}
-	
+	.listview-header .group,
+	.listview-header .opt{
+		display:none;
+	}
 }
 
 @media only screen and (max-width: 480px){
@@ -1383,6 +1490,15 @@ table#allAddressbooks{
 		display:none;
 		
 	}
+	.app-contactsplus #searchresults {
+		width:100%;
+		padding:0;
+	}
+	
+	select#searchOpt, #contactsearch{
+		display:none;
+	}
+	
 	#new-contact input[type="text"],#new-contact select,#edit-contact input[type="text"],#edit-contact select{
 		width:160px;
 		margin-left:20px;
@@ -1392,7 +1508,18 @@ table#allAddressbooks{
 		width:70%;
 		margin-bottom:5px;
 	}
+	li.contactsrow.listview .categories{
+		display:none;
+	}
 	
+	li.contactsrow.listview .rowHeader .email,
+	li.contactsrow.listview .rowHeader .tel {
+		display:none;
+	}
+	.listview-header .email,
+	.listview-header .tel{
+		display:none;
+	}
 	
 	#edit-contact input.inputMobil{
 		width:140px;

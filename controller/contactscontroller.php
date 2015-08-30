@@ -33,6 +33,7 @@ use Sabre\VObject;
 use OCA\ContactsPlus\App as ContactsApp;
 use OCA\ContactsPlus\VCard;
 use OCA\ContactsPlus\Addressbook;
+use OCA\ContactsPlus\Http\ImageResponse;
 
 class ContactsController extends Controller {
 	
@@ -56,6 +57,7 @@ class ContactsController extends Controller {
 		$EMAILTYPE = ContactsApp::getTypesOfProperty('EMAIL');
 		$URLTYPE = ContactsApp::getTypesOfProperty('URL');
 		$ADRTYPE = ContactsApp::getTypesOfProperty('ADR');
+		$IMTYPE = ContactsApp::getIMOptions();
 		$ADDFIELDS = ContactsApp::getAdditionalFields();
 		
 		$params =[
@@ -63,12 +65,14 @@ class ContactsController extends Controller {
 			'TELTYPE' => $TELTYPE,
 			'EMAILTYPE' => $EMAILTYPE,
 			'URLTYPE' => $URLTYPE,
+			'IMTYPE' => $IMTYPE,
 			'ADRTYPE' => $ADRTYPE,
 			'ADDFIELDS' => $ADDFIELDS,
 			'TELTYPE_DEF' => 'WORK',
 			'EMAILTYPE_DEF' => 'INTERNET',
 			'URLTYPE_DEF' => 'WORK',
 			'ADRTYPE_DEF' => 'WORK',
+			'MESSENGERTYPE_DEF' => 'facebook',
 		];
 		 $response = new TemplateResponse($this->appName, 'contact.new',$params, '');  
         
@@ -167,26 +171,32 @@ class ContactsController extends Controller {
 		     }
 		  }
 		  
-		  $aUrl=array('val' =>'', 'type' =>'' );
-		  if(isset($editInfoCard['URL'][0]['value']) && !empty($editInfoCard['URL'][0]['value'])){
-		  	$aUrl['val']=	$editInfoCard['URL'][0]['value'];
-		  	 if(array_key_exists('TYPE', $editInfoCard['URL'][0]['parameters'])){
-		  	 	  foreach($editInfoCard['URL'][0]['parameters']['TYPE'] as $typeInfo){
-		  	 	  	if(strtoupper($typeInfo) != 'PREF' && $typeInfo !== ''){
-		  	 	  		$aUrl['type']=$typeInfo;
+		  $aUrl = array();
+		   if(isset($editInfoCard['URL']) && count($editInfoCard['URL'])>0){
+		   		$iUrlCount=0;	
+		    	foreach($editInfoCard['URL'] as $urlInfo){
+		    		$aUrl[$iUrlCount]['val'] = $urlInfo['value'];
+					
+					if(array_key_exists('PREF', $urlInfo['parameters'])){
+						$aUrl[$iUrlCount]['pref'] = 1;
 					}
-		  	 	  }
-				 if($aUrl['type'] ===''){
-				 	$aUrl['type'] = 'INTERNET';
-				 } 
-		  	 }else{
-		  	 	$aUrl['type']='INTERNET';
-		  	 }
-		  }else{
-		  	$aUrl['val']='';
-			$aUrl['type']='INTERNET';
-		  }
-		  
+					
+					if(array_key_exists('TYPE', $urlInfo['parameters'])){
+						foreach($urlInfo['parameters']['TYPE'] as $typeInfo){
+							if($typeInfo !=='' && strtoupper($typeInfo) != 'PREF'){	
+								$aUrl[$iUrlCount]['type'] = strtoupper($typeInfo);
+							}
+						}
+					}
+					$iUrlCount++;
+		    	}
+				
+		   }else{
+		   		$aUrl[0]['val'] = '';
+				$aUrl[0]['type'] = 'INTERNET';
+		   }
+		 
+		 
 		 $sBday='';
 		 if(isset($editInfoCard['BDAY'][0]['value']) && !empty($editInfoCard['BDAY'][0]['value'])){
 		 	$sBday=$editInfoCard['BDAY'][0]['value'];
@@ -209,7 +219,7 @@ class ContactsController extends Controller {
 		 	$sPosition=$editInfoCard['TITLE'][0]['value'];
 		 }
 		 
-		 $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'','5'=>'postalcode','6'=>'country');
+		 $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'state','5'=>'postalcode','6'=>'country');
 		 $aAddr=array();
 		 if(isset($editInfoCard['ADR']) && count($editInfoCard['ADR'])>0){
 			$iACount=0;	
@@ -218,28 +228,34 @@ class ContactsController extends Controller {
 				foreach($addrInfo['value'] as $key => $val){	
 						$aAddr[$iACount]['val'][$addressDefArray[$key]]=$val;	
 				}
-				
+				if(array_key_exists('PREF', $addrInfo['parameters'])){
+						$aAddr[$iACount]['pref'] = 1;
+				}	
 				if(array_key_exists('TYPE', $addrInfo['parameters'])){
 					$temp_sel='';	
 					foreach($addrInfo['parameters']['TYPE'] as $typeInfo){
 						if($typeInfo !=='' && strtoupper($typeInfo) != 'PREF'){
-							  if($temp_sel=='')	$temp_sel=$typeInfo;
-							  else $temp_sel.='#'.$typeInfo;
+							  if($temp_sel=='')	$temp_sel = strtoupper($typeInfo);
+							  else $temp_sel.='#'.strtoupper($typeInfo);
 						}
 				   }
-				   $aAddr[$iACount]['type']=$temp_sel;
+				   $aAddr[$iACount]['type'] = $temp_sel;
 				   if($aAddr[$iACount]['type'] === ''){
 				   		$aAddr[$iACount]['type'] = 'WORK';
 				   }
 				}
 				$iACount++;
 			}
-			$aAddr[$iACount]['val']=array('street'=>'','postalcode'=>'','city'=>'','country'=>'');
-		    $aAddr[$iACount]['type']='HOME';
+			
 		   }else{
-		   	  $aAddr[0]['val']=array('street'=>'','postalcode'=>'','city'=>'','country'=>'');
+		   	  $aAddr[0]['val']=array('street'=>'','postalcode'=>'','city'=>'','state'=>'','country'=>'');
 			  $aAddr[0]['type']='WORK';
 		   }
+		   
+		   /*TEL;TYPE=pref:0151 50114479
+			TEL;TYPE=WORK,VOICE:0824 7254
+			TEL;TYPE=WORK,FAX:08224 78335
+			TEL;TYPE=CELL,VOICE:0160 8042056*/
 		  
 		   $aTel=array();
 		    if(isset($editInfoCard['TEL']) && count($editInfoCard['TEL'])>0){
@@ -249,39 +265,78 @@ class ContactsController extends Controller {
 		    		$aTel[$iCount]['val']=$telInfo['value'];
 					
 					if(array_key_exists('PREF', $telInfo['parameters'])){
-						$aTel[$iCount]['pref']=$telInfo['parameters']['PREF'];
+						$aTel[$iCount]['pref'] = 1;
 					}	
 					
-					
 					if(array_key_exists('TYPE', $telInfo['parameters'])){
-					 $temp_sel='';	
-					foreach($telInfo['parameters']['TYPE'] as $typeInfo){
-							
-						if($typeInfo !== '' && strtoupper($typeInfo) != 'PREF'){
-							  if($temp_sel=='')	$temp_sel=$typeInfo;
-							  else $temp_sel.='#'.$typeInfo;
+						$testType = strtoupper(implode('_',$telInfo['parameters']['TYPE']));	
+					
+						if(stristr($testType,'_PREF')){
+							$aTel[$iCount]['pref'] = 1;
+							$testType = str_replace('_PREF', '', $testType);	
 						}
-					}
-					if(stristr($temp_sel,'VOICE')){
-	                	$sTypeTemp=explode('#',$temp_sel);	
-	                	$aTel[$iCount]['type']=$sTypeTemp[0];
-					}
-					if(stristr($temp_sel,'FAX')){
-	                	$sTypeTemp=explode('#',$temp_sel);		
-	                	$aTel[$iCount]['type']=$sTypeTemp[1].'_'.$sTypeTemp[0];
-					}
-					if($aTel[$iCount]['type'] === ''){
-							$aTel[$iCount]['type'] = 'WORK';
-					}
+						if(stristr($testType,'_VOICE')){
+							$sTypeTemp=explode('_',$testType);	
+	                		$aTel[$iCount]['type'] = $sTypeTemp[0];
+						}else{
+							$aTel[$iCount]['type'] = $testType;
+						}
+						
+						if($aTel[$iCount]['type'] === ''){
+							$aTel[$iCount]['type'] = 'OTHER';
+						}
+						
+					//\OCP\Util::writeLog($this->appName,'TYPE OF TEL '. strtoupper($test), \OCP\Util::DEBUG);	
+					
+					
 				}
 					$iCount++;
 			    }
-		        $aTel[$iCount]['val']='';
-				$aTel[$iCount]['type']='WORK';
+		       
 			}else{
 				$aTel[0]['val']='';
 				$aTel[0]['type']='WORK';
 			}
+			//FIXME
+			$aMessenger=array();
+		    if(isset($editInfoCard['IMPP']) && count($editInfoCard['IMPP'])>0){
+		    	$iMCount=0;	
+		    	foreach($editInfoCard['IMPP'] as $messengerInfo){
+		    		if(array_key_exists('PREF', $messengerInfo['parameters'])){
+						$aMessenger[$iMCount]['pref'] = 1;
+					}		
+		    		$aMessenger[$iMCount]['val'] = $messengerInfo['value'];
+					$aMessenger[$iMCount]['type'] = $messengerInfo['parameters']['X-SERVICE-TYPE'];
+					
+		    	$iMCount++;
+				}
+			
+		    }else{
+		    	$aMessenger[0]['val'] = '';
+				$aMessenger[0]['type'] = 'facebook';	
+		    }
+			
+			$aCloud=array();
+		    if(isset($editInfoCard['CLOUD']) && count($editInfoCard['CLOUD'])>0){
+		    	$iClCount=0;	
+		    	foreach($editInfoCard['CLOUD'] as $cloudInfo){
+		    		if(array_key_exists('PREF', $cloudInfo['parameters'])){
+						$aCloud[$iClCount]['pref'] = 1;
+					}	
+		    		$aCloud[$iClCount]['val'] = $cloudInfo['value'];
+					
+					if(array_key_exists('TYPE', $cloudInfo['parameters'])){
+						foreach($cloudInfo['parameters']['TYPE'] as $typeInfo){
+							$aCloud[$iClCount]['type'] = $typeInfo;
+						}
+					}
+					$iClCount++;
+		    	}
+				
+		    }else{
+		    	$aCloud[$iClCount]['val'] = '';
+				$aCloud[$iClCount]['type'] = 'WORK';
+		    }
 			
 			$aEmail=array();
 		    if(isset($editInfoCard['EMAIL']) && count($editInfoCard['EMAIL'])>0){
@@ -298,8 +353,8 @@ class ContactsController extends Controller {
 						 $temp_sel='';	
 						foreach($emailInfo['parameters']['TYPE'] as $typeInfo){
 							if($typeInfo !== '' && strtoupper($typeInfo) != 'PREF'){
-								  if($temp_sel=='')	$temp_sel=$typeInfo;
-							      else $temp_sel.='#'.$typeInfo;
+								  if($temp_sel=='')	$temp_sel = strtoupper($typeInfo);
+							      else $temp_sel.='#'.strtoupper($typeInfo);
 							}
 							
 							if(stristr($temp_sel,'INTERNET')){
@@ -311,7 +366,7 @@ class ContactsController extends Controller {
 								}
 								
 						   }else{
-						   	   $aEmail[$iECount]['type']=$temp_sel;
+						   	   $aEmail[$iECount]['type'] = $temp_sel;
 						   }
 							if($aEmail[$iECount]['type'] === ''){
 								$aEmail[$iECount]['type'] = 'WORK';
@@ -320,8 +375,6 @@ class ContactsController extends Controller {
 				   }
 					$iECount++;
 			    }
-				$aEmail[$iECount]['val']='';
-				$aEmail[$iECount]['type']='WORK';
 			}else{
 				$aEmail[0]['val']='';
 				$aEmail[0]['type']='WORK';
@@ -345,13 +398,14 @@ class ContactsController extends Controller {
 		$EMAILTYPE = ContactsApp::getTypesOfProperty('EMAIL');
 		$URLTYPE = ContactsApp::getTypesOfProperty('URL');
 		$ADRTYPE = ContactsApp::getTypesOfProperty('ADR');
+		$IMTYPE = ContactsApp::getIMOptions();
 		$ADDFIELDS = ContactsApp::getAdditionalFields();
 
 	    $oldaddressbookid=VCard::getAddressbookid($pId);
 		$addressBookPerm=Addressbook::find($oldaddressbookid);
 	
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize('/');
-		
+		//FIXME
 		$params =[
 			'id' => $pId,
 			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
@@ -372,6 +426,8 @@ class ContactsController extends Controller {
 			'aEmail' => isset($aEmail) ? $aEmail : '',
 			'aAddr' => isset($aAddr) ? $aAddr : '',
 			'aUrl' => isset($aUrl) ? $aUrl : '',
+			'aCloud' => isset($aCloud) ? $aCloud : '',
+			'aMessenger' => isset($aMessenger) ? $aMessenger : '',
 			'sBday' => isset($sBday) ? $sBday : '',
 			'nickname' => isset($sNickname) ? $sNickname : '',
 			'position' => isset($sPosition) ? $sPosition : '',
@@ -380,6 +436,7 @@ class ContactsController extends Controller {
 			'EMAILTYPE' => $EMAILTYPE,
 			'URLTYPE' => $URLTYPE,
 			'ADRTYPE' => $ADRTYPE,
+			'IMTYPE' => $IMTYPE,
 			'ADDFIELDS' => $ADDFIELDS,
 		];
 		
@@ -579,6 +636,23 @@ class ContactsController extends Controller {
 		
 		return $params;
 	  }
+		 /**
+	     * @NoAdminRequired
+		  *
+		 * @NoCSRFRequired
+	     */
+     
+		public function getContactPhoto($id){
+			$vcard = ContactsApp::getContactVCard($id);
+			
+			if (isset($vcard->PHOTO)){
+				 $image = new \OCP\Image();
+				 $image->loadFromData((string)$vcard->PHOTO);
+				 \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image -> data(), 600);
+				 
+				 return $response = new ImageResponse($image);
+			}
+		}
 	
 	  /**
      * @NoAdminRequired
@@ -596,6 +670,7 @@ class ContactsController extends Controller {
 		$EMAILTYPE = ContactsApp::getTypesOfProperty('EMAIL');	
 		$URLTYPE = ContactsApp::getTypesOfProperty('URL');
 		$ADRTYPE = ContactsApp::getTypesOfProperty('ADR');
+		$IMTYPE = ContactsApp::getIMOptions();
 		
 		$aDefNArray=array('0'=>'lname','1'=>'fname','2'=>'anrede', '3'=>'title');
 		$aN='';
@@ -657,6 +732,16 @@ class ContactsController extends Controller {
 			$aUrl = $this->getUrlInfo($editInfoCard['URL'], $URLTYPE);
 		}
 		
+		$aImpp = '';
+		if(array_key_exists('IMPP', $editInfoCard)){
+			$aImpp = $this->getImppInfo($editInfoCard['IMPP'], $IMTYPE);
+		}
+		
+		$aCloud = '';
+		if(array_key_exists('CLOUD', $editInfoCard)){
+			$aCloud = $this->getCloudInfo($editInfoCard['CLOUD'], $ADRTYPE);
+		}
+		
 		 $bPhoto=0;
 		 $imgSrc='';
 		 $imgMimeType='';
@@ -671,6 +756,9 @@ class ContactsController extends Controller {
 			 \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image -> data(), 600);
 			 
 		}
+		 
+		 
+		 
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize('/');
 		
 		$params = [
@@ -692,6 +780,8 @@ class ContactsController extends Controller {
 			'aEmail' => isset($aEmail) ? $aEmail : '',
 			'aAddr' => isset($aAddr) ? $aAddr : '',
 			'aUrl' => isset($aUrl) ? $aUrl : '',
+			'aImpp' => isset($aImpp) ? $aImpp : '',
+			'aCloud' => isset($aCloud) ? $aCloud : '',
 			'sBday' =>  isset($sBday) ? $sBday : '',
 			'nickname' => isset($sNickname) ? $sNickname : '',
 			'position' => isset($sPosition) ? $sPosition : '',
@@ -941,11 +1031,14 @@ class ContactsController extends Controller {
 	
 	private function getAddressInfo(array $editInfoAddr, $ADRTYPE){
 	   	
-	   $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'','5'=>'postalcode','6'=>'country');
+	   $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'state','5'=>'postalcode','6'=>'country');
 	   $aAddr='';
 	   if(isset($editInfoAddr) && count($editInfoAddr)>0){
 			$iACount=0;	
 			foreach($editInfoAddr as $addrInfo){
+				if(array_key_exists('PREF', $addrInfo['parameters'])){
+					$aAddr[$iACount]['pref']=$addrInfo['parameters']['PREF'];
+				}
 				
 				foreach($addrInfo['value'] as $key => $val){	
 					
@@ -1002,7 +1095,7 @@ class ContactsController extends Controller {
 					}
 				}
 				if(stristr($temp_search,'FAX')){
-					$temp_sel=$TELTYPE['FAX_WORK'];
+					$temp_sel=$TELTYPE['WORK_FAX'];
 				}
 		      	$aTel[$iCount]['type']=$temp_sel;
 				
@@ -1055,27 +1148,89 @@ class ContactsController extends Controller {
 	}
 	
 	private function getUrlInfo(array $editInfoUrl, $URLTYPE){
-		$aUrl=array('val' =>'', 'type' =>'' );
-		  if(isset($editInfoUrl[0]['value']) && !empty($editInfoUrl[0]['value'])){
-		  	$aUrl['val']=	$editInfoUrl[0]['value'];
-		  	 if(array_key_exists('TYPE', $editInfoUrl[0]['parameters'])){
-		  	 	  foreach($editInfoUrl[0]['parameters']['TYPE'] as $typeInfo){
-		  	 	  	if(strtoupper($typeInfo) != 'PREF' && $typeInfo !=''){
-		  	 	  		$aUrl['type']=$URLTYPE[$typeInfo];
+		  
+		 $aUrl = array();
+		   if(isset($editInfoUrl) && count($editInfoUrl)>0){
+		   		$iUrlCount=0;	
+		    	foreach($editInfoUrl as $urlInfo){
+		    		$aUrl[$iUrlCount]['val'] = $urlInfo['value'];
+					if(array_key_exists('PREF', $urlInfo['parameters'])){
+						$aUrl[$iUrlCount]['pref']=$urlInfo['parameters']['PREF'];
 					}
-		  	 	  }
-				 if($aUrl['type'] ===''){
-				 	$aUrl['type'] = $URLTYPE['INTERNET'];
-				 } 
-		  	 }else{
-		  	 	$aUrl['type'] = $URLTYPE['INTERNET'];
-		  	 }
-		  }else{
-		  	$aUrl['val']='';
-			$aUrl['type']= $URLTYPE['INTERNET'];
-		  }
+					if(array_key_exists('TYPE', $urlInfo['parameters'])){
+						foreach($urlInfo['parameters']['TYPE'] as $typeInfo){
+							if($typeInfo !=='' && strtoupper($typeInfo) != 'PREF'){	
+								$aUrl[$iUrlCount]['type'] = $URLTYPE[$typeInfo];
+							}
+						}
+					}
+					$iUrlCount++;
+		    	}
+				
+		   }else{
+		   		$aUrl[0]['val'] = '';
+				$aUrl[0]['type'] = $URLTYPE['INTERNET'];
+		   }
+		   
+		 
 		  
 		  return $aUrl;
 	}
-	
+	private function getImppInfo(array $editInfoImpp, $IMTYPE){
+		  
+		 $returnArray = array();
+		   if(isset($editInfoImpp) && count($editInfoImpp)>0){
+		   		$iCount=0;	
+		    	foreach($editInfoImpp as $editInfo){
+		    		$returnArray[$iCount]['val'] = $editInfo['value'];
+					if(array_key_exists('PREF', $editInfo['parameters'])){
+						$returnArray[$iCount]['pref']=$editInfo['parameters']['PREF'];
+					}
+					if(array_key_exists('X-SERVICE-TYPE', $editInfo['parameters'])){
+						$returnArray[$iCount]['type'] = $IMTYPE[$editInfo['parameters']['X-SERVICE-TYPE']]['displayname'];
+					}
+					
+					$iCount++;
+					}
+					
+		  
+				
+		   }else{
+		   		$returnArray[0]['val'] = '';
+				$returnArray[0]['type'] = $IMTYPE['facebook'];
+		   }
+		   
+		 
+		  
+		  return $returnArray;
+	}
+	private function getCloudInfo(array $editInfoCloud, $CLOUDTYPE){
+		  
+		 $returnArray = array();
+		   if(isset($editInfoCloud) && count($editInfoCloud)>0){
+		   		$iCount=0;	
+		    	foreach($editInfoCloud as $editInfo){
+		    		$returnArray[$iCount]['val'] = $editInfo['value'];
+					if(array_key_exists('PREF', $editInfo['parameters'])){
+						$returnArray[$iCount]['pref']=$editInfo['parameters']['PREF'];
+					}
+					if(array_key_exists('TYPE', $editInfo['parameters'])){
+						foreach($editInfo['parameters']['TYPE'] as $typeInfo){
+							if($typeInfo !=='' && strtoupper($typeInfo) != 'PREF'){	
+								$returnArray[$iCount]['type'] = $CLOUDTYPE[$typeInfo];
+							}
+						}
+					}
+					$iCount++;
+		    	}
+				
+		   }else{
+		   		$returnArray[0]['val'] = '';
+				$returnArray[0]['type'] = $CLOUDTYPE['INTERNET'];
+		   }
+		   
+		 
+		  
+		  return $returnArray;
+	}
 }

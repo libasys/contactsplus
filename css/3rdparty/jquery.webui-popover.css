@@ -3,7 +3,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 2600;
+  z-index: 300;
   display: none;
   width: 276px;
   min-height: 32px;
@@ -18,6 +18,9 @@
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
+
+
+
 .webui-popover.top,
 .webui-popover.top-left,
 .webui-popover.top-right {

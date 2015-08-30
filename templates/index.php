@@ -130,16 +130,17 @@
 	<div id="second-group" class="button-group"  style="float:left;">
 		<button id="showList" class="button" title="<?php p($l->t('List View')); ?>"><i class="ioc ioc-th-list"></i></button> 
 		<button id="showCards" class="button" title="<?php p($l->t('Card View')); ?>"><i class="ioc ioc-th-large isActiveListView"></i></button> 
-	<select id="searchOpt" style="font-size:14px;padding:0;">
- 		<option value="fullname" selected><?php p($l->t('Organization')); ?></option>
- 		<option value="name"><?php p($l->t('Name')); ?></option>
- 		<option value="address"><?php p($l->t('Address')); ?></option>
- 		<option value="email"><?php p($l->t('E-Mail')); ?></option>
- 		</select>
- 		<input type="search" placeholder="&#xe815;" name="contactsearch" id="contactsearch" style="font-family:Arial,fontello;font-size:18px;" />
+		<input type="search" placeholder="&#xe815; <?php p($l->t(' in current addressbook')); ?>" name="contactsearch" id="contactsearch" style="font-family:Arial,fontello;font-size:18px;" />
 
 	</div>	
 	
+</div>
+<div class="listview-header">
+	 <span class="fullname"><?php p($l->t('Displayname')); ?></span>
+	 <span class="tel"><?php p($l->t('Phone')); ?></span>
+	 <span class="email"><?php p($l->t('Email')); ?></span>
+	 <span class="group"><?php p($l->t('Group')); ?></span>
+	 <span class="opt"><?php p($l->t('Opt')); ?></span>
 </div>
 	<div id="rightcontent">
 	

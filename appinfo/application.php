@@ -36,7 +36,14 @@ use \OCA\ContactsPlus\Controller\ImportController;
 use \OCA\ContactsPlus\Controller\AddressbookController;
 use \OCA\ContactsPlus\Controller\ContactsApiController;
 
+
 class Application extends App {
+	
+	 /**
+	 * An array holding the current users address books.
+	 * @var array
+	 */
+	protected static $addressBooks = array();
 	
 	public function __construct (array $urlParams=array()) {
 		
@@ -148,7 +155,7 @@ class Application extends App {
 		);
 	}
   
-    
+   
 
 }
 

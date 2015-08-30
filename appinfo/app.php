@@ -1,6 +1,7 @@
 <?php
 namespace OCA\ContactsPlus\AppInfo;
 use \OCA\ContactsPlus\App as ContactsApp;	
+use \OCA\ContactsPlus\AddressbookProvider;
 
 $app = new Application();
 $c = $app->getContainer();
@@ -43,4 +44,22 @@ if (\OCP\User::isLoggedIn() && !\OCP\App::isEnabled('contacts')) {
 		\OCP\Util::addscript($contactsAppName,'loader');
 		}
 	}
+	
+	
 }
+
+
+if (\OCP\User::isLoggedIn()) {
+	$cm = \OC::$server->getContactsManager();
+	
+	$cm->register(function() use ($cm) {
+		$myApp = new Application();
+		$addressBooks = $myApp->getContainer()->query('AddressbookController')->getAddressBooksForCM();
+		
+		foreach ($addressBooks as $addressBook)  {
+				$cm->registerAddressBook(new AddressbookProvider($addressBook));
+			
+		}
+	});
+}
+

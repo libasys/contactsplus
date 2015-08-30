@@ -1114,38 +1114,40 @@ class VCard {
 	 * NOTE: $value is not escaped anymore. It shouldn't make any difference
 	 * but we should look out for any problems.
 	 */
-	public static function structureProperty($property) {
+	public static function structureProperty(\Sabre\VObject\Property $property) {
 		if(!in_array($property->name, App::$index_properties)) {
 			return;
 		}
 		$value = $property->getValue();
-		if($property->name == 'ADR' || $property->name == 'N' || $property->name == 'ORG') {
+		if($property->name == 'ADR' || $property->name == 'N' || $property->name == 'ORG' || $property->name == 'CATEGORIES') {
 			$value = $property->getParts();
-			
 			$value = array_map('trim', $value);
 		}
 		elseif($property->name == 'BDAY') {
-			if(strpos($value, '-') === false) {
-				if(strlen($value) >= 8) {
-					$value = substr($value, 0, 4).'-'.substr($value, 4, 2).'-'.substr($value, 6, 2);
-				} else {
-					return null; // Badly malformed :-(
+			if(strlen($value) >= 8
+				&& is_int(substr($value, 0, 4))
+				&& is_int(substr($value, 4, 2))
+				&& is_int(substr($value, 6, 2))) {
+				$value = substr($value, 0, 4).'-'.substr($value, 4, 2).'-'.substr($value, 6, 2);
+			} else if($value[5] !== '-' || $value[7] !== '-') {
+				try {
+					// Skype exports as e.g. Jan 14, 1996
+					$date = new \DateTime($value);
+					$value = $date->format('Y-m-d');
+				} catch(\Exception $e) {
+					\OCP\Util::writeLog('contactsplus', __METHOD__.' Error parsing date: ' . $value, \OCP\Util::DEBUG);
+					return;
 				}
 			}
 		} elseif($property->name == 'PHOTO') {
 			$value = true;
-		}
-		elseif($property->name == 'CATEGORIES') {
-			$value = strtr($value, array('\,' => ',', '\;' => ';'));
-			$tmp= explode(',', $value);
-			$value = array_map('trim', $tmp);
 		}
 		elseif($property->name == 'IMPP') {
 			if(strpos($value, ':') !== false) {
 				$value = explode(':', $value);
 				$protocol = array_shift($value);
 				if(!isset($property['X-SERVICE-TYPE'])) {
-					$property['X-SERVICE-TYPE'] = strtoupper(\OCP\Util::sanitizeHTML($protocol));
+					$property['X-SERVICE-TYPE'] = strtoupper($protocol);
 				}
 				$value = implode('', $value);
 			}

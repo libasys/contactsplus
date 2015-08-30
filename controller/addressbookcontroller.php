@@ -45,6 +45,22 @@ class AddressbookController extends Controller {
 		$this->l10n = $l10n;
 		$this->configInfo = $settings;
 	}
+	/**
+     * @NoAdminRequired
+     */
+    public function getAddressBooksForCM() {
+    	$active_addressbooks = array();
+
+		$active_addressbooks = Addressbook::all($this->userId,true);
+		if(count($active_addressbooks) === 0) {
+			Addressbook::addDefault($this->userId);
+			$active_addressbooks = Addressbook::all($this->userId,true);
+		}
+		
+		return $active_addressbooks;
+		
+    }
+	
 	 /**
      * @NoAdminRequired
      */

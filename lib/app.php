@@ -29,12 +29,15 @@ class App{
 		/**
 	 * Properties there can be more than one of.
 	 */
-	public static $multi_properties = array('EMAIL', 'TEL', 'IMPP', 'ADR', 'URL');
+	public static $multi_properties = array('EMAIL', 'TEL', 'IMPP', 'ADR', 'URL','CLOUD');
 
 	/**
 	 * Properties to index.
 	 */
-	public static $index_properties = array('BDAY', 'UID', 'N', 'FN', 'TITLE', 'ROLE', 'NOTE', 'NICKNAME', 'ORG', 'CATEGORIES', 'EMAIL', 'TEL', 'IMPP', 'ADR', 'URL', 'GEO', 'PHOTO');
+	 
+	 //lat:lon GEO:37.386013;-122.082932
+	 
+	public static $index_properties = array('BDAY', 'UID', 'N', 'FN', 'TITLE', 'ROLE', 'NOTE', 'NICKNAME', 'ORG', 'CATEGORIES', 'EMAIL', 'TEL', 'IMPP', 'ADR', 'URL', 'GEO', 'PHOTO', 'CLOUD');
 	
 	public static function searchProperties($searchquery){
 		
@@ -466,11 +469,8 @@ class App{
 	public static function getAdditionalFields() {
 		$l = self::$l10n;
 		return array(
-			'phone' => $l->t('Phone'),
-			'email' => $l->t('Email'),
-			'gender' => $l->t('Gender'),
+			'gender' => $l->t('Title'),
 			'nickname' => $l->t('Nickname'),
-			'position' =>  $l->t('Position'),
 			'position' =>  $l->t('Position'),
 			'department' =>  $l->t('Department'),
 			'bday' =>  $l->t('Birthday'),
@@ -498,9 +498,9 @@ class App{
 					'TEXT'  =>  $l->t('Text'),
 					'VOICE' =>  $l->t('Voice'),
 					'MSG'   =>  $l->t('Message'),
-					'FAX_WORK'   =>  $l->t('Fax').' '.$l->t('Work'),
-					'FAX_HOME'   =>  $l->t('Fax').' '.$l->t('Home'),
-					'FAX_OTHER'   =>  $l->t('Fax').' '.$l->t('Other'),
+					'WORK_FAX'   =>  $l->t('Fax').' '.$l->t('Work'),
+					'HOME_FAX'   =>  $l->t('Fax').' '.$l->t('Home'),
+					'OTHER_FAX'   =>  $l->t('Fax').' '.$l->t('Other'),
 					'FAX'   =>  $l->t('Fax'),
 					'VIDEO' =>  $l->t('Video'),
 					'PAGER' =>  $l->t('Pager'),
@@ -514,9 +514,102 @@ class App{
 					'INTERNET' => $l->t('Internet'),
 					'OTHER' =>  $l->t('Other'),
 				);
+			case 'CLOUD':
+				return array(
+					'HOME' => (string)$l->t('Home'),
+					'WORK' => (string)$l->t('Work'),
+					'OTHER' =>  (string)$l->t('Other'),
+				);	
 		}
 	}
 	
+	/**
+	 * Get options for IMPP properties
+	 * @param string $im
+	 * @return array of vcard prop => label
+	 */
+	public static function getIMOptions($im = null) {
+		$l10n = self::$l10n;
+		$ims = array(
+				'jabber' => array(
+					'displayname' => (string)$l10n->t('Jabber'),
+					'xname' => 'X-JABBER',
+					'protocol' => 'xmpp',
+				),
+				'sip' => array(
+					'displayname' => (string)$l10n->t('Internet call'),
+					'xname' => 'X-SIP',
+					'protocol' => 'sip',
+				),
+				'aim' => array(
+					'displayname' => (string)$l10n->t('AIM'),
+					'xname' => 'X-AIM',
+					'protocol' => 'aim',
+				),
+				'msn' => array(
+					'displayname' => (string)$l10n->t('MSN'),
+					'xname' => 'X-MSN',
+					'protocol' => 'msn',
+				),
+				'twitter' => array(
+					'displayname' => (string)$l10n->t('Twitter'),
+					'xname' => 'X-TWITTER',
+					'protocol' => 'twitter',
+				),
+				'googletalk' => array(
+					'displayname' => (string)$l10n->t('GoogleTalk'),
+					'xname' => null,
+					'protocol' => 'xmpp',
+				),
+				'facebook' => array(
+					'displayname' => (string)$l10n->t('Facebook'),
+					'xname' => null,
+					'protocol' => 'xmpp',
+				),
+				'xmpp' => array(
+					'displayname' => (string)$l10n->t('XMPP'),
+					'xname' => null,
+					'protocol' => 'xmpp',
+				),
+				'icq' => array(
+					'displayname' => (string)$l10n->t('ICQ'),
+					'xname' => 'X-ICQ',
+					'protocol' => 'icq',
+				),
+				'yahoo' => array(
+					'displayname' => (string)$l10n->t('Yahoo'),
+					'xname' => 'X-YAHOO',
+					'protocol' => 'ymsgr',
+				),
+				'skype' => array(
+					'displayname' => (string)$l10n->t('Skype'),
+					'xname' => 'X-SKYPE',
+					'protocol' => 'skype',
+				),
+				'qq' => array(
+					'displayname' => (string)$l10n->t('QQ'),
+					'xname' => 'X-SKYPE',
+					'protocol' => 'x-apple',
+				),
+				'gadugadu' => array(
+					'displayname' => (string)$l10n->t('GaduGadu'),
+					'xname' => 'X-SKYPE',
+					'protocol' => 'x-apple',
+				),
+				'owncloud-handle' => array(
+				    'displayname' => (string)$l10n->t('ownCloud'),
+				    'xname' => null,
+				    'protocol' => 'x-owncloud-handle'
+				),
+		);
+		if(is_null($im)) {
+			return $ims;
+		} else {
+			$ims['ymsgr'] = $ims['yahoo'];
+			$ims['gtalk'] = $ims['googletalk'];
+			return isset($ims[$im]) ? $ims[$im] : null;
+		}
+	}
 	
 	/**
 	 * @brief Get the last modification time.
@@ -687,42 +780,43 @@ class App{
 			$sReturn='';	
 			$count=1;	
 			if($bTrans) $trans=self::getTypesOfProperty($Name);	
-			if($pref){
-				
-			}
+			
 			foreach($aCon[$Name] as $Info){
 				$sReturnTypeOutput='';
 				
-				if(array_key_exists('TYPE',$Info['parameters']) &&  array_key_exists('PREF',$Info['parameters'])){
+				if((array_key_exists('TYPE',$Info['parameters']) || array_key_exists('X-SERVICE-TYPE',$Info['parameters'])) &&  array_key_exists('PREF',$Info['parameters'])){
 					//\OCP\Util::writeLog(self::$appname,'Tel PREF: '.$Info['parameters']['PREF'], \OCP\Util::DEBUG);
+					if(array_key_exists('TYPE',$Info['parameters'])){
+						foreach($Info['parameters']['TYPE'] as $TypeInfo){
+							 $TypeInfo=strtoupper($TypeInfo);	
+							
+							 if($TypeInfo!='PREF' && $TypeInfo!='INTERNET' && $TypeInfo!='VOICE'){
+						          		
+						          if($bTrans) {
+						          	 $sTransLationName = $TypeInfo;
+									  if(isset($trans[$TypeInfo])){
+									  	$sTransLationName=$trans[$TypeInfo];	
+									  }
+						          	$sReturnTypeOutput.='<b>'.$sTransLationName.'</b> ';
+								  }
+								  else $sReturnTypeOutput.='<b>,'.$TypeInfo.'</b> ';
+							 }
+						   
+						}
+					}else{
+						$IMTYPE = self::getIMOptions();	
+						$sReturnTypeOutput = $IMTYPE[$Info['parameters']['X-SERVICE-TYPE']]['displayname'].' ';
+					} 
+					$sReturn['descr'] = $sReturnTypeOutput;
+					$sReturn['value'] = $Info['value'];
 					
-					foreach($Info['parameters']['TYPE'] as $TypeInfo){
-						 $TypeInfo=strtoupper($TypeInfo);	
-						
-						 if($TypeInfo!='PREF' && $TypeInfo!='INTERNET' && $TypeInfo!='VOICE'){
-					          		
-					          if($bTrans) {
-					          	 $sTransLationName=$TypeInfo;
-								  if(isset($trans[$TypeInfo]))$sTransLationName=$trans[$TypeInfo];	
-					          	$sReturnTypeOutput.='<b>'.$sTransLationName.'</b> ';
-							  }
-							  else $sReturnTypeOutput.='<b>,'.$TypeInfo.'</b> ';
-						 }
-					   
-					}
-					if($sReturn=='') $sReturn=$sReturnTypeOutput.$Info['value'];
-				    else $sReturn.='<br>'.$sReturnTypeOutput.$Info['value'];
+				   return $sReturn;
 				}
 				
 				
-				if($depth>0 && $depth==$count){
-					return $sReturn;
-				}else{
-					$count++;
-				}
+				
 			}
-			if($depth ==0) return $sReturn;
-			//return $sReturn;
+			
 			
 		}else return false;
     }
@@ -786,8 +880,8 @@ class App{
 				 	
 				$contacts = array();
 				$counterAlle=0;
-				//$aLetter=array('Ä','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
 				$aLetter = [];
+				
 				if($contacts_alphabet) {
 					$oldLetter = '';
 					foreach($contacts_alphabet as $contact) {
@@ -870,6 +964,7 @@ class App{
 
    public static function renderSingleCard($CONTACTDATA,$contactInfo, $addressBookPerm, $aFavourites){
    		$catOutput = '';
+		$searchCat='';
 		$hiddenClass = 'hidden';
 		if(isset($CONTACTDATA['CATEGORIES'][0]['value']) && count($CONTACTDATA['CATEGORIES'][0]['value'])>0){
 			$hiddenClass ='';
@@ -878,19 +973,38 @@ class App{
 				$backgroundColor=	self::genColorCodeFromText(trim($categories),80);
 				$color=self::generateTextColor($backgroundColor);
 				$catOutput.='<span class="colorgroup" data-category="'.$categories.'"  style="background-color:'.$backgroundColor.';color:'.$color.';" title="'.$categories.'">'.mb_substr($categories, 0,1,"UTF-8").'</span> ';
+				$searchCat.=' '.$categories;
 			}
 		}
 		
-		$sEmailOutput=self::renderSingleCardParameter($CONTACTDATA,'EMAIL',0,1);
+		$sEmailOutput = self::renderSingleCardParameter($CONTACTDATA,'EMAIL',0,1);
+		$sEmailOutputHeader = '&nbsp;';
 		if($sEmailOutput!=''){
-			$sEmailOutput='<i class="ioc ioc-mail"></i> '.$sEmailOutput;
+			$sEmailOutputHeader='<a href="mailto:'.$sEmailOutput['value'].'">'.$sEmailOutput['value'].'</a> ';
+			$sEmailOutput='<a href="mailto:'.$sEmailOutput['value'].'"><i class="ioc ioc-mail"></i></a> '.$sEmailOutput['descr'].'<a href="mailto:'.$sEmailOutput['value'].'">'.$sEmailOutput['value'].'</a>';
 		}
 		
-		$sTelOutput=self::renderSingleCardParameter($CONTACTDATA,'TEL',0,1);
+		$sTelOutput = self::renderSingleCardParameter($CONTACTDATA,'TEL',0,1);
+		$sTelOutputHeader = '&nbsp;';
 		if($sTelOutput!=''){
-			$sTelOutput='<i class="ioc ioc-phone"></i> '.$sTelOutput;
+			$sTelOutputHeader = $sTelOutput['value'];	
+			$sTelOutput='<i class="ioc ioc-phone"></i> '.$sTelOutput['descr'].$sTelOutput['value'];
+		}
+		/*
+		$sUrlOutput = self::renderSingleCardParameter($CONTACTDATA,'URL',0,1);
+		if($sUrlOutput != ''){
+			$sUrlOutput='<a href="'.$sEmailOutput['value'].'" target="_blank"><i class="ioc ioc-publiclink"></i></a> '.$sUrlOutput['descr'].'<a href="'.$sUrlOutput['value'].'" target="_blank">'.$sUrlOutput['value'].'</a>';
 		}
 		
+		$sImppOutput = self::renderSingleCardParameter($CONTACTDATA,'IMPP',0,1);
+		if($sImppOutput != ''){
+			$sImppOutput='<i class="ioc ioc-users"></i> '.$sImppOutput['descr'].$sImppOutput['value'];
+		}
+		
+		$sCloudOutput = self::renderSingleCardParameter($CONTACTDATA,'CLOUD',0,1);
+		if($sCloudOutput != ''){
+			$sCloudOutput='<i class="ioc ioc-upload-cloud"></i> '.$sCloudOutput['descr'].$sCloudOutput['value'];
+		}*/
 		
 		$sAddrOutput='';
 		 $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'','5'=>'postalcode','6'=>'country');
@@ -901,7 +1015,9 @@ class App{
 				}
 			}
 			
-			$sAddrOutput=isset($addrOutput['street'])?'<span class="addrStreet">'.$addrOutput['street'].'</span> ':'';
+			$linkAddr='<a target="_blank" href="http://open.mapquest.com/?q='.$addrOutput['street'].','.$addrOutput['postalcode'].','.$addrOutput['city'].','.$addrOutput['state'].','.$addrOutput['country'].'"><i style="font-size:18px;color:#999;" class="ioc ioc-search"></i></a>';
+			$sAddrOutput='<i class="ioc ioc ioc-address"></i>';
+			$sAddrOutput.= isset($addrOutput['street'])?'<span class="addrStreet">'.$addrOutput['street'].$linkAddr.'</span> ':'';
 			$sAddrOutput.=isset($addrOutput['postalcode'])?$addrOutput['postalcode'].' ':'';
 			$sAddrOutput.=isset($addrOutput['city'])?$addrOutput['city'].' ':'';
 			$sAddrOutput.=isset($addrOutput['country'])?' ('.$addrOutput['country'].') ':'';
@@ -979,12 +1095,16 @@ class App{
 		if(!empty($contactInfo['lastname'])){
 			//$DisplayName .= $contactInfo['lastname'];
 		}
-		
+		/*<span class="url">'.$sUrlOutput.'</span>
+			  <span class="impp">'.$sImppOutput.'</span>
+			  <span class="clouding">'.$sCloudOutput.'</span>*/
 		
 		$prepareOutput='<span data-contactid="'.$contactInfo['id'].'" data-letter="'.$contactInfo['letter'].'" class="container">
 		 <span class="rowHeader">
-		 	 <span class="head-picture">'.$thumbHead.'</span>
+		 	 <span class="head-picture">'.$thumbHead.'<input class="contact-select" type="checkbox" value="'.$contactInfo['id'].'" name="contact['.$contactInfo['id'].']" /></span>
 			 <span class="fullname" data-id="'.$contactInfo['id'].'"><a>'.strip_tags($DisplayName).'</a></span>
+			 <span class="tel">'.$sTelOutputHeader.'</span>
+			  <span class="email">'.$sEmailOutputHeader.'</span>
 			  <span class="categories '.$hiddenClass.'">'.$catOutput.'</span>
 			   <span class="option">'.$editLink.' '.$delLink.'</span>
 		   </span>
@@ -992,8 +1112,10 @@ class App{
 			 <span class="picture">'.$thumb.'</span>
 			 <span class="name">'.$sNameOutput.'</span>
 			 <span class="address">'.$sAddrOutput.'</span>
-			  <span class="tel">'.$sTelOutput.'</span>
-			  <span class="email">'.$sEmailOutput.'</span>
+			  <span class="tel telsearch">'.$sTelOutput.'</span>
+			  <span class="email emailsearch">'.$sEmailOutput.'</span>
+			  <span class="hidden-category">'.$searchCat.'</span>
+			  
 		  </span>
 		  <span>
 		';
@@ -1132,9 +1254,10 @@ class App{
 	    		if($val!=''){	
 		    		
 					$tType=$sRequest['phonetype'][$ipCount].',VOICE';
+					
 		    		if(stristr($sRequest['phonetype'][$ipCount],'FAX')){
 		    			$tempT=explode('_',$sRequest['phonetype'][$ipCount]);
-						$tType=$tempT[1].','.$tempT[0];
+						$tType=$tempT[0].','.$tempT[1];
 		    		}
 					if($iPref!='' && $iPref==$ipCount){
 						$vcard->add('TEL',$val,array('type'=>$tType,'pref'=>'1'));	
@@ -1176,15 +1299,86 @@ class App{
 		}else{
 			if(isset($vcard->EMAIL))	unset($vcard->EMAIL);
 		}
-
-
-		if(isset($sRequest['homepage']) && !empty($sRequest['homepage'])){
-			 $vcard->URL = $sRequest['homepage'];
-			 $vcard->URL['TYPE']=$sRequest['urltype'];
-			 $vcard->URL['PREF']=1;
+		
+		//Messenger
+		if(isset($sRequest['im']) && !empty($sRequest['im'][0])) {
+			
+			if(isset($vcard->IMPP))	unset($vcard->IMPP);
+			
+			$iCIm=0;
+			$iPref = '';
+			if(isset($sRequest['imPref'])){
+				$temp=explode('_',$sRequest['imPref']);
+				$iPref=$temp[1];
+			}
+						
+			foreach($sRequest['im'] as $key => $val){
+	    		if($val!== ''){
+		    		$messengerType=(isset($sRequest['imtype'][$iCIm])?$sRequest['imtype'][$iCIm]:'');		
+		    		$aMessenger=self::getIMOptions($messengerType);
+					if($iPref !='' && $iPref == $iCIm){
+						$vcard->add('IMPP',$aMessenger['protocol'].':'.$val,array('X-SERVICE-TYPE'=>$messengerType,'pref'=>'1'));	
+					}else{
+						$vcard->add('IMPP',$aMessenger['protocol'].':'.$val,array('X-SERVICE-TYPE'=>$messengerType));	
+					} 
+					
+				}
+				$iCIm++;
+			}
 		}else{
-			if(isset($vcard->URL))	unset($vcard->URL);
+			if(isset($vcard->IMPP))	unset($vcard->IMPP);
 		}
+		//Cloud
+		if(isset($sRequest['cloud']) && !empty($sRequest['cloud'][0])) {
+			
+			if(isset($vcard->CLOUD))	unset($vcard->CLOUD);
+			$iCCm=0;
+			$iPref = '';
+			if(isset($sRequest['cloudPref'])){
+				$temp=explode('_',$sRequest['cloudPref']);
+				$iPref=$temp[1];
+			}			
+			foreach($sRequest['cloud'] as $val){
+	    		if($val!== ''){
+					$cloudType=(isset($sRequest['cloudtype'][$iCCm])?$sRequest['cloudtype'][$iCCm]:'');		
+					if($iPref !='' && $iPref == $iCCm){
+						$vcard->add('CLOUD',$val,array('type'=>$cloudType,'pref'=>'1'));	
+					}else{
+						$vcard->add('CLOUD',$val,array('type'=>$cloudType));	
+					}
+					
+				}
+				$iCCm++;
+			}
+		}else{
+			if(isset($vcard->CLOUD)) 	unset($vcard->CLOUD);
+		}
+		
+		
+		if(isset($sRequest['url']) && !empty($sRequest['url'][0])) {
+			
+			if(isset($vcard->URL))	unset($vcard->URL);
+				$iCUm = 0;
+				$iPref = '';
+				if(isset($sRequest['urlPref'])){
+					$temp=explode('_',$sRequest['urlPref']);
+					$iPref=$temp[1];
+				}			
+				foreach($sRequest['url'] as $val){
+		    		if($val!== ''){
+						$urlType=(isset($sRequest['urltype'][$iCUm])?$sRequest['urltype'][$iCUm]:'');	
+						if($iPref !='' && $iPref == $iCUm){
+							$vcard->add('URL',$val,array('type'=>$urlType,'pref' =>'1'));
+						}else{
+							$vcard->add('URL',$val,array('type'=>$urlType));
+						}	
+					}
+				$iCUm++;
+			}
+		}else{
+			if(isset($vcard->URL)) 	unset($vcard->URL);
+		}
+		
 		
 		if(isset($sRequest['notice']) && !empty($sRequest['notice'])) {
 			$vcard->NOTE = $sRequest['notice'];
@@ -1202,20 +1396,32 @@ class App{
          [6]=the country name*/
 		$sAddrStreet=isset($sRequest['addr'][0]['street']) && !empty($sRequest['addr'][0]['street'])?$sRequest['addr'][0]['street']:'';
 		$sAddrZip=isset($sRequest['addr'][0]['postal']) && !empty($sRequest['addr'][0]['postal'])?$sRequest['addr'][0]['postal']:'';
+		$sAddrState=isset($sRequest['addr'][0]['state']) && !empty($sRequest['addr'][0]['state'])?$sRequest['addr'][0]['state']:'';
 		$sAddrCity=isset($sRequest['addr'][0]['city']) && !empty($sRequest['addr'][0]['city'])?$sRequest['addr'][0]['city']:'';
 		$sAddrCountry=isset($sRequest['addr'][0]['country']) && !empty($sRequest['addr'][0]['country'])?$sRequest['addr'][0]['country']:'';
 		
-		if($sAddrStreet!='' || $sAddrZip!='' || $sAddrCity!='' || $sAddrCountry!=''){
+		if($sAddrStreet!='' || $sAddrZip!='' || $sAddrCity!='' || $sAddrCountry!='' || $sAddrState!=''){
 			 if(isset($vcard->ADR))	unset($vcard->ADR);
 			 $iACount=0;
+			 $iPref = '';
+			if(isset($sRequest['addrPref'])){
+				$temp=explode('_',$sRequest['addrPref']);
+				$iPref=$temp[1];
+			}
+			
 			 foreach($sRequest['addr'] as $val){
 			 	 
-				 if($val['street']!='' || $val['city']!='' || $val['postal']!='' || $val['country']!=''){	
-				 	 $saveAdress=array('','',$val['street'],$val['city'],'',$val['postal'],$val['country']);
-					 $bPref='';	
-			    	 if($iACount==0) $bPref=1;	
+				 if($val['street']!='' || $val['city']!='' || $val['postal']!='' || $val['country']!='' || $val['state']!=''){	
+				 	 $saveAdress=array('','',$val['street'],$val['city'],$val['state'],$val['postal'],$val['country']);
+					 
 					 $tType=$sRequest['addrtype'][$iACount];
-			    	 $vcard->add('ADR',$saveAdress,array('type'=>$tType,'pref'=>$bPref));
+					 if($iPref !='' && $iPref == $iACount){
+					 	$vcard->add('ADR',$saveAdress,array('type'=>$tType,'pref'=>'1'));
+					 }
+					 else{
+					 	$vcard->add('ADR',$saveAdress,array('type'=>$tType));
+					 }
+			    	 
 		    	 }
 				 $iACount++;
 			 }	

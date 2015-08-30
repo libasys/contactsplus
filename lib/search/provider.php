@@ -44,7 +44,7 @@ class Provider extends \OCP\Search\Provider {
 		foreach($results as $result) {
 			$vcard = VCard::find($result['id']);
 			
-			$link = '#contactsplus-'.intval($vcard['id']);
+			$link = '#'.intval($vcard['id']);
 		
 			$props = '';
 			
