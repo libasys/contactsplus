@@ -79,7 +79,7 @@
 		</field>
 		
 		<index>
-			<name>c_addressbook_userid_index</name>
+			<name>cp_addressbook_userid_index</name>
 			<field>
 				<name>userid</name>
 				<sorting>ascending</sorting>
@@ -176,7 +176,7 @@
 		</field>
 		
 		<index>
-			<name>c_addressbookid_index</name>
+			<name>cp_addressbookid_index</name>
 			<field>
 				<name>addressbookid</name>
 				<sorting>ascending</sorting>
@@ -244,7 +244,7 @@
 		</field>
 
 		<index>
-			<name>cp_contactid_index</name>
+			<name>cpp_contactid_index</name>
 			<field>
 				<name>contactid</name>
 				<sorting>ascending</sorting>
@@ -252,7 +252,7 @@
 		</index>
 
 		<index>
-			<name>cp_name_index</name>
+			<name>cpp_name_index</name>
 			<field>
 				<name>name</name>
 				<sorting>ascending</sorting>
@@ -260,7 +260,7 @@
 		</index>
 
 		<index>
-			<name>cp_value_index</name>
+			<name>cpp_value_index</name>
 			<field>
 				<name>value</name>
 				<sorting>ascending</sorting>
