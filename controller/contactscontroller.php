@@ -317,6 +317,7 @@ class ContactsController extends Controller {
 		    }
 			
 			$aCloud=array();
+			
 		    if(isset($editInfoCard['CLOUD']) && count($editInfoCard['CLOUD'])>0){
 		    	$iClCount=0;	
 		    	foreach($editInfoCard['CLOUD'] as $cloudInfo){
@@ -334,8 +335,8 @@ class ContactsController extends Controller {
 		    	}
 				
 		    }else{
-		    	$aCloud[$iClCount]['val'] = '';
-				$aCloud[$iClCount]['type'] = 'WORK';
+		    	$aCloud[0]['val'] = '';
+				$aCloud[0]['type'] = 'WORK';
 		    }
 			
 			$aEmail=array();

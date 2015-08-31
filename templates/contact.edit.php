@@ -11,8 +11,7 @@
    <input type="hidden" name="tmpkey" id="tmpkey" value="<?php p($_['tmpkey']); ?>" />
      <input type="hidden" name="oldaddressbookid" value="<?php p($_['oldaddressbookid']); ?>" />
     <input type="hidden" name="selectedContactgroup" id="selectedContactgroup" value="" />
-    <input type="hidden" name="urltype" id="urltype" value="<?php p($_['aUrl']['type']); ?>" />
-
+ 
 
 <span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Addressbook')); ?></span>
 <select name="addressbooks">	

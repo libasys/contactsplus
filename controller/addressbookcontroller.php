@@ -141,7 +141,7 @@ class AddressbookController extends Controller {
 				</a>';
 		  }
 						  
-		 	$output.='<li class="dropcontainerAddressBook '.$activeClass.'" data-adrbid="'.$addressbookInfo['id'].'"  data-perm="'.$addressbookInfo['permissions'].'">'.$checkBox.$displayName.$shareLink.'<span class="groupcounter">'.$countCardsAddressbooks[$addressbookInfo['id']].'</span></li>';
+		 	$output.='<li class="dropcontainerAddressBook '.$activeClass.'" data-adrbid="'.$addressbookInfo['id'].'"  data-perm="'.$addressbookInfo['permissions'].'">'.$displayName.$shareLink.'<span class="groupcounter">'.$countCardsAddressbooks[$addressbookInfo['id']].'</span></li>';
 
 		 }
 		

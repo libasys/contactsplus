@@ -3,8 +3,7 @@
 	<form name="contactForm" id="contactForm" action=" ">	
     <input type="hidden" name="hiddenfield" value="" />
     <input type="hidden" name="selectedContactgroup" id="selectedContactgroup" value="" />
-    
-    <input type="hidden" name="urltype" id="urltype" value="<?php p($_['URLTYPE_DEF']); ?>" />
+   
  <span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Addressbook')); ?></span>
 <select name="addressbooks">	
 <?php foreach($_['addressbooks'] as $addressbook) {
@@ -56,7 +55,7 @@
 		  &nbsp;<input type="radio" class="phone-pref regular-radio"  value="phone_0" id="phonePref-0" name="phonePref" checked="checked" />
 		  <label style="float:left;margin-top:5px;" class="phone-labelpref" for="phonePref-0"></label>
 
-          <input id="phone-0"  name="phone[0]" type="text" class="inputMobil phone-val" style="width:190px;" placeholder="<?php p($l->t('Phone')); ?>" value="<?php p($VALUE['val']); ?>"  />
+          <input id="phone-0"  name="phone[0]" type="text" class="inputMobil phone-val" style="width:190px;" placeholder="<?php p($l->t('Phone')); ?>" value=""  />
           <i class="ioc ioc-add add-phone" data-add="0"></i>
           <i class="ioc ioc-delete delete-phone" data-del="0"></i>
    		
@@ -141,7 +140,7 @@
 <i class="ioc ioc-delete delete-addr" data-del="0"></i>
  <br style="clear:both;">
 <span class="labelLeft" style="width:170px;">&nbsp;</span> <input class="addr-val-postal" name="addr[0][postal]" type="text" style="width:68px;" placeholder="<?php p($l->t('Postal Code')); ?>" value="" maxlength="100"   />
- <input class="addr-val-city" name="addr[0][city]" type="text" style="width:100px;" placeholder="<?php p($l->t('City')); ?>" value="<?php p($VALUE['val']['city']); ?>" maxlength="100"  />
+ <input class="addr-val-city" name="addr[0][city]" type="text" style="width:100px;" placeholder="<?php p($l->t('City')); ?>" value="" maxlength="100"  />
 <span class="labelLeft" style="width:170px;">&nbsp;</span> <input style="width:190px;" class="addr-val-state" name="addr[0][state]" type="text" placeholder="<?php p($l->t('State')); ?>" value="" maxlength="100"   />
 <span class="labelLeft" style="width:170px;">&nbsp;</span> <input style="width:190px;" class="addr-val-country" name="addr[0][country]" type="text" placeholder="<?php p($l->t('Country')); ?>" value="" maxlength="100"   />
  </span>

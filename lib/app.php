@@ -1007,7 +1007,7 @@ class App{
 		}*/
 		
 		$sAddrOutput='';
-		 $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'','5'=>'postalcode','6'=>'country');
+		 $addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'state','5'=>'postalcode','6'=>'country');
 		if(isset($CONTACTDATA['ADR'][0]['value']) && count($CONTACTDATA['ADR'][0]['value'])>0){
 			foreach($CONTACTDATA['ADR'][0]['value'] as $key => $val){
 				if($val!='') {
@@ -1015,12 +1015,34 @@ class App{
 				}
 			}
 			
-			$linkAddr='<a target="_blank" href="http://open.mapquest.com/?q='.$addrOutput['street'].','.$addrOutput['postalcode'].','.$addrOutput['city'].','.$addrOutput['state'].','.$addrOutput['country'].'"><i style="font-size:18px;color:#999;" class="ioc ioc-search"></i></a>';
+			$sStreet =  isset($addrOutput['street'])?$addrOutput['street']:'';
+			$sPostal =  isset($addrOutput['postalcode'])?$addrOutput['postalcode']:'';
+			$sCity =  isset($addrOutput['city'])?$addrOutput['city']:'';
+			$sState =  isset($addrOutput['state'])?$addrOutput['state']:'';
+			$sCountry =  isset($addrOutput['country'])?$addrOutput['country']:'';
+			
+			$linkAddr=' <a target="_blank" href="http://open.mapquest.com/?q='.$sStreet.','.$sPostal.','.$sCity.','.$sState.','.$sCountry.'"><i style="font-size:18px;color:#999;" class="ioc ioc-search"></i></a>';
+			
 			$sAddrOutput='<i class="ioc ioc ioc-address"></i>';
-			$sAddrOutput.= isset($addrOutput['street'])?'<span class="addrStreet">'.$addrOutput['street'].$linkAddr.'</span> ':'';
-			$sAddrOutput.=isset($addrOutput['postalcode'])?$addrOutput['postalcode'].' ':'';
-			$sAddrOutput.=isset($addrOutput['city'])?$addrOutput['city'].' ':'';
-			$sAddrOutput.=isset($addrOutput['country'])?' ('.$addrOutput['country'].') ':'';
+			if($sStreet != ''){
+				$sAddrOutput.= '<span class="addrStreet">'.$sStreet.$linkAddr.'</span>';
+			}
+			
+			if($sPostal != ''){
+				$sAddrOutput.= $sPostal;
+			}
+			if($sCity != ''){
+				$sAddrOutput.= ' '.$sCity;
+			}
+			
+			if($sState != ''){
+				$sAddrOutput.= ' '.$sState;
+			}
+			if($sCountry != ''){
+				$sAddrOutput.= ' ('.$sCountry.') ';
+			}
+			
+			
 			
 			unset($addrOutput);
 		}
