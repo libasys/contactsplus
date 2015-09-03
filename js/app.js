@@ -19,6 +19,24 @@
  *
  */
 
+L.PinMarker = L.Marker.extend({
+	  options: {
+	 	contactId:0,
+	 	addrBkId:0,
+	 	zoom:16
+	 },
+	 initialize: function (latlngs, options) {
+		L.Marker.prototype.initialize.call(this, latlngs, options);
+	},
+	 getContactId:function(){
+	 	  return this.options.contactId;
+	 }	
+});
+
+L.pinMarker = function (latlngs, options) {	 
+return new L.PinMarker(latlngs, options);
+};
+
 OC.ContactsPlus ={
 	firstLoading : true,
 	oldGroup:false,
@@ -26,14 +44,22 @@ OC.ContactsPlus ={
 	photoData:false,
 	popOverElem:null,
 	groups:[],
+	mapObject:null,
+	mapObjectMarker : {},
+	aPinsMap:{},
+	layerMarker : null,
+	multiSelect:[],
 	imgSrc :'',
 	imgMimeType :'',
 	init:function(){
-		OC.ContactsPlus.getAddressBooks(0);
+		
+		var lastBook = $('#allbooks').data('lastbook');
+		OC.ContactsPlus.getAddressBooks(lastBook);
 		OC.ContactsPlus.initSearch();
  		OC.ContactsPlus.Drop.init();
-		OC.ContactsPlus.loadContacts(0,'',1,0);
-		OC.ContactsPlus.Settings.init();
+ 		
+		OC.ContactsPlus.loadContacts(lastBook,'',1,0);
+		
 		if (OC.ContactsPlus.firstLoading === true) {
 			OC.ContactsPlus.checkShowEventHash();
 			OC.ContactsPlus.calcDimension();
@@ -41,6 +67,32 @@ OC.ContactsPlus ={
 			OC.ContactsPlus.firstLoading=false;
 			
 		}
+		
+		$('body').on('click',function(evt){
+			if($('.app-navigation-entry-menu').hasClass('open') 
+			&& !$(evt.target).parent().hasClass('app-navigation-entry-utils-menu-button')
+			&& $(evt.target).parent().find('.app-navigation-entry-menu').hasClass('open')
+			){
+				$('.app-navigation-entry-menu').removeClass('open');
+			}
+			
+		});
+		$(document).on('keydown', '#adrbookname', function(event) {
+			if (event.which == 13){
+				OC.ContactsPlus.saveAddrBook($(event.target).parent().data('addr'));
+			}
+		});
+		
+		$('#chk-all').on('change',function(){
+			if($(this).is(':checked')){
+				$('.contactsrow.visible .contact-select').attr('checked','checked');
+				$('.contactsrow.visible .is-checkbox').addClass('ui-selected');
+			}else{
+				$('.contactsrow.visible .contact-select').removeAttr('checked');
+				$('.contactsrow.visible .is-checkbox').removeClass('ui-selected');
+			}
+		});
+		
 	},
 	ContactPhoto:{
 		loadPhoto:function(){
@@ -184,10 +236,11 @@ OC.ContactsPlus ={
 						onSelect : OC.ContactsPlus.ContactPhoto.showCoords,
 						maxSize : [399, 399],
 						bgColor : 'black',
+						aspectRatio: 1,
 						bgOpacity : .4,
 						boxWidth : 400,
 						boxHeight : 400,
-						setSelect :[ 100, 130, 50, 50 ]//,
+						setSelect :[ 200, 200, 100, 100 ]//,
 						//aspectRatio: 0.8
 					});
 				}
@@ -249,17 +302,23 @@ OC.ContactsPlus ={
 
 					return false;
 				}
-
-				droparea = document.getElementById('app-content');
+				droparea = document.getElementById('drop-area');
 				droparea.ondragover = function() {
-					return false;
-				};
-				droparea.ondragend = function() {
+					$('#drop-area').text('').addClass('loading');
 					
 					return false;
 				};
+				droparea.ondragend = function() {
+					$('#drop-area').text(t(OC.ContactsPlus.appname,'Import addressbook per Drag & Drop')).removeClass('loading').slideUp(1500);
+					return false;
+				};
+				droparea.ondragleave = function() {
+					$('#drop-area').text(t(OC.ContactsPlus.appname,'Import addressbook per Drag & Drop')).removeClass('loading');
+					return false;
+				};
+				
+				
 				droparea.ondrop = function(e) {
-					$('#loading').show();
 					e.preventDefault();
 					e.stopPropagation();
 					OC.ContactsPlus.Drop.drop(e);
@@ -284,10 +343,13 @@ OC.ContactsPlus ={
 							
 							OC.ContactsPlus.Import.Store.isDragged = true;
 							OC.ContactsPlus.Import.Dialog.open(event.target.result);
- 							$('#loading').hide();
+							$('#drop-area').text(t(OC.ContactsPlus.appname,'Import addressbook per Drag & Drop')).removeClass('loading').slideUp(1500);
+		
+ 							
 						};
 						reader.readAsDataURL(file);
 					}
+					
 				}
 			},
 			
@@ -306,16 +368,122 @@ OC.ContactsPlus ={
 							
 					}
 					
-					$('#cAddressbooks li span.groupname').on('click',function(){
-						  	  $('#cAddressbooks li').removeClass('isActiveABook');
-						  	  $(this).parent('li').addClass('isActiveABook');
-						  	  OC.ContactsPlus.loadContacts($(this).parent('li').attr('data-adrbid'),'',1,0);
-					});
+					OC.ContactsPlus.addrBookEventHandler();
+				  
+				   
+				   
+				}
+			});
+	},
+	addrBookEventHandler : function() {
+			$('.isActiveAddressbook').on('change', function(event) {
+				event.stopPropagation();
+
+				OC.ContactsPlus.activateAddrBook($(this).data('id'), this );
+			});
+			
+			$('.app-navigation-entry-utils-menu-button button').on('click',function(){
+				if(!$(this).parent().find('.app-navigation-entry-menu').hasClass('open')){
+				  $('.app-navigation-entry-menu').removeClass('open');
+				  $(this).parent().find('.app-navigation-entry-menu').addClass('open');
+				  $(this).parent().find('.app-navigation-entry-menu').css('right',$(window).width() - 252+'px');
+				
+				}else{
+					 $(this).parent().find('.app-navigation-entry-menu').removeClass('open');
+					  
+				}
+			
+			});
+			//Show Caldav url
+			$('.app-navigation-entry-menu li i.ioc-globe').on('click',function(){
+				if($('.app-navigation-entry-edit').length === 1){
+					 $('.app-navigation-entry-menu').removeClass('open');
+					var adrId =$(this).closest('.app-navigation-entry-menu').data('adrbid');
+					var myClone = $('#addr-clone').clone();
+					$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').after(myClone);
+					myClone.attr('data-addr',adrId).show();
+					$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').hide();
 					
-					 $('.toolTip').tipsy({
-						html : true
-					});
+					myClone.find('input[name="adrbookname"]').hide();
+					var cardDavUrl = OC.linkToRemote(OC.ContactsPlus.appname)+'/addressbooks/' +  oc_current_user + '/'+$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').data('url') ;
+					myClone.find('input[name="carddavuri"]').val(cardDavUrl).show();
 					
+					myClone.find('button.icon-checkmark').on('click',function(){
+						myClone.remove();
+						$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').show();
+					});
+				}
+			});
+			
+			$('#addAddr').on('click',function(){
+				
+				if($('.app-navigation-entry-edit').length === 1){
+					
+					var addrId = 'new';
+					var myClone = $('#addr-clone').clone();
+					
+					$('#cAddressbooks').prepend(myClone);
+					myClone.attr('data-addr',addrId).show();
+					myClone.find('input[name="carddavuri"]').hide();
+					myClone.find('input[name="adrbookname"]').focus();
+					
+					myClone.on('keyup',function(evt){
+						if (evt.keyCode===27){
+							myClone.remove();
+							$('li.dropcontainerAddressBook[data-adrbid="'+addrId+'"]').show();
+						}
+					});
+					myClone.find('button.icon-checkmark').on('click',function(){
+						if(myClone.find('input[name="adrbookname"]').val()!==''){
+							OC.ContactsPlus.saveAddrBook(addrId);
+						}else{
+							myClone.remove();
+						}
+					});
+				}
+			});
+			
+			//edit  Calendar		
+			$('.app-navigation-entry-menu li.ioc-edit').on('click',function(){
+				if($('.app-navigation-entry-edit').length === 1){
+					 $('.app-navigation-entry-menu').removeClass('open');
+					var adrId =$(this).closest('.app-navigation-entry-menu').data('adrbid');
+					var name = $(this).closest('.app-navigation-entry-menu').data('name');
+					var myClone = $('#addr-clone').clone();
+					$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').after(myClone);
+					myClone.attr('data-addr',adrId).show();
+					$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').hide();
+					myClone.find('input[name="carddavuri"]').hide();
+					myClone.find('input[name="adrbookname"]').val($('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').data('name')).focus();
+					myClone.find('input[name="adrbookname"]');
+					
+					myClone.on('keyup',function(evt){
+						if (evt.keyCode===27){
+							myClone.remove();
+							$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').show();
+						}
+					});
+					myClone.find('button.icon-checkmark').on('click',function(){
+						OC.ContactsPlus.saveAddrBook(adrId);
+					});
+				}
+			});
+			//deleteCalendar
+			$('.app-navigation-entry-menu li.ioc-delete').on('click',function(){
+				var id =$(this).closest('.app-navigation-entry-menu').data('adrbid');
+				OC.ContactsPlus.deleteAddrBook(id);
+			});
+			
+			$('#cAddressbooks li span.groupname').on('click',function(){
+				  	  $('#cAddressbooks li').removeClass('isActiveABook');
+				  	  $(this).parent('li').addClass('isActiveABook');
+				  	  OC.ContactsPlus.loadContacts($(this).parent('li').attr('data-adrbid'),'',1,0);
+			});
+			
+			 $('.toolTip').tipsy({
+				html : true
+			});
+			
 					
 						  
 					$(".dropcontainerAddressBook").droppable({
@@ -330,12 +498,68 @@ OC.ContactsPlus ={
 								
 							}
 				   });
-				   OC.Share.loadIcons('cpladdrbook');
 				   
-				   
+			 OC.Share.loadIcons('cpladdrbook');
+			
+	},
+	saveAddrBook:function(addrid){
+		var saveForm = $('.app-navigation-entry-edit[data-addr="'+addrid+'"]');
+		var displayname = saveForm.find('input[name="adrbookname"]').val();
+		var url;
+		if (addrid == 'new') {
+			
+			url = OC.generateUrl('apps/'+OC.ContactsPlus.appname+'/addaddrbook');
+		
+		} else {
+			url = OC.generateUrl('apps/'+OC.ContactsPlus.appname+'/updateaddrbook');
+		}
+		self = this;
+			$.post(url, { id: addrid, name: displayname, active:1, description: '' },
+				function(jsondata){
+					if(jsondata.status == 'success'){
+						$('li.dropcontainerAddressBook[data-adrbid="'+addrid+'"]').find('.groupname').text(displayname);
+						$('li.dropcontainerAddressBook[data-adrbid="'+addrid+'"]').data('name',displayname)
+						$('li.dropcontainerAddressBook[data-adrbid="'+addrid+'"]').show();
+						saveForm.remove();
+					}
+					if(addrid === 'new'){
+							OC.ContactsPlus.getAddressBooks(0);
+						}
+				});
+		
+				
+	},
+	activateAddrBook:function(id, checkbox) {
+			
+			//console.log('doActivate: ', id, active);
+			$.post(OC.generateUrl('apps/'+OC.ContactsPlus.appname+'/activateaddrbook'), {
+				id: id, active: checkbox.checked ? 1 : 0}, function(jsondata) {
+				if (jsondata.status == 'success') {
+					OC.ContactsPlus.getAddressBooks(id);
 				}
 			});
-	},
+		},
+	deleteAddrBook:function(id) {
+			 
+			var handleDelete=function(YesNo){
+			 
+			 	if(YesNo){
+					
+					$.post(OC.generateUrl('apps/'+OC.ContactsPlus.appname+'/deleteaddrbook'), { id: id}, function(jsondata) {
+						if (jsondata.status == 'success'){
+						
+							$('#cAddressbooks').find('.dropcontainerAddressBook[data-adrbid="'+id+'"]').remove();
+							OC.ContactsPlus.getAddressBooks(0);
+						} else {
+							OC.dialogs.alert(jsondata.data.message, t(OC.ContactsPlus.appname, 'Error'));
+						}
+					});
+				}
+			 };
+			 
+			  OC.dialogs.confirm(t(OC.ContactsPlus.appname,'Do you really want to delete this address book?'),t(OC.ContactsPlus.appname,'Delete Addressbook'),handleDelete);
+			
+		},
 	buildCounterGroups:function(addrbkId){
 		
 		var AllCount=$("li.contactsrow").length;
@@ -389,6 +613,7 @@ OC.ContactsPlus ={
 						helper: OC.ContactsPlus.DragElement,
 						cursor: "move",
 						delay: 500,
+						multiple: true,
 						start: function(event, ui) {
 							ui.helper.addClass('draggingContact');
 						}
@@ -467,8 +692,9 @@ OC.ContactsPlus ={
 				   	   });
 				   	    $('#loading').hide();
 				   	     $('#rightcontent').html(jsondata);
-				   	    
+				   	    //FIXME
 				   	    $('#alphaScroll').html();
+				   	    $('#chk-all').removeAttr('checked');
 				   	    var NavLetter=[];
 				   	    $('li.letter').each(function(i,el){
 				   	    	NavLetter[i] = $('<li />').attr({'data-letter':$(el).attr('data-scroll')}).text($(el).attr('data-scroll'))
@@ -477,21 +703,24 @@ OC.ContactsPlus ={
 								    var liIndex = $(this).attr('data-letter');
 								    $('#alphaScroll li').removeClass('isScrollTo');
 									$(this).addClass('isScrollTo');
-									$('#rightcontent').scrollTo('.letter[data-scroll='+liIndex+']',800);
+									$('#rightcontent').scrollTo('.letter[data-scroll="'+liIndex+'"]',800);
 							    }
 							}); 
 							
 				   	    });
 				   	    $('#alphaScroll').html(NavLetter);
-				   	     
 				   	    
+								   	  
 				   	      if($('#showList i.ioc').hasClass('isActiveListView')){
 				   	     	
 				   	     	$('#showCards i').removeClass('isActiveListView');
 							$('#showList i').addClass('isActiveListView');
 				   	     	$('.contactsrow').addClass('listview');
+				   	     	$('.listview-header').show();
 				   	     	$('.letter').addClass('listview');
 				   	     }
+				   	     
+				   	     
 				   	     
 				   	      $( "li.contactsrow .fullname" ).draggable({
 							appendTo: "body",
@@ -500,9 +729,25 @@ OC.ContactsPlus ={
 							delay: 500,
 							start: function(event, ui) {
 								ui.helper.addClass('draggingContact');
+							},
+							stop: function(event, ui){
+								if($('.ui-selected').length>0){
+									// $('.contactsrow .contact-select').removeAttr('checked').removeClass('ui-selected');	
+								}
 							}
 						});
-							
+						
+						$('li.contactsrow.visible .contact-select').on('change',function(){
+				   	     	if($(this).is(':checked')){
+				   	     		
+				   	     		$('label[for="chk-'+$(this).val()+'"]').addClass('ui-selected');
+				   	     	}else{
+				   	     		
+				   	     		$('label[for="chk-'+$(this).val()+'"]').removeClass('ui-selected');
+				   	     	}
+				   	     	
+				   	     });
+				   	     
 						$(".contactsrow .fullname a, .contactsrow .rowBody").on('click',function(){
 							$CardId=$(this).closest('.container').attr('data-contactid');
 							OC.ContactsPlus.showContact($CardId,null);
@@ -532,7 +777,7 @@ OC.ContactsPlus ={
 										if($('#cgroups li[data-id="fav"]').hasClass('isActiveGroup')){
 											$('.container[data-contactid='+$CardId+']').closest('li.contactsrow').addClass('hidden').removeClass('visible');
 											if($('.container[data-letter="'+$Letter+'"]').closest('li.contactsrow.visible').length === 0){
-								         		$('.letter[data-scroll='+$Letter+']').addClass('hidden');
+								         		$('.letter[data-scroll="'+$Letter+'"]').addClass('hidden');
 								         		$('#alphaScroll li[data-letter="'+$Letter+'"]').removeClass('bLetterActive');
 								         	}
 										}
@@ -564,7 +809,7 @@ OC.ContactsPlus ={
 						 $('.letter').each(function(i,el){
 							if(!$(el).hasClass('hidden')){
 								existLetter=$(el).attr('data-scroll');
-								$('#rightcontentSideBar li[data-letter='+existLetter+']').addClass('bLetterActive');
+								$('#rightcontentSideBar li[data-letter="'+existLetter+'"]').addClass('bLetterActive');
 							}
 						});
 						if(bCount === 1){
@@ -584,7 +829,20 @@ OC.ContactsPlus ={
 						
 						if(id > 0){
 						  $('#rightcontent').scrollTo('.container[data-contactid='+id+']',800);
-						 }	
+						 }
+						 
+						 if($('#showMap').hasClass('isMap')){
+					   	  	if(OC.ContactsPlus.mapObject !== null){
+					   	  		OC.ContactsPlus.aPinsMap = null;
+					   	 	 	OC.ContactsPlus.aPinsMap = {};
+					   	 	 	OC.ContactsPlus.mapObject.removeLayer(OC.ContactsPlus.layerMarker);
+					   	 	 	OC.ContactsPlus.initMapList();
+					   	  	}
+					   	  	
+						   	  	
+					   	  	
+					   	  	 
+					   	  }	
 						 	
 				   });
 			   }else{
@@ -634,6 +892,13 @@ OC.ContactsPlus ={
 				   	 	}
 		   	 	 	  });
 		   	 	 }
+		   	 	 if($('#showMap').hasClass('isMap')){
+		   	 	 	OC.ContactsPlus.aPinsMap = null;
+		   	 	 	OC.ContactsPlus.aPinsMap = {};
+		   	 	 	OC.ContactsPlus.mapObject.removeLayer(OC.ContactsPlus.layerMarker);
+		   	 	 	OC.ContactsPlus.initMapList();
+		   	 	 }
+		   	 	 
 			   }
 		},		
 	newContact:function(){
@@ -958,62 +1223,86 @@ OC.ContactsPlus ={
 	},
 	deleteContact:function(iCardId){
 			
+			var iCount = 1;
+		 	if($('.visible .ui-selected').length>0){
+		 		iCount = $('.visible .ui-selected').length;
+		 	}	
 		 $( "#dialogSmall" ).html( t(OC.ContactsPlus.appName, 'Please choose: contact delete or remove all groups from contact'));
+	  	 
 	  	 
 	  	  $( "#dialogSmall" ).dialog({
 			resizable: false,
 			title : t(OC.ContactsPlus.appName, 'Delete Contact or From Groups'),
-			width:460,
+			width:500,
 			height:200,
 			modal: true,
 			buttons: [
-						 { text:t(OC.ContactsPlus.appName, 'Delete Contact'),'class':'delButton', click: function() {
+						 { text:t(OC.ContactsPlus.appName, 'Delete Contact')+' ('+iCount+')','class':'delButton', click: function() {
 						 	
-						 	 var oDialog=$(this);
-						 	
-								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/deletecontact'),{'id':iCardId},function(jsondata){
+						 	var oDialog=$(this);
+						 	var delId= 0;
+						  	 	if($('.visible .ui-selected').length>0){
+									$('.visible .ui-selected').each(function(i,el){
+										if(delId === 0){
+											delId = $(el).data('conid');
+										}else{
+											delId += ','+$(el).data('conid');
+										}
+									});
+								 $('.contactsrow .contact-select').removeAttr('checked');	
+								 $('.contactsrow .is-checkbox').removeClass('ui-selected');
+								 $('#chk-all').removeAttr('checked');	
+								}else{
+									delId = iCardId;
+								}
+								
+								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/deletecontact'),{'id':delId},function(jsondata){
 										if(jsondata.status == 'success'){
 											oDialog.dialog( "close" );
-											
-											if(jsondata.data.groups!=''){
-												temp=jsondata.data.groups.split(',');
-												$.each(temp,function(i,el){
-													var iCounter=parseInt($('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text());
-				                                    $('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text((iCounter - 1));
-												});
-											}else{
-												//not in group
-												var iCounterNone=parseInt($('#cgroups li[data-id="none"]').find('.groupcounter').text());
-				                            	$('#cgroups li[data-id="none"]').find('.groupcounter').text((iCounterNone - 1));
-											}
-											var iCounterAll=parseInt($('#cgroups li[data-id="all"]').find('.groupcounter').text());
-											$('#cgroups li[data-id="all"]').find('.groupcounter').text((iCounterAll - 1));
-											var iCounterAddrBook=parseInt($('#cAddressbooks li.isActiveABook').find('.groupcounter').text());
-											$('#cAddressbooks li.isActiveABook').find('.groupcounter').text((iCounterAddrBook - 1));
-											if($('.container[data-contactid='+iCardId+'] a.favourite i.yellow').length > 0){
-												OC.Tags.removeFromFavorites(iCardId,OC.ContactsPlus.appName).then(function(){
-									  		 	var iFavCounter=parseInt($('#cgroups li[data-id=fav]').find('.groupcounter').text());
-												$('#cgroups li[data-id=fav]').find('.groupcounter').text((iFavCounter - 1));
-												if($('#cgroups li[data-id="fav"]').hasClass('isActiveGroup')){
-														$('.container[data-contactid='+$CardId+']').closest('li.contactsrow').remove();
+											if(jsondata.data.count == 1){
+												if(jsondata.data.groups!=''){
+													temp=jsondata.data.groups.split(',');
+													$.each(temp,function(i,el){
+														var iCounter=parseInt($('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text());
+					                                    $('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text((iCounter - 1));
+													});
+												}else{
+													//not in group
+													var iCounterNone=parseInt($('#cgroups li[data-id="none"]').find('.groupcounter').text());
+					                            	$('#cgroups li[data-id="none"]').find('.groupcounter').text((iCounterNone - 1));
 												}
-												iFavCounter=parseInt($('#cgroups li[data-id=fav]').find('.groupcounter').text());
-												if(iFavCounter == 0){
-													$('#cgroups li[data-id=fav]').remove();
-													
+												var iCounterAll=parseInt($('#cgroups li[data-id="all"]').find('.groupcounter').text());
+												$('#cgroups li[data-id="all"]').find('.groupcounter').text((iCounterAll - 1));
+												var iCounterAddrBook=parseInt($('#cAddressbooks li.isActiveABook').find('.groupcounter').text());
+												$('#cAddressbooks li.isActiveABook').find('.groupcounter').text((iCounterAddrBook - 1));
+												if($('.container[data-contactid='+iCardId+'] a.favourite i.yellow').length > 0){
+													OC.Tags.removeFromFavorites(iCardId,OC.ContactsPlus.appName).then(function(){
+										  		 	var iFavCounter=parseInt($('#cgroups li[data-id=fav]').find('.groupcounter').text());
+													$('#cgroups li[data-id=fav]').find('.groupcounter').text((iFavCounter - 1));
+													if($('#cgroups li[data-id="fav"]').hasClass('isActiveGroup')){
+															$('.container[data-contactid='+$CardId+']').closest('li.contactsrow').remove();
+													}
+													iFavCounter=parseInt($('#cgroups li[data-id=fav]').find('.groupcounter').text());
+													if(iFavCounter == 0){
+														$('#cgroups li[data-id=fav]').remove();
+														
+													}
+													$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').remove();
+										  		 });
+												}else{
+													$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').remove();
 												}
-												$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').remove();
-									  		 });
-											}else{
-												$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').remove();
-											}
-											
-											if($('.container[data-letter="'+jsondata.data.letter+'"]').closest('li.contactsrow.visible').length === 0){
-								         		$('.letter[data-scroll='+jsondata.data.letter+']').addClass('hidden');
-								         		$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').removeClass('bLetterActive');
-								         	}
-								         	
-											 OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contacts delete success!'));
+												
+												if($('.container[data-letter="'+jsondata.data.letter+'"]').closest('li.contactsrow.visible').length === 0){
+									         		$('.letter[data-scroll="'+jsondata.data.letter+'"]').addClass('hidden');
+									         		$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').removeClass('bLetterActive');
+									         	}
+									         	
+												 OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contacts delete success!'));
+										}else{
+											OC.ContactsPlus.loadContacts(jsondata.data.addrId,'',1,0);
+											OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contacts delete success!'));
+										}
 										}
 										else{
 											alert(jsondata.data.message);
@@ -1021,43 +1310,52 @@ OC.ContactsPlus ={
 							        });
 						  	 }
 						 },
-						  { text:t(OC.ContactsPlus.appName, 'Delete From All Groups'), click: function() { 
+						  { text:t(OC.ContactsPlus.appName, 'Delete From All Groups')+' ('+iCount+')', click: function() { 
 						  	  var oDialog=$(this);
-						  	 
-								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/deletecontactfromgroup'),{'id':iCardId},function(jsondata){
+						  	 	var delId= 0;
+						  	 	if($('.visible .ui-selected').length>0){
+									$('.visible .ui-selected').each(function(i,el){
+										if(delId === 0){
+											delId = $(el).data('conid');
+										}else{
+											delId += ','+$(el).data('conid');
+										}
+									});
+								  $('.contactsrow .contact-select').removeAttr('checked');
+								  $('.contactsrow .is-checkbox').removeClass('ui-selected');	
+								   $('#chk-all').removeAttr('checked');	
+								}else{
+									delId = iCardId;
+								}
+								
+								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/deletecontactfromgroup'),{'id':delId},function(jsondata){
 										if(jsondata.status == 'success'){
 											oDialog.dialog( "close" );
-											if(jsondata.data.scat !== ''){
-												temp=jsondata.data.scat.split(',');
+											if(jsondata.data.count == 1){
+												if(jsondata.data.scat !== ''){
+													temp=jsondata.data.scat.split(',');
+												
+													$.each(temp,function(i,el){
+														var iCounter=parseInt($('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text());
+					                                    $('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text((iCounter - 1));
+													});
+													var iCounter=parseInt($('#cgroups li[data-id="none"]').find('.groupcounter').text());
+					                                 $('#cgroups li[data-id="none"]').find('.groupcounter').text((iCounter + 1));
+												}
+												$('.container[data-contactid='+iCardId+']').find('.categories').html('');
+												$('.container[data-contactid='+iCardId+']').find('.categories').addClass('hidden');
+												if(!$('#cgroups li[data-id="all"]').hasClass('isActiveGroup')){
+													$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').removeClass('visible').addClass('hidden');
+												}
+												
+												if($('.container[data-letter="'+jsondata.data.letter+'"]').closest('li.contactsrow.visible').length === 0){
+									         		$('.letter[data-scroll="'+jsondata.data.letter+'"]').addClass('hidden');
+									         		$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').removeClass('bLetterActive');
+									         	}
+								         }else{
+								         	OC.ContactsPlus.loadContacts(jsondata.data.addrId,'',1,0);
+								         }
 											
-												$.each(temp,function(i,el){
-													var iCounter=parseInt($('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text());
-				                                    $('#cgroups li[data-id="'+el+'"]').find('.groupcounter').text((iCounter - 1));
-												});
-												var iCounter=parseInt($('#cgroups li[data-id="none"]').find('.groupcounter').text());
-				                                 $('#cgroups li[data-id="none"]').find('.groupcounter').text((iCounter + 1));
-											}
-											$('.container[data-contactid='+iCardId+']').find('.categories').html('');
-											$('.container[data-contactid='+iCardId+']').find('.categories').addClass('hidden');
-											if(!$('#cgroups li[data-id="all"]').hasClass('isActiveGroup')){
-												$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').removeClass('visible').addClass('hidden');
-											}
-											
-											if($('.container[data-letter="'+jsondata.data.letter+'"]').closest('li.contactsrow.visible').length === 0){
-								         		$('.letter[data-scroll='+jsondata.data.letter+']').addClass('hidden');
-								         		$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').removeClass('bLetterActive');
-								         	}
-								         	
-											/*
-											if(!$('#cgroups li[data-id="all"]').hasClass('isActiveGroup')){
-												$('.container[data-contactid='+iCardId+']').closest('li.contactsrow').remove();
-											}else{
-												$('.container[data-contactid='+iCardId+']').find('.categories').html('&nbsp;');
-											}
-											if($('.container[data-letter="'+jsondata.data.letter+'"]').length === 0){
-								         		$('.letter[data-scroll='+jsondata.data.letter+']').addClass('hidden');
-								         		$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').removeClass('bLetterActive');
-								         	}*/
 										}
 										else{
 											alert(jsondata.data.message);
@@ -1065,7 +1363,14 @@ OC.ContactsPlus ={
 							        });
 						  	 }
 						},
-						{ text:t(OC.ContactsPlus.appName, 'Cancel'), click: function() { $( this ).dialog( "close" ); } } 
+						{ text:t(OC.ContactsPlus.appName, 'Cancel'), click: function() { 
+							$( this ).dialog( "close" );
+							if($('.visible .ui-selected').length>0){
+								 $('.contactsrow .contact-select').removeAttr('checked');	
+								 $('.contactsrow .is-checkbox').removeClass('ui-selected');
+								 $('#chk-all').removeAttr('checked');	
+							}
+						 } } 
 						 ],
 		});
   	 
@@ -1105,7 +1410,7 @@ OC.ContactsPlus ={
 								OC.ContactsPlus.loadContacts(jsondata.data.addrBookId,'',2,jsondata.data.id);
 							}else{
 								
-								if($('.letter[data-scroll='+jsondata.data.letter+']').length === 0){
+								if($('.letter[data-scroll="'+jsondata.data.letter+'"]').length === 0){
 									
 									
 									OC.ContactsPlus.loadContacts($('#cAddressbooks li.isActiveABook').data('adrbid'),'',1,jsondata.data.id);
@@ -1114,8 +1419,8 @@ OC.ContactsPlus ={
 									//$('.letter[data-scroll='+jsondata.data.letter+']').removeClass('hidden');
 									//$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').addClass('bLetterActive');
 								}
-								if($('.letter[data-scroll='+jsondata.data.letter+']').hasClass('hidden')){
-									$('.letter[data-scroll='+jsondata.data.letter+']').removeClass('hidden');
+								if($('.letter[data-scroll="'+jsondata.data.letter+'"]').hasClass('hidden')){
+									$('.letter[data-scroll="'+jsondata.data.letter+'"]').removeClass('hidden');
 									$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').addClass('bLetterActive');
 								}
 								var listView = '';
@@ -1126,9 +1431,9 @@ OC.ContactsPlus ={
 									$('li span.noitem').addClass('hidden');
 								}
 			
-								$('.letter[data-scroll='+jsondata.data.letter+']').after($('<li class="contactsrow '+listView+'">'+jsondata.data.card+'</li>'));
+								$('.letter[data-scroll="'+jsondata.data.letter+'"]').after($('<li class="contactsrow '+listView+'">'+jsondata.data.card+'</li>'));
 								OC.ContactsPlus.initActionhandlerSingleCard(jsondata.data.id);
-								$('#rightcontent').scrollTo('.letter[data-scroll='+jsondata.data.letter+']',800);
+								$('#rightcontent').scrollTo('.letter[data-scroll="'+jsondata.data.letter+'"]',800);
 								$('#alphaScroll li').removeClass('isScrollTo');
 								$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').addClass('isScrollTo');
 								var counter=$('.contactsrow').length - $('.contactsrow.hidden').length;
@@ -1154,7 +1459,7 @@ OC.ContactsPlus ={
 					         var oldLetter = $('.toremove').data('letter');
 					         
 					         if(oldLetter !== jsondata.data.letter){
-					         	if($('.letter[data-scroll='+jsondata.data.letter+']').length === 0){
+					         	if($('.letter[data-scroll="'+jsondata.data.letter+'"]').length === 0){
 									
 									OC.ContactsPlus.loadContacts($('#cAddressbooks li.isActiveABook').data('adrbid'),'',1,jsondata.data.id);
 								}
@@ -1162,15 +1467,15 @@ OC.ContactsPlus ={
 								if($('#showList i').hasClass('isActiveListView')){
 									var listView = 'listview';
 								}
-					         	 $('.letter[data-scroll='+jsondata.data.letter+']').after($('<li class="contactsrow '+listView+'">'+jsondata.data.card+'</li>'));
+					         	 $('.letter[data-scroll="'+jsondata.data.letter+'"]').after($('<li class="contactsrow '+listView+'">'+jsondata.data.card+'</li>'));
 					         	 $('.toremove[data-contactid='+jsondata.data.id+']').closest('.contactsrow').remove();
 					         	
 					         	 if($('.container[data-letter="'+oldLetter+'"]').length === 0){
-					         		$('.letter[data-scroll='+oldLetter+']').addClass('hidden');
+					         		$('.letter[data-scroll="'+oldLetter+'"]').addClass('hidden');
 					         		$('#alphaScroll li[data-letter="'+oldLetter+'"]').removeClass('bLetterActive');
 					         	}
 					         	
-					         	$('#rightcontent').scrollTo('.letter[data-scroll='+jsondata.data.letter+']',800);
+					         	$('#rightcontent').scrollTo('.letter[data-scroll="'+jsondata.data.letter+'"]',800);
 					         	$('#alphaScroll li').removeClass('isScrollTo');
 					         	$('#alphaScroll li[data-letter="'+jsondata.data.letter+'"]').addClass('isScrollTo');
 					         }else{
@@ -1332,18 +1637,30 @@ OC.ContactsPlus ={
 			}
 		},
 	listView:function(){
-		$('#showCards i').removeClass('isActiveListView');
-		$('#showList i').addClass('isActiveListView');
-		$('.contactsrow').addClass('listview');
-		$('.letter').addClass('listview');
-		$('.listview-header').show();
+		if(!$('#showMap').hasClass('isMap')){
+			$('#showCards i').removeClass('isActiveListView');
+			$('#showList i').addClass('isActiveListView');
+			$('.contactsrow').addClass('listview');
+			$('.letter').addClass('listview');
+			$('.listview-header').show();
+			
+			$.post(OC.generateUrl('apps/'+OC.ContactsPlus.appname+'/changeviewcontacts'), {
+				v : 'listview'
+			});
+				
+		}
 	},
 	cardsView:function(){
-		$('#showList i').removeClass('isActiveListView');
-		$('#showCards i').addClass('isActiveListView');
-		$('.contactsrow').removeClass('listview');
-		$('.letter').removeClass('listview');
-		$('.listview-header').hide();
+		if(!$('#showMap').hasClass('isMap')){
+			$('#showList i').removeClass('isActiveListView');
+			$('#showCards i').addClass('isActiveListView');
+			$('.contactsrow').removeClass('listview');
+			$('.letter').removeClass('listview');
+			$('.listview-header').hide();
+			$.post(OC.generateUrl('apps/'+OC.ContactsPlus.appname+'/changeviewcontacts'), {
+				v : 'cardview'
+			});
+		}
 	},
 	generateSelectList:function(iSelectId,iReturnId){
 		 $(iSelectId+'.combobox ul').removeClass('isOpen').hide();
@@ -1410,7 +1727,7 @@ OC.ContactsPlus ={
 							
 							var letter = $('.container[data-contactid='+iCardId+']').data('letter');
 				   	 		if($('.container[data-letter="'+letter+'"]').closest('li.contactsrow.visible').length === 0){
-				         		$('.letter[data-scroll='+letter+']').addClass('hidden');
+				         		$('.letter[data-scroll="'+letter+'"]').addClass('hidden');
 				         		$('#alphaScroll li[data-letter="'+letter+'"]').removeClass('bLetterActive');
 				         	}
 						}
@@ -1475,7 +1792,16 @@ OC.ContactsPlus ={
 							
 						},
 						drop: function( event, ui ) {
+							if($('.visible .ui-selected').length>0){
+								$('.visible .ui-selected').each(function(i,el){
+									OC.ContactsPlus.addCardToGroup($(this).attr('data-id'),$(el).data('conid'));
+								}.bind(this));
+							   $('.contactsrow .contact-select').removeAttr('checked');	
+							   $('.contactsrow .is-checkbox').removeClass('ui-selected');
+							   $('#chk-all').removeAttr('checked');	
+							}else{
 							OC.ContactsPlus.addCardToGroup($(this).attr('data-id'),ui.draggable.attr('data-id'));
+							}
 						}
 			   });
 				 
@@ -1500,7 +1826,11 @@ OC.ContactsPlus ={
 		 
 		},
 		DragElement :  function(evt) {
-			return $(this).clone().text($(evt.target).text());
+			var moreItems='';
+			if($('.visible .ui-selected').length > 0){
+				moreItems= ' + '+($('.visible .ui-selected').length - 1)+' '+t(OC.ContactsPlus.appName, 'more Contacts');
+			}
+			return $(this).clone().text($(evt.target).text()+moreItems);
 		},
 		
 		checkIosGroup:function(aGroups){
@@ -1526,21 +1856,44 @@ OC.ContactsPlus ={
 		},
 		showDialogAddressbook:function(addrId,CardId){
 			 $( "#dialogSmall" ).html(t(OC.ContactsPlus.appName, 'Would you like copy or move the contact to the addressbook?'));
+			 
+			 var iCount = 1;
+			 if($('.visible .ui-selected').length>0){
+			 		iCount = $('.visible .ui-selected').length;
+			 }
+			 
 			 $( "#dialogSmall" ).dialog({
 			resizable: false,
-			title : t(OC.ContactsPlus.appName, 'Copy or Move Contact to Addressbook'),
-			width:460,
+			title : t(OC.ContactsPlus.appName, 'Copy or Move Contact to Addressbook')+' ('+iCount+')',
+			width:520,
 			height:200,
 			modal: true,
 			buttons: [
-						 { text:t(OC.ContactsPlus.appName, 'Copy Contact'), click: function() {
+						 { text:t(OC.ContactsPlus.appName, 'Copy Contact')+' ('+iCount+')', click: function() {
 						 	
 						 	 var oDialog=$(this);
-								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/copycontact'),{'addrid':addrId,'id':CardId},function(jsondata){
+						 	 var moveId= 0;
+						  	 	if($('.visible .ui-selected').length>0){
+									$('.visible .ui-selected').each(function(i,el){
+										if(moveId === 0){
+											moveId = $(el).data('conid');
+										}else{
+											moveId += ','+$(el).data('conid');
+										}
+									});
+								 $('.contactsrow .contact-select').removeAttr('checked');	
+								 $('.contactsrow .is-checkbox').removeClass('ui-selected');
+								 $('#chk-all').removeAttr('checked');	
+							}else{
+								moveId = CardId;
+							}
+						 	 
+						 	 
+								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/copycontact'),{'addrid':addrId,'id':moveId},function(jsondata){
 										if(jsondata.status === 'success'){
 											oDialog.dialog( "close" );
 											var iCounterAll = parseInt($('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text());
-											$('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text((iCounterAll + 1));
+											$('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text((iCounterAll + jsondata.data.count));
 											OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contact copied success!'));
 										}
 										if(jsondata.status === 'error'){
@@ -1550,19 +1903,38 @@ OC.ContactsPlus ={
 							        });
 						  	 }
 						 },
-						  { text:t(OC.ContactsPlus.appName, 'Move Contact'), click: function() { 
+						  { text:t(OC.ContactsPlus.appName, 'Move Contact')+' ('+iCount+')', click: function() { 
 						  	  var oDialog=$(this);
-						  	  
-								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/movecontact'),{'addrid':addrId,'id':CardId},function(jsondata){
+						  	  	 var moveId= 0;
+						  	 	if($('.visible .ui-selected').length>0){
+									$('.visible .ui-selected').each(function(i,el){
+										if(moveId === 0){
+											moveId = $(el).data('conid');
+										}else{
+											moveId += ','+$(el).data('conid');
+										}
+									});
+								 $('.contactsrow .contact-select').removeAttr('checked');	
+								 $('.contactsrow .is-checkbox').removeClass('ui-selected');
+								 $('#chk-all').removeAttr('checked');	
+							}else{
+								moveId = CardId;
+							}
+								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/movecontact'),{'addrid':addrId,'id':moveId},function(jsondata){
 										if(jsondata.status === 'success'){
 											oDialog.dialog( "close" );
-											
-											 $('.container[data-contactid='+CardId+']').closest('li.contactsrow').remove();
-											 var iCounterAll=parseInt($('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text());
-											$('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text((iCounterAll + 1));
-												
-											OC.ContactsPlus.buildCounterGroups($('#cAddressbooks li.isActiveABook').data('adrbid'));
-											OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contact moving success!'));
+											if(jsondata.data.count == 1){
+												 $('.container[data-contactid='+CardId+']').closest('li.contactsrow').remove();
+												 var iCounterAll=parseInt($('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text());
+												$('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text((iCounterAll + 1));
+													
+												OC.ContactsPlus.buildCounterGroups($('#cAddressbooks li.isActiveABook').data('adrbid'));
+												OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contact moving success!'));
+											}else{
+												OC.ContactsPlus.loadContacts(addrId,'',1,0);
+												OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contact moving success!'));
+	
+											}
 										}
 										if(jsondata.status === 'error'){
 											oDialog.dialog( "close" );
@@ -1571,7 +1943,15 @@ OC.ContactsPlus ={
 							        });
 						  	 }
 						},
-						{ text:t(OC.ContactsPlus.appName, 'Cancel'), click: function() { $( this ).dialog( "close" ); } } 
+						{ text:t(OC.ContactsPlus.appName, 'Cancel'), click: function() { 
+							$( this ).dialog( "close" ); 
+							if($('.visible .ui-selected').length>0){
+								 $('.contactsrow .contact-select').removeAttr('checked');	
+								 $('.contactsrow .is-checkbox').removeClass('ui-selected');
+								 $('#chk-all').removeAttr('checked');	
+							}
+							
+							} } 
 						 ],
 		});
   	    
@@ -1681,7 +2061,132 @@ OC.ContactsPlus ={
 		         $(this).change();
 		    });
   },
-		
+	showMap : function() {
+	if(!$('#showMap').hasClass('isMap')){
+   	  	if(OC.ContactsPlus.mapObject !== null){
+   	  		OC.ContactsPlus.mapObject.removeLayer(OC.ContactsPlus.layerMarker);
+   	  	}
+   	  	$('#showMap').addClass('isMap');
+   	  	$('#map').height($('#app-content').height()-10);
+   	  	 $('#alphaScroll').hide();
+   	  	 $('#rightcontent').hide();
+   	  	 $('#contactsearch').hide();
+   	  	if($('#showList i.ioc').hasClass('isActiveListView')){
+   	  	 	 $('.listview-header').hide();
+   	  	 }
+   	  	 $('#map').show();
+   	  	
+   	  	  OC.ContactsPlus.initMapList();
+   	  	 
+   	  }else{
+   	  	$('#showMap').removeClass('isMap');
+   	  	OC.ContactsPlus.aPinsMap = null;
+		OC.ContactsPlus.aPinsMap = {};
+		OC.ContactsPlus.mapObject.removeLayer(OC.ContactsPlus.layerMarker);
+   	  	
+   	  	$('#map').hide();
+   	  	$('#rightcontent').show();
+   	  	$('#alphaScroll').show();
+      	$('#contactsearch').show();
+      	if($('#showList i.ioc').hasClass('isActiveListView')){
+   	  	 	 $('.listview-header').show();
+   	  	 }
+   	  }
+	},
+	initMapList : function() {
+	var attribution = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
+	    if( OC.ContactsPlus.mapObject == null){
+		   OC.ContactsPlus.mapObject = L.map('map').setView([51.505, -0.09], 2);
+				L.tileLayer('http://otile{s}.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.png', {
+			    attribution:attribution,
+			    maxZoom: 18,
+			    subdomains : "1234"
+		   }).addTo(OC.ContactsPlus.mapObject);
+	       
+	  }else{
+	  	  OC.ContactsPlus.mapObject.setView([51.505, -0.09], 2);
+	  }
+	  
+	  	
+	  	
+	  	$('.contactsrow.visible .container').each(function(i,el){
+	  		var id= $(el).data('contactid');
+	  		var lat = $(el).data('lat');
+	  		var lon = $(el).data('lon');
+	  		var company = $(el).data('company');
+	  		var imgSrc = '';
+	  		if($(el).find('.picture img').length > 0){
+	  			imgSrc = $(el).find('.picture img').attr('src');
+	  		}
+	  		if(lat !== ''){
+	  			var sMarkerColor = 'red';
+	  			var sIcon = 'ioc ioc-user-1';
+	  			if(company ===  1){
+	  				sMarkerColor = 'blue';
+	  				sIcon = 'ioc ioc-money';
+	  			}
+	  			OC.ContactsPlus.aPinsMap[id] = {
+		  			'id':id,
+		  			'lat':lat,
+		  			'lon':lon,
+		  			'title':$(el).find('.fullname').text(),
+		  			 icon: sIcon,
+					 markerColor:sMarkerColor,
+					image: imgSrc,
+	  			};
+	  		}
+	  	});
+	  
+	 
+	
+	   OC.ContactsPlus.layerMarker = L.markerClusterGroup();
+	    //showMapPin
+	   
+	   $('#mappinsInner').empty();
+	
+	   $.each(OC.ContactsPlus.aPinsMap,function(i,element){
+	   	      var redMarker = L.AwesomeMarkers.icon({
+				    icon: element.icon,
+				    markerColor: element.markerColor
+				  });
+				  
+				
+				 var popupContent='<span class="pinmap-title">'+element.title+'</span>'; 
+			      if(element.image!=''){
+   	               popupContent+='<br /><span class="pinmap-image" style="display:inline-block;width:100%;"><img width="150" src="'+ element.image+'"  /></span>';
+   	               }else{
+   	               	    popupContent+='<br /><span class="pinmap-image" style="text-align:center;width:100%;display:block;"><i style="font-size:60px;" class="ioc ioc-user"></i></span>';
+   	 
+   	               }
+   	            popupContent+='<br /><span class="pinmap-link"><a data-contactid="'+element.id+'" href="#'+element.id+'">Details</a></span>';
+		   	   	var popup = L.popup({
+					minWidth:150
+				}).setContent(popupContent);  
+		   	    OC.ContactsPlus.mapObjectMarker[i] = L.pinMarker([element.lat, element.lon],{'title':element.title,contactId:element.id,icon:redMarker}).bindPopup(popup);
+	            OC.ContactsPlus.layerMarker.addLayer( OC.ContactsPlus.mapObjectMarker[i]);
+      	   
+	   });
+	       
+	     OC.ContactsPlus.mapObject.addLayer(OC.ContactsPlus.layerMarker);
+        /*
+          L.edgeMarker({
+		      icon: L.icon({ // style markers
+		          iconUrl: OC.imagePath('contactsplus','edge-arrow-marker-black.png'),
+		          clickable: true,
+		          iconSize: [48, 48],
+		          iconAnchor: [24, 24]
+		      }),
+		      rotateIcons: true, // rotate EdgeMarkers depending on their relative position
+		      layerGroup: null // you can specify a certain L.layerGroup to create the edge markers from.
+    }).addTo(OC.ContactsPlus.mapObject);
+         */
+	},
+	showMapPin:  function(lat,lon,zoom,oMarker) {
+		   OC.ContactsPlus.mapObject.setView([lat, lon], zoom);
+		  oMarker.openPopup();
+		  //OC.ContactsPlus.showMapPin(element.lat,element.lon,16, OC.ContactsPlus.mapObjectMarker[element.id]);
+		  //alert(oMarker.getPinId());
+	},
 };
 
 
@@ -1707,14 +2212,19 @@ $(document).ready(function(){
 			return false;
 		});
 		
-		$(document).on('click','#searchresults .info a',function(event){
+		$(document).on('click','#searchresults .info a, #map .pinmap-link a',function(event){
 			event.preventDefault();
 			event.stopPropagation();
-			
+		
 			var tmp = $(this).attr('href').split('#');
 			var id = parseInt(tmp[1]);
 			
 			OC.ContactsPlus.showContact(id,event);
+			if($('#showMap').hasClass('isMap')){
+				if(OC.ContactsPlus.mapObject.getZoom()<16){
+					OC.ContactsPlus.mapObject.setView([OC.ContactsPlus.aPinsMap[id].lat,OC.ContactsPlus.aPinsMap[id].lon], 16);
+				}
+			}
 			return false;
 		});
 		
@@ -1776,6 +2286,12 @@ $(document).ready(function(){
 		return false;
 		//}
 	});
+	
+		
+		$(document).on('click', '#importAddr, #importAddrStart', function(evt) {
+			$('#drop-area').slideToggle(500);
+		});
+		
 		$('#refreshGroups').on('click',function(){
 			OC.ContactsPlus.getGroups();
 		});
@@ -1826,7 +2342,10 @@ $(document).ready(function(){
 			OC.ContactsPlus.cardsView();
 			
 	 });
-	 
+	 $('#showMap').on('click', function() {
+		OC.ContactsPlus.showMap();
+		return false;
+	});
  
  	
 	  $('#cgroups li').on('click',function(){
@@ -1842,7 +2361,7 @@ $(document).ready(function(){
 	
 	$('.letter').each(function(i,el){
 		existLetter=$(el).attr('data-scroll');
-		$('#rightcontentSideBar li[data-letter='+existLetter+']').addClass('bLetterActive');
+		$('#rightcontentSideBar li[data-letter="'+existLetter+'"]').addClass('bLetterActive');
 	});
 	
      $(OC.Tags).on('change', function(event, data) {
@@ -1876,6 +2395,7 @@ $(document).ready(function(){
 				click: function() {
 					OC.ContactsPlus.ContactPhoto.savePhoto(this);
 					$('#coords input').val('');
+					$('#cropbox').attr('src','');
 					$(this).dialog('close');
 				}
 			},
@@ -1896,19 +2416,8 @@ $(document).ready(function(){
 			}
 			
 		});
-					
-		 $(document).on('click', function(event) {
-			event.stopPropagation();
-			/*
-			
-			if($("#contact_details").is(':visible') && !$("#contact_details").hasClass('forceOpen') && $('#contact_details').has(event.target).length === 0){
-				$("#contact_details").hide();
-				$("#contact_details").html('');
-				$("#contact_details").removeClass('isOpenDialog');
-				
-			}*/
-	});
-		
+	//FIXME
+	
 			
 });
 $(window).bind('hashchange', function() {

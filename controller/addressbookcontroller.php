@@ -68,10 +68,10 @@ class AddressbookController extends Controller {
 			
 		$active_addressbooks = array();
 
-		$active_addressbooks = Addressbook::all($this->userId,true);
+		$active_addressbooks = Addressbook::all($this->userId,false);
 		if(count($active_addressbooks) === 0) {
 			Addressbook::addDefault($this->userId);
-			$active_addressbooks = Addressbook::all($this->userId,true);
+			$active_addressbooks = Addressbook::all($this->userId,false);
 		}
 		
 		$countCardsAddressbooks = Addressbook::getCountCardsAddressbook($this->userId);
@@ -113,8 +113,8 @@ class AddressbookController extends Controller {
 		 	    $share = '<b>'.(string) $this->l10n->t('Shared with').'</b><br>'.$mySharees[$addressbookInfo['id']]['shareTypeDescr']; 	
 		    	$bShared =true; 
 			}
-			
-		     $displayName='<span  class="groupname">'.$addressbookInfo['displayname'].$sync.'</span>';
+			 $inActive =	($addressbookInfo['active'] == 1) ? 'groupname' : 'groupinactive';
+		     $displayName='<span  class="'.$inActive.'">'.$addressbookInfo['displayname'].$sync.'</span>';
 			 
 		 	 if($addressbookInfo['userid'] !== $this->userId){
   	        	$rightsOutput=ContactsApp::permissionReader($addressbookInfo['permissions']);	
@@ -136,14 +136,47 @@ class AddressbookController extends Controller {
 			    data-title="'.$addressbookInfo['displayname'].'"
 				data-possible-permissions="'.$addressbookInfo['permissions'].'"
 				title="'.$share.'"
-				style="position:absolute;float:right;right:22px;margin-top:-6px;display:block;height:30px;width:30px;'.$addCss.'"
+				style="position:absolute;float:right;right:42px;margin-top:-6px;display:block;height:30px;width:30px;'.$addCss.'"
 				>
 				</a>';
 		  }
-						  
-		 	$output.='<li class="dropcontainerAddressBook '.$activeClass.'" data-adrbid="'.$addressbookInfo['id'].'"  data-perm="'.$addressbookInfo['permissions'].'">'.$displayName.$shareLink.'<span class="groupcounter">'.$countCardsAddressbooks[$addressbookInfo['id']].'</span></li>';
+		$addrbookuri	= $addressbookInfo['uri'];
+		if($addressbookInfo['userid'] !== $this->userId){
+			$addrbookuri= $addressbookInfo['uri'] . '_shared_by_' . $addressbookInfo['userid'];
+		}
+
+		$actionAddr = '';
+		$checkBox = '';
+		if($addressbookInfo['userid'] === $this->userId){
+			$actionAddr = '<li class="ioc ioc-edit"></li><li class="ioc ioc-delete"></li>';
+				
+			$checked = ($addressbookInfo['active'] == 1) ? ' checked="checked"' : '';
+			$checkBox='<input class="regular-checkbox isActiveAddressbook" data-id="'.$addressbookInfo['id'].'" style="float:left;" id="active_aid_'.$addressbookInfo['id'].'" type="checkbox" '.$checked.' /><label style="float:left;margin-left:8px;top:5px;" for="active_aid_'.$addressbookInfo['id'].'"></label>';
+		}
+		$urlDl = \OC::$server -> getURLGenerator() -> linkToRoute($this -> appName . '.export.exportContacts') . '?bookid=' . $addressbookInfo['id'];
+		
+		$downloadLink ='<a class="icon-download" style="margin-top:-6px;" href="'.$urlDl.'" title="'.$this->l10n->t('Download').'"></a>';
+		
+			$addMenu='<span style="position:absolute;float:right;right:20px;" class="app-navigation-entry-utils-menu-button"><button></button>
+						  <span class="app-navigation-entry-menu" data-adrbid="'.$addressbookInfo['id'].'">
+							  <ul>
+							  <li>'.$checkBox.'</li>
+							  <li><i class="ioc ioc-globe"></i></li>
+							  <li>'.$downloadLink.'</li>
+							  '.$actionAddr.'
+							  </ul>
+						  </span>
+					  </span>';
+				    
+		 	$output.='<li class="dropcontainerAddressBook '.$activeClass.'" data-adrbid="'.$addressbookInfo['id'].'"  data-perm="'.$addressbookInfo['permissions'].'" data-url="'.$addrbookuri.'" data-name="'.$addressbookInfo['displayname'].'">'.$displayName.$shareLink.$addMenu.'<span class="groupcounter">'.$countCardsAddressbooks[$addressbookInfo['id']].'</span></li>';
 
 		 }
+
+		$output.='<li class="app-navigation-entry-edit" id="addr-clone" data-addr="">
+				<input type="text" name="adrbookname" id="adrbookname" value="" placeholder="'.$this->l10n->t('Displayname').'" />
+				<input type="text" name="carddavuri" readonly="readonly" value="" />
+				<button class="icon-checkmark"></button>
+			</li>	';
 		
 		return $output;
 		
@@ -419,6 +452,24 @@ class AddressbookController extends Controller {
 	/**
      * @NoAdminRequired
      */
+    public function saveSortOrderContacts() {
+    	$pValue = $this -> params('sortorder');
+
+		$this->configInfo->setUserValue($this->userId, $this->appName, 'sortcontacts', $pValue);
+		
+		$params = [
+		'status' => 'success',
+		];
+		
+		$response = new JSONResponse($params);
+		return $response;
+		
+		
+    }
+	
+	/**
+     * @NoAdminRequired
+     */
     public function saveSortOrderGroups() {
     	$pValue = $this -> params('jsortorder');
 
@@ -433,4 +484,13 @@ class AddressbookController extends Controller {
 		
 		
     }
+	
+	public function changeCiewContacts(){
+		$pValue = $this -> params('v');
+
+		$this->configInfo->setUserValue($this->userId, $this->appName, 'view', $pValue);
+		
+		
+	}
+	
 }

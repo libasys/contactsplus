@@ -280,7 +280,7 @@ class App{
 		$existCats=self::getCategoryOptions();
 		$tag=array();
 		foreach($existCats as $groupInfo){
-			$backgroundColor=	self::genColorCodeFromText(trim($groupInfo['name']),80);
+			$backgroundColor=	self::genColorCodeFromText(trim($groupInfo['name']));
 			$tag[]=array(
 				'id'=>$groupInfo['id'],
 				'name'=>$groupInfo['name'],
@@ -896,7 +896,7 @@ class App{
 								 $imgSrc=$image->__toString();
 								 $imgBuild='data:'.$image->mimeType().';base64,' .$imgSrc;
 							}
-							$sLetter=strtoupper(mb_substr($contact['fullname'],0,1,"UTF-8"));
+							$sLetter=strtoupper(mb_substr($contact['sortFullname'],0,1,"UTF-8"));
 							
 							
 							if($sLetter !== $oldLetter){
@@ -913,6 +913,8 @@ class App{
 									'fullname' =>  $contact['fullname'],
 									'surename' =>  $contact['surename'],
 									'lastname' =>  $contact['lastname'],
+									'organization' =>  $contact['organization'],
+									'bcompany' =>  $contact['bcompany'],
 									'data' => $details,
 								);
 								
@@ -936,7 +938,7 @@ class App{
 							  		 $CONTACTDATA=$contactInfo['data'];	
 									 $prepareOutput = self::renderSingleCard($CONTACTDATA, $contactInfo, $addressBookPerm,$aFavourites);
 								
-									 $ContactsOutput.='<li class="contactsrow">'.$prepareOutput.'</li>';
+									 $ContactsOutput.='<li class="contactsrow visible">'.$prepareOutput.'</li>';
 							  	}
 						  }
 						if($bFound === true){
@@ -952,7 +954,7 @@ class App{
 					  foreach($aLetter as $letterInfo){
 					  	$buildingOutput.='<li class="letter hidden" data-scroll="'.$letterInfo.'"><span>'.$letterInfo.'</span></li>';
 					  }
-					  $buildingOutput.='<li><span class="noitem">'.(string)self::$l10n->t('No Cards found!').'</span></li>';
+					  $buildingOutput.='<li><span class="noitem">'.(string)self::$l10n->t('Add a new contact or import existing contacts from a file (VCF) per Drag & Drop.').' <i id="importAddrStart" title="'.(string)self::$l10n->t('Import addressbook per Drag & Drop').'" class="toolTip ioc ioc-upload"></i></span></li>';
 					  $buildingOutput.='</ul>'; 
 				   	
 				   }
@@ -968,12 +970,26 @@ class App{
 		$hiddenClass = 'hidden';
 		if(isset($CONTACTDATA['CATEGORIES'][0]['value']) && count($CONTACTDATA['CATEGORIES'][0]['value'])>0){
 			$hiddenClass ='';
-			foreach($CONTACTDATA['CATEGORIES'][0]['value'] as $categories){
-				
-				$backgroundColor=	self::genColorCodeFromText(trim($categories),80);
-				$color=self::generateTextColor($backgroundColor);
-				$catOutput.='<span class="colorgroup" data-category="'.$categories.'"  style="background-color:'.$backgroundColor.';color:'.$color.';" title="'.$categories.'">'.mb_substr($categories, 0,1,"UTF-8").'</span> ';
-				$searchCat.=' '.$categories;
+			foreach($CONTACTDATA['CATEGORIES'] as $key => $catInfo){
+				if($key == 'value'){	
+					$aCatInfo = explode(',',$catInfo['value'][0]);	
+					foreach($aCatInfo as $key => $val){
+						$backgroundColor=	self::genColorCodeFromText(trim($val),80);
+						$color=self::generateTextColor($backgroundColor);
+						$catOutput.='<span class="colorgroup" data-category="'.$val.'"  style="background-color:'.$backgroundColor.';color:'.$color.';" title="'.$val.'">'.mb_substr($val, 0,1,"UTF-8").'</span> ';
+						$searchCat.=' '.$val;
+					}
+				}
+			}
+		}
+		
+		$lon='';
+		$lat='';
+		if(isset($CONTACTDATA['GEO'][0])){
+			$tempLatLon=explode(';',$CONTACTDATA['GEO'][0]['value']);	
+			if($tempLatLon[0]!=''){
+				$lat = $tempLatLon[0];
+				$lon = $tempLatLon[1];
 			}
 		}
 		
@@ -1061,8 +1077,16 @@ class App{
 			$sNameOutput.=isset($aNameOutput['lname'])?$aNameOutput['lname'].' ':'';
 			$sNameOutput.=isset($aNameOutput['fname'])?$aNameOutput['fname'].' ':'';
 			
+			$lastname = isset($aNameOutput['fname'])?$aNameOutput['fname'].' ':'';
+			$surname = isset($aNameOutput['lname'])?$aNameOutput['lname'].' ':'';
+			
 			unset($aNameOutput);
 		}
+		
+		if(!$contactInfo['bcompany']){
+			$sNameOutput = $contactInfo['organization'];
+		}
+		
 		/*
 		 $aDefOrgArray=array('0'=>'orgname','1'=>'abteilung');
 		if(isset($CONTACTDATA['ORG'][0]['value']) && count($CONTACTDATA['ORG'][0]['value'])>0){
@@ -1080,10 +1104,11 @@ class App{
 			unset($aNameOutput);
 		}*/
 		
-
-		$favLink='<a class="favourite"><i class="ioc ioc-star" title="add to favourite"></i></a>';
+		//FIXME
+		$l = App::$l10n;
+		$favLink='<a class="favourite"><i class="ioc ioc-star" title="'.$l ->t('Add to favourite').'"></i></a>';
 		if(array_key_exists($contactInfo['id'], $aFavourites)){
-			$favLink='<a class="favourite"><i class="ioc ioc-star yellow" title="delete from favourite"></i></a>';
+			$favLink='<a class="favourite"><i class="ioc ioc-star yellow" title="'.$l ->t('Delete from favourite').'"></i></a>';
 		}
 
 		$thumb=$favLink.'<i id="photo-id-'.$contactInfo['id'].'" class="nopic-row ioc ioc-user"></i>';
@@ -1096,35 +1121,27 @@ class App{
 		/**ADDRESSBOOK PERMISSIONS**/
 		$editLink='';
 		if($addressBookPerm['permissions'] & \OCP\PERMISSION_UPDATE){
-			$editLink='<a class="edit"><i class="ioc ioc-edit" title="edit"></i></a>';
+			$editLink='<a class="edit"><i class="ioc ioc-edit" title="'.$l ->t('Edit').'"></i></a>';
 		}
 
 		$delLink='';
 		if($addressBookPerm['permissions'] & \OCP\PERMISSION_DELETE){
-			$delLink='<a class="delete"><i class="ioc ioc-delete" title="delete"></i></a>';
-		}
-		$DisplayName ='';
-		//\OCP\Util::writeLog(self::$appname,'LASTNAME: '.empty($contactInfo['lastname']), \OCP\Util::DEBUG);
-		
-		//if(empty($contactInfo['surename']) && empty($contactInfo['lastname'])){
-			$DisplayName = $contactInfo['fullname'];
-		//}
-		
-		if(!empty($contactInfo['surename'])){
-		//	$DisplayName = $contactInfo['surename'].' ';
+			$delLink='<a class="delete"><i class="ioc ioc-delete" title="'.$l ->t('Delete').'"></i></a>';
 		}
 		
-		if(!empty($contactInfo['lastname'])){
-			//$DisplayName .= $contactInfo['lastname'];
-		}
+		$DisplayName = $contactInfo['fullname'];
+		
+		
 		/*<span class="url">'.$sUrlOutput.'</span>
 			  <span class="impp">'.$sImppOutput.'</span>
 			  <span class="clouding">'.$sCloudOutput.'</span>*/
 		
-		$prepareOutput='<span data-contactid="'.$contactInfo['id'].'" data-letter="'.$contactInfo['letter'].'" class="container">
+		$prepareOutput='<span data-contactid="'.$contactInfo['id'].'" data-letter="'.$contactInfo['letter'].'" data-lat="'.$lat.'" data-lon="'.$lon.'" data-company="'.$contactInfo['bcompany'].'" class="container">
 		 <span class="rowHeader">
-		 	 <span class="head-picture">'.$thumbHead.'<input class="contact-select" type="checkbox" value="'.$contactInfo['id'].'" name="contact['.$contactInfo['id'].']" /></span>
+		 	 <span class="head-picture">'.$thumbHead.'</span>
+		 	 <span class="head-check"><input class="contact-select regular-checkbox" type="checkbox" value="'.$contactInfo['id'].'" id="chk-'.$contactInfo['id'].'" /><label data-conid="'.$contactInfo['id'].'" class="is-checkbox" for="chk-'.$contactInfo['id'].'"></label></span>
 			 <span class="fullname" data-id="'.$contactInfo['id'].'"><a>'.strip_tags($DisplayName).'</a></span>
+			
 			 <span class="tel">'.$sTelOutputHeader.'</span>
 			  <span class="email">'.$sEmailOutputHeader.'</span>
 			  <span class="categories '.$hiddenClass.'">'.$catOutput.'</span>
@@ -1133,6 +1150,7 @@ class App{
 		   <span class="rowBody" data-id="'.$contactInfo['id'].'">
 			 <span class="picture">'.$thumb.'</span>
 			 <span class="name">'.$sNameOutput.'</span>
+			 
 			 <span class="address">'.$sAddrOutput.'</span>
 			  <span class="tel telsearch">'.$sTelOutput.'</span>
 			  <span class="email emailsearch">'.$sEmailOutput.'</span>
@@ -1224,6 +1242,18 @@ class App{
 			if(!empty($categorySelection)){	
 				$vcard->CATEGORIES=$categorySelection;
 			}
+		}
+		if(isset($sRequest['bcompany'])){
+			$vcard->{'X-ABSHOWAS'} = 'COMPANY';
+		}else{
+			unset($vcard->{'X-ABSHOWAS'});
+		}
+		
+		if(isset($sRequest['GEO']) && $sRequest['GEO']['lat'] != ''){
+			//GEO:37.386013;-122.082932
+			$vcard->GEO = $sRequest['GEO']['lat'].';'.$sRequest['GEO']['lon'];
+		}else{
+			unset($vcard->GEO);
 		}
 		
 		if($lname!='' || $fname!='') {

@@ -1,3 +1,35 @@
+<?php
+		
+
+		
+		style('contactsplus', '3rdparty/leaflet');
+		style('contactsplus', '3rdparty/MarkerCluster');
+		style('contactsplus', '3rdparty/MarkerCluster.Default');
+		style('contactsplus', '3rdparty/leaflet.awesome-markers');
+		style('contactsplus', 'jquery.Jcrop');
+		style('contactsplus', '3rdparty/fontello/css/animation');
+		style('contactsplus', '3rdparty/fontello/css/fontello');
+		style('contactsplus', '3rdparty/jquery.webui-popover');
+		style('contactsplus','style');	
+		
+		script('core','tags');	
+		script('contactsplus', '3rdparty/jquery-ui.drag-multiple');
+		script('contactsplus', '3rdparty/leaflet');
+		script('contactsplus', '3rdparty/Leaflet.EdgeMarker');
+		script('contactsplus', '3rdparty/leaflet.markercluster-src');
+		script('contactsplus', '3rdparty/leaflet.awesome-markers');
+		script('contactsplus', '3rdparty/jquery.webui-popover');
+		
+		script('contactsplus','jquery.scrollTo.min');
+		script('contactsplus','jquery.nicescroll.min');
+		script('files', 'jquery.fileupload');
+		script('contactsplus', 'jquery.Jcrop');
+		script('contactsplus', 'app');
+		//script('contactsplus','settings');
+		script('contactsplus','loader');
+
+?>
+
 <form class="float" id="file_upload_form" action=" " method="post" enctype="multipart/form-data" target="file_upload_target">
 	<input type="hidden" name="id" value="">
 	<input type="hidden" name="requesttoken" value="<?php p($_['requesttoken']) ?>">
@@ -10,19 +42,21 @@
 
 <div id="searchresults" data-appfilter="contactsplus"></div>
 <div id="notification" style="display:none;"></div>
-<div id="loading">
-	<i style="margin-top:20%;" class=" ioc-spinner ioc-spin"></i>
-</div>
+
 
 <div id="app-navigation">
 <div id="leftsidebar">
 
-	<h3><i class="ioc ioc-book"></i> <?php p($l->t('Address books')); ?></h3>
+	<h3><i id="allbooks" data-lastbook="<?php p($_['lastSelectedBook']) ?>" class="ioc ioc-book"></i> <?php p($l->t('Address books')); ?>
+		<i id="importAddr" title="<?php p($l->t('Import addressbook per Drag & Drop')); ?>" class="toolTip ioc ioc-upload"></i>
+		<i id="addAddr" title="<?php p($l->t('New Addressbook')) ?>" class="toolTip ioc ioc-add"></i>
+		</h3>
+	<div id="drop-area"><?php p($l->t('Import addressbook per Drag & Drop')); ?></div>
 	<ul id="cAddressbooks">
 		
 	</ul>
 	<br style="clear:both;" /><br />
-	<h3><i class="ioc ioc-users"></i> <?php p($l->t('Groups')); ?> <i id="sortGroups" title="<?php p($l->t('Sort Groups')); ?>" class="toolTip ioc ioc-sort"></i><i id="refreshGroups" title="<?php p($l->t('Refresh Groups')); ?>" class="toolTip ioc ioc-refresh"></i></h3>
+	<h3><i class="ioc ioc-users"></i> <?php p($l->t('Groups')); ?><i  id="addGroup" class="ioc ioc-add toolTip" title="<?php p($l->t('Add new group')); ?>"></i>  <i id="sortGroups" title="<?php p($l->t('Sort Groups')); ?>" class="toolTip ioc ioc-sort"></i><i id="refreshGroups" title="<?php p($l->t('Refresh Groups')); ?>" class="toolTip ioc ioc-refresh"></i></h3>
 	<ul id="cgroups">
 
 </ul>
@@ -34,11 +68,9 @@
 			</button>
 		</div>
 		<div id="app-settings-content">
-		<form id="contacts-settings">
+
 <input id="totalurl" type="hidden" value="<?php print_unescaped(OCP\Util::linkToRemote('contactsplus')); ?>" />
 <input id="totalurlAbo" type="hidden" value="<?php print_unescaped(OCP\Util::linkToAbsolute('contactsplus','exportbday.php')); ?>" />
-
-		  <dt><?php p($l->t('CardDAV syncing addresses')); ?> (<a href="http://owncloud.org/synchronisation/" target="_blank"><?php p($l->t('more info')); ?></a>)</dt>
 		<dl>
 		<dt><?php p($l->t('Primary address (for Contacts or similar)')); ?></dt>
 		<dd><input type="text" style="width:95%;" readonly="readonly" value="<?php print_unescaped(OCP\Util::linkToRemote('contactsplus')); ?>" /></dd>
@@ -57,91 +89,49 @@
 		      	</dd>
 
 		</dl>
-		<div class="addressbooks-settings">
-			<dt><?php p($l->t('Addressbooks')); ?></dt>
-			<table id="allAddressbooks">
-			<?php foreach($_['addressbooks'] as $addressbook) { ?>
-			<tr class="addressbook" data-id="<?php p($addressbook['id']) ?>"
-				data-uri="<?php p($addressbook['uri']) ?>"
-				data-owner="<?php p($addressbook['userid']) ?>"
-				>
-				<?php
-						$checkBox = '';
-						if($addressbook['userid'] === OCP\USER::getUser()){
-							if($addressbook['active']){
-								 $checked = 'checked="checked"';
-							}
-							$checkBox='<input class="regular-checkbox isActiveAddressbook" data-id="'.$addressbook['id'].'" style="float:left;" id="active_aid_'.$addressbook['id'].'" type="checkbox" '.$checked.' /><label style="float:left;margin-top:4px;margin-right:5px;" for="active_aid_'.$addressbook['id'].'"></label>';
-						}
-				?>
-				<td class="activate" title=""><?php print_unescaped($checkBox); ?></td>
-				<td class="name" title="<?php p($addressbook['description']) ?>"><?php p($addressbook['displayname']) ?></td>
-				<td class="action">
-					<a title="<?php p($l->t('Show CardDav link')); ?>">
-						<i class="ioc ioc-publiclink globe"></i>
-					</a>
-				</td>
-				
-				<?php if($addressbook['userid'] === OCP\USER::getUser()) { ?>
-				<td class="action">
-					<a title="<?php p($l->t('Export Addressbook')); ?>">
-						 <i class="ioc ioc-export export"></i>
-					</a>
-				</td>
-				<?php } ?>
-				<td class="action">
-					<?php if($addressbook['userid'] === OCP\USER::getUser() && $addressbook['permissions'] & OCP\PERMISSION_UPDATE) { ?>
-					<a title="<?php p($l->t("Edit")); ?>">
-						<i class="ioc ioc-edit edit"></i>
-						
-					</a>
-					<?php } ?>
-				</td>
-				<td class="action">
-					<?php if($addressbook['userid'] === OCP\USER::getUser() && $addressbook['permissions'] & OCP\PERMISSION_DELETE) { ?>
-					<a title="<?php p($l->t("Delete")); ?>">
-						<i class="ioc ioc-delete delete"></i>
-					</a>
-					<?php } ?>
-				</td>
-			</tr>
-			<?php } ?>
-			</table>
-			<div class="actions" style="width: 100%;">
-				
-				<button class="button new"><?php p($l->t('New Address Book')) ?></button>
-				<input class="name hidden" type="text" autofocus="autofocus" placeholder="<?php p($l->t('Name')); ?>" />
-				<input class="description hidden" type="text" placeholder="<?php p($l->t('Description')); ?>" />
-				<button class="button save hidden" style="margin-right:5px;"><?php p($l->t('Save')) ?></button> <button class="button cancel hidden"><?php p($l->t('Cancel')) ?></button>
-			</div>
-		</div>
 	
-</form><br /><br />
+<br />
 		</div>
 	</div>
 
 </div>
 <div id="app-content">
+	<div id="loading">
+	<i style="margin-top:20%;" class=" ioc-spinner ioc-spin"></i>
+</div>
 	<div id="controls">
 	<div id="first-group"  class="button-group" style="float:left;">	
-		<button class="button" id="addGroup"><i class="ioc ioc-add"></i> <?php p($l->t('Group')); ?></button>
+		
 		<button class="button" id="addContact"><i class="ioc ioc-add"></i> <?php p($l->t('Contact')); ?></button>
+
 	</div>
 	<div id="second-group" class="button-group"  style="float:left;">
-		<button id="showList" class="button" title="<?php p($l->t('List View')); ?>"><i class="ioc ioc-th-list"></i></button> 
-		<button id="showCards" class="button" title="<?php p($l->t('Card View')); ?>"><i class="ioc ioc-th-large isActiveListView"></i></button> 
-		<input type="search" placeholder="&#xe815; <?php p($l->t(' in current addressbook')); ?>" name="contactsearch" id="contactsearch" style="font-family:Arial,fontello;font-size:18px;" />
+		<?php 
+			$selectedListView = '';
+			$selectedCardView = 'isActiveListView';
+			if($_['activeView'] == 'listview'){
+				$selectedListView = 'isActiveListView';
+				$selectedCardView = '';	
+			}
+		?>
+		<button id="showList" class="button toolTip" title="<?php p($l->t('List View')); ?>"><i class="ioc ioc-th-list <?php p($selectedListView); ?>"></i></button> 
+		<button id="showCards" class="button toolTip" title="<?php p($l->t('Card View')); ?>"><i class="ioc ioc-th-large <?php p($selectedCardView); ?>"></i></button> 
+		<button class="button toolTip" id="showMap" title=" <?php p($l->t('Shows your contacts on world map')); ?>"><i class="ioc ioc-globe"></i></button>
+
+		<input type="search" placeholder="&#xe802; <?php p($l->t(' in current addressbook')); ?>" name="contactsearch" id="contactsearch" style="font-family:Arial,fontello;font-size:18px;" />
 
 	</div>	
 	
 </div>
 <div class="listview-header">
-	 <span class="fullname"><?php p($l->t('Displayname')); ?></span>
+	<span class="head-check"><input class="regular-checkbox" type="checkbox" id="chk-all" /><label  class="is-checkbox-all toolTip" for="chk-all" title="<?php p($l->t('Select/ unselect all cards')); ?>"></label></span>
+	 <span class="fullname" id="sortName"><?php p($l->t('Displayname')); ?></span>
 	 <span class="tel"><?php p($l->t('Phone')); ?></span>
 	 <span class="email"><?php p($l->t('Email')); ?></span>
 	 <span class="group"><?php p($l->t('Group')); ?></span>
-	 <span class="opt"><?php p($l->t('Opt')); ?></span>
+	 <span class="opt">&nbsp;</span>
 </div>
+<div id="map" style="display:none;"></div>
 	<div id="rightcontent">
 	
 	

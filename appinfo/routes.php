@@ -38,6 +38,7 @@ $application->registerRoutes($this, ['routes' => [
 	['name' => 'addressbook#addIosGroupsSupport', 'url' => '/addiosgroupssupport', 'verb' => 'POST'],
 	['name' => 'addressbook#prepareIosGroups', 'url' => '/prepareiosgroups', 'verb' => 'POST'],	
 	['name' => 'addressbook#saveSortOrderGroups', 'url' => '/savesortordergroups', 'verb' => 'POST'],
+	['name' => 'addressbook#changeCiewContacts', 'url' => '/changeviewcontacts', 'verb' => 'POST'],
 	//Appi 1.0
 	['name' => 'contacts_api#version', 'url' => '/api/1.0/version', 'verb' => 'GET'],
 	['name' => 'contacts_api#contact', 'url' => '/api/1.0/contact/{id}', 'verb' => 'GET'],

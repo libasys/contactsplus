@@ -90,6 +90,7 @@ class PhotoController extends Controller {
 		
 		$data = \OC::$server->getCache()->get($tmpkey);
 		if($data) {
+			\OC::$server->getCache()->remove($tmpkey);	
 			$image = new \OCP\Image();
 			if($image->loadFromdata($data)) {
 				$w = ($w !== -1 ? $w : $image->width());
@@ -160,7 +161,7 @@ class PhotoController extends Controller {
 		$path = $this -> params('path');	
 		
 		$localpath = \OC\Files\Filesystem::getLocalFile($path);
-		$tmpkey = 'kontakte-photo-' . $id;
+		$tmpkey = uniqid('photo-') ;
 		$size = getimagesize($localpath, $info);
 		$exif = @exif_read_data($localpath);
 		$image = new \OCP\Image();
@@ -237,7 +238,7 @@ class PhotoController extends Controller {
 		}
 
 		if(file_exists($file['tmp_name'])) {
-			$tmpkey = 'kontakte-photo-'.md5(basename($file['tmp_name']));
+			$tmpkey = uniqid('photo-') ;
 			$size = getimagesize($file['tmp_name'], $info);
 		    $exif = @exif_read_data($file['tmp_name']);
 			$image = new \OCP\Image();

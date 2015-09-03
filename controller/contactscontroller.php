@@ -90,6 +90,13 @@ class ContactsController extends Controller {
 			
 			if(isset($pHiddenField) && $pHiddenField==='newitContact'){
 				 
+				 //location to lon lat
+				if(isset($postRequestAll['addr'])){
+				 	$aLocation = $this->prepareAddress($postRequestAll['addr']);
+					$postRequestAll['GEO'] = $this->getLonLatFromAddress($aLocation[0]);
+				 }		
+				
+				 
 			    $vcard = ContactsApp::createVCardFromRequest($postRequestAll);
 			    try {
 					
@@ -102,8 +109,14 @@ class ContactsController extends Controller {
 				$vcard = VObject\Reader::read($carddata['carddata']);
 				$carddata['photo'] = '';
 				$fullname = strtoupper(substr($carddata['fullname'],0,1));
+				if(!isset($postRequestAll['bcompany'])){
+					$fullname = strtoupper(substr($carddata['lastname'],0,1));
+				}
+				
 				$newLetter= $fullname;
 				$carddata['letter'] = $newLetter;
+				
+				
 				
 				$details = VCard::structureContact($vcard);
 				$cardOutput = ContactsApp::renderSingleCard($details, $carddata, $addressBookPerm,$aFavourites);
@@ -392,7 +405,8 @@ class ContactsController extends Controller {
 				 $image->loadFromData((string)$vcard->PHOTO);
 				 $imgSrc=$image->__toString();
 				 $imgMimeType=$image->mimeType();
-				 \OC::$server->getCache()->set('edit-contacts-foto-' . $pId, $image -> data(), 600);
+				  \OC::$server->getCache()->remove('kontakte-photo-' . $pId);
+				 \OC::$server->getCache()->set('kontakte-photo-' . $pId, $image -> data(), 600);
 			 }
 			 	
 		$TELTYPE = ContactsApp::getTypesOfProperty('TEL');
@@ -406,6 +420,10 @@ class ContactsController extends Controller {
 		$addressBookPerm=Addressbook::find($oldaddressbookid);
 	
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize('/');
+		
+		$bCompany = isset($vcard->{'X-ABSHOWAS'}) ? true : false;
+		
+		
 		//FIXME
 		$params =[
 			'id' => $pId,
@@ -413,8 +431,9 @@ class ContactsController extends Controller {
 			'oldaddressbookid' => $oldaddressbookid,
 			'addressbooks' => $active_addressbooks,
 			'addressbooksPerm' => $addressBookPerm,
-			'tmpkey' =>  'edit-contacts-foto-' . $pId,
+			'tmpkey' =>  'kontakte-photo-' . $pId,
 			'isPhoto' => $bPhoto,
+			'bCompany' => $bCompany,
 			'thumbnail' => $thumb,
 			'imgsrc' => $imgSrc,
 			'imgMimeType' => $imgMimeType,
@@ -465,6 +484,12 @@ class ContactsController extends Controller {
 			$vcard = ContactsApp::getContactVCard($pId);
 			
 			if(isset($pHiddenField) && $pHiddenField==='editContact'){
+				   //location to lon lat
+				 if(isset($postRequestAll['addr'])){
+				 	$aLocation = $this->prepareAddress($postRequestAll['addr']);
+					$postRequestAll['GEO'] = $this->getLonLatFromAddress($aLocation[0]);
+				 }	
+					
 				  $vcard = ContactsApp::updateVCardFromRequest($postRequestAll,$vcard);
 		    try {
 				VCard::edit($pId, $vcard);
@@ -494,6 +519,10 @@ class ContactsController extends Controller {
 					 $carddata['photo'] ='data:'.$image->mimeType().';base64,' .$imgSrc;
 				}
 				$fullname = strtoupper(substr($carddata['fullname'],0,1));
+				if(!isset($postRequestAll['bcompany'])){
+					$fullname = strtoupper(substr($carddata['lastname'],0,1));
+				}
+				
 				$newLetter = $fullname;
 				$carddata['letter'] = $newLetter;
 				
@@ -682,6 +711,11 @@ class ContactsController extends Controller {
 				}
 			}
 		}
+		//X-ABSHOWAS;
+		 $bShowCompany = false;
+		 if(isset($editInfoCard['ORG'][0]['SHOWAS']) && $editInfoCard['ORG'][0]['SHOWAS'] == 'COMPANY'){
+			 $bShowCompany = true;
+		 }
 		
 		 $aOrgDef=array('0'=>'firm','1'=>'department');
 		  $aOrg=array();
@@ -754,7 +788,8 @@ class ContactsController extends Controller {
 			 $image->loadFromData((string)$vcard->PHOTO);
 			 $imgSrc=$image->__toString();
 			 $imgMimeType=$image->mimeType();
-			 \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image -> data(), 600);
+			 $tmpkey = uniqid('photo-') ;
+			 \OC::$server->getCache()->set($tmpkey, $image -> data(), 600);
 			 
 		}
 		 
@@ -764,11 +799,12 @@ class ContactsController extends Controller {
 		
 		$params = [
 			'id' => $id,
-			'tmpkey' => 'show-contacts-foto-' . $id,
+			'tmpkey' => $tmpkey,
 			'oldaddressbookid' => $oldaddressbookid,
 			'addressbooksPerm' => $addressBookPerm,
 			'isPhoto' => $bPhoto,
 			'thumbnail' => $thumb,
+			'bShowCompany' => $bShowCompany,
 			'imgsrc' => $imgSrc,
 			'imgMimeType' => $imgMimeType,
 			'anrede' => isset($aN['title']) ? $aN['title'] : '',
@@ -800,28 +836,37 @@ class ContactsController extends Controller {
      * @NoAdminRequired
      */
     public function deleteContact() {
-    	$pId = $this -> params('id');
+    	$pIds = $this -> params('id');
 		
-		$vcard = ContactsApp::getContactVCard($pId);
-
-		$property = $vcard->select('CATEGORIES');
-		
-		if(count($property) === 0) {
-			$oldValue='';
-		}else{
-			$property = array_shift($property);	
-			$oldValue=stripslashes($property->getValue());
+		$aPid = explode(',',$pIds);
+		$oldValue='';
+		$fullname = '';
+		$addrId = 0;
+		foreach($aPid as $id){
+			$vcard = ContactsApp::getContactVCard($id);
+	
+			$property = $vcard->select('CATEGORIES');
+			
+			if(count($property) === 0) {
+				
+				$oldValue='';
+			}else{
+				$property = array_shift($property);	
+				$oldValue=stripslashes($property->getValue());
+			}
+			$carddata = VCard::find($id);
+			$fullname = strtoupper(substr($carddata['fullname'],0,1));
+			$addrId = $carddata['addressbookid'];
+			VCard::delete($id);
 		}
-		$carddata = VCard::find($pId);
-		$fullname = strtoupper(substr($carddata['fullname'],0,1));
-		VCard::delete($pId);
-		
 		$params = [
 		'status' => 'success',
 		'data' =>[
-			'id' =>$pId,
+			'id' =>$aPid[0],
 			'groups' => $oldValue,
-			'letter' => $fullname
+			'letter' => $fullname,
+			'count' => count($aPid),
+			'addrId' => $addrId
 		]];
 		
 		$response = new JSONResponse($params);
@@ -834,18 +879,26 @@ class ContactsController extends Controller {
      */
 	public function copyContact(){
 		
-		$pId = $this -> params('id');
-		$pAddrBookId = $this -> params('addrid');	
+		$pIds = $this -> params('id');
+		$aPid = explode(',',$pIds);
 		
-		$vcard = ContactsApp::getContactVCard($pId);
-		$oldcard = VCard::find($pId);
+		$pAddrBookId = $this -> params('addrid');
+		$bMove = false;	
+		foreach($aPid as $id){
+			$vcard = ContactsApp::getContactVCard($id);
+			$oldcard = VCard::find($id);
+			if($oldcard['addressbookid'] !== $pAddrBookId){
+				VCard::add($pAddrBookId, $vcard);
+				$bMove = true;
+			}
+		}
 		
-		if($oldcard['addressbookid']!== $pAddrBookId){
-			VCard::add($pAddrBookId, $vcard);
+		if($bMove){
 			$params = [
 				'status' => 'success',
 				'data' =>[
-					'id' =>$pId
+					'id' => $aPid[0],
+					'count' => count($aPid),
 				]];
 			
 		}else{
@@ -866,22 +919,41 @@ class ContactsController extends Controller {
      * @NoAdminRequired
      */
 	public function moveContact(){
-		$pId = $this -> params('id');
-		$pAddrBookId = $this -> params('addrid');	
+		
+		$pIds = $this -> params('id');
+		$aPid = explode(',',$pIds);
+		
+		$pAddrBookId = $this -> params('addrid');
+		$bMove = false;	
+		foreach($aPid as $id){
+			$oldcard = VCard::find($id);
+			$addressbook = Addressbook::find($oldcard['addressbookid']);
+			if ($addressbook['userid'] !== $this->userId) {
+				$sharedAddressbook = \OCP\Share::getItemSharedWithBySource(ContactsApp::SHAREADDRESSBOOK, ContactsApp::SHAREADDRESSBOOKPREFIX. $oldcard['addressbookid']);
+				if (!$sharedAddressbook || !($sharedAddressbook['permissions'] & \OCP\PERMISSION_CREATE)) {
+					$bMove = false;
+					break;
+				}
+			}
+			
+			if($oldcard['addressbookid'] !== $pAddrBookId){
+				VCard::moveToAddressBook($pAddrBookId, $id);
+				$bMove = true;
+			}
+		}
 		
 		
-		$oldcard = VCard::find($pId);
+		if($bMove){
 		
-		if($oldcard['addressbookid']!== $pAddrBookId){
-			VCard::moveToAddressBook($pAddrBookId, $pId);
 			$params = [
 				'status' => 'success',
 				'data' =>[
-					'id' =>$pId
+					'id' => $aPid[0],
+					'count' => count($aPid),
 				]];
 			
 		}else{
-			$sMsg='Kontakt konnte nicht verschoben werden!';
+			$sMsg='Kontakt konnte nicht verschoben werden! Fehlende Berechtigungen.';
 			$params = [
 				'status' => 'error',
 				'data' =>[
@@ -897,30 +969,38 @@ class ContactsController extends Controller {
      * @NoAdminRequired
      */
     public function deleteContactFromGroup() {
-    	$pId = $this -> params('id');
+    	$pIds = $this -> params('id');
 		
-		$vcard = ContactsApp::getContactVCard($pId);
-
-		$property = $vcard->select('CATEGORIES');
-		
-		if(count($property) === 0) {
-			$oldValue='';
-		}else{
-			$property = array_shift($property);	
-			$oldValue=stripslashes($property->getValue());
+		$aPid = explode(',',$pIds);
+		$fullname = '';
+		$addrId = 0;
+		foreach($aPid as $id){
+			$vcard = ContactsApp::getContactVCard($id);
+	
+			$property = $vcard->select('CATEGORIES');
+			
+			if(count($property) === 0) {
+				$oldValue='';
+			}else{
+				$property = array_shift($property);	
+				$oldValue=stripslashes($property->getValue());
+			}
+			
+			unset($vcard->CATEGORIES);
+			VCard::edit($id, $vcard);
+			$carddata = VCard::find($id);
+			$fullname = strtoupper(substr($carddata['fullname'],0,1));
+			$addrId = $carddata['addressbookid'];
 		}
-		
-		unset($vcard->CATEGORIES);
-		VCard::edit($pId, $vcard);
-		$carddata = VCard::find($pId);
-		$fullname = strtoupper(substr($carddata['fullname'],0,1));
 		
 		$params = [
 		'status' => 'success',
 		'data' =>[
-			'id' =>$pId,
+			'id' =>$aPid[0],
 			'scat' => $oldValue,
-			'letter' => $fullname
+			'letter' => $fullname,
+			'count' => count($aPid),
+			'addrId' => $addrId
 		]];
 		
 		$response = new JSONResponse($params);
@@ -990,7 +1070,7 @@ class ContactsController extends Controller {
 			VCard::edit($cardId, $vcard);
 		}
 		if($param === 'CATEGORIES'){
-			$backgroundColor=	ContactsApp::genColorCodeFromText(trim($value),80);
+			$backgroundColor=	ContactsApp::genColorCodeFromText(trim($value));
 			$color = ContactsApp::generateTextColor($backgroundColor);
 			$aCat['name'] = $value;
 			$aCat['color'] = $color;
@@ -1025,10 +1105,105 @@ class ContactsController extends Controller {
 			}
 			$addrbookId=$ids[0];
 		}
-		$cardslist=ContactsApp::renderOutput($addrbookId,$grpId);
+		$this->configInfo->setUserValue($this->userId, $this->appName, 'currentbook', $addrbookId);
+		
+		$cardslist = ContactsApp::renderOutput($addrbookId,$grpId);
 		
 		return $cardslist;
     }
+	
+	private function prepareAddress($aLocationInfo){
+			
+		$saveAdress = array();	
+		foreach($aLocationInfo as $val){
+			 	 	$sAdress ='';
+					$sAdress .=isset($val['street']) && !empty($val['street'])?$val['street']:'';
+					$sAdress .=isset($val['postal']) && !empty($val['postal'])?','.$val['postal']:'';
+					$sAdress .=isset($val['state']) && !empty($val['state'])?','.$val['state']:'';
+					$sAdress .=isset($val['city']) && !empty($val['city'])?','.$val['city']:'';
+					$sAdress .=isset($val['country']) && !empty($val['country'])?','.$val['country']:'';
+				
+				$saveAdress[] = $sAdress;
+					
+		}	
+		
+		return $saveAdress;
+	}
+	
+	/**
+	 * @NoAdminRequired
+	 * 
+	 * @param $location string with addressdata street postal city country
+	 */
+	private function getLonLatFromAddress($location){
+		 
+		 $name = urlencode($location);
+
+		$renderUrl='http://nominatim.openstreetmap.org/search?format=json&q='.$name.'&limit=1&addressdetails=0&polygon=0';
+		
+		$locationInfo=$this->getLocationInfo($renderUrl,false);
+		
+		    if($locationInfo){
+		    	$GeoInfo =json_decode($locationInfo);
+				$lat = (isset($GeoInfo[0]->lat) ? $GeoInfo[0]->lat : '');
+				$lon =  (isset($GeoInfo[0]->lat) ? $GeoInfo[0]->lon : '');
+				
+				$GPSLatitude=$this->convertDecimalToDMS($lat);
+				$GPSLatitudeRef = ($lat < 0) ? 'S' : 'N';
+				$GPSLongitude=$this->convertDecimalToDMS($lon);
+				$GPSLongitudeRef = ($lon < 0) ? 'W' : 'E';
+				
+				$result = array('lon'=>$lon,'lat'=>$lat,'gpslatref'=>$GPSLatitudeRef,'gpslat'=>$GPSLatitude,'gpslonref'=>$GPSLongitudeRef,'gpslon'=>$GPSLongitude);
+				
+				
+				return $result;
+			}else{
+				return false;
+			}
+	}
+	
+	private function convertDecimalToDMS($degree) {
+		if ($degree > 180 || $degree < -180){
+			return null;
+		}
+		$degree = abs($degree); // make sure number is positive
+		// (no distinction here for N/S
+		// or W/E).
+		$seconds = $degree * 3600; // Total number of seconds.
+		$degrees = floor($degree); // Number of whole degrees.
+		$seconds -= $degrees * 3600; // Subtract the number of seconds
+		// taken by the degrees.
+		$minutes = floor($seconds / 60); // Number of whole minutes.
+		$seconds -= $minutes * 60; // Subtract the number of seconds
+		// taken by the minutes.
+		$seconds = round($seconds*100, 0); // Round seconds with a 1/100th
+		// second precision.
+		return array(array($degrees, 1), array($minutes, 1), array($seconds, 100));
+	}
+	
+	private function getLocationInfo($url, $userAgent = true) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+    	curl_setopt($ch, CURLOPT_TIMEOUT, 900); 
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		if ($userAgent) {
+			curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 GTB5');
+		}
+		curl_setopt($ch, CURLOPT_URL, $url);
+		$tmp = curl_exec($ch);
+		$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+		//\OCP\Util::writeLog('pinit','HTTPCODE:'.$httpCode,\OCP\Util::DEBUG);
+		if ($httpCode == 404) {
+			return false;
+		} else {
+			if ($tmp != false) {
+				return $tmp;
+			}
+		}
+
+	}
 	
 	private function getAddressInfo(array $editInfoAddr, $ADRTYPE){
 	   	
