@@ -136,6 +136,21 @@
 			<length>255</length>
 		</field>
 		<field>
+			<name>organization</name>
+			<type>text</type>
+			<default></default>
+			<notnull>false</notnull>
+			<length>255</length>
+		</field>
+		<field>
+			<name>bcompany</name>
+			<type>integer</type>
+			<default></default>
+			<notnull>false</notnull>
+			<unsigned>true</unsigned>
+			<length>2</length>
+		</field>
+		<field>
 			<name>carddata</name>
 			<type>clob</type>
 			<notnull>false</notnull>

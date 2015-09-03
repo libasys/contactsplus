@@ -103,10 +103,13 @@ OC.ContactsPlus.Import =  {
 					if(data.percent < 100 ){
 						window.setTimeout('OC.ContactsPlus.Import.Dialog.update()', 100);
 					}else{
+						$('#contacts_import_progressbar').progressbar('option', 'value', 100);
+						$('#contacts_import_progressbar > div').css('background-color', '#FF2626');
 						$('#contacts_import_done').css('display', 'block');
 						
 					}
 				}else{
+				
 					$('#contacts_import_progressbar').progressbar('option', 'value', 100);
 					$('#contacts_import_progressbar > div').css('background-color', '#FF2626');
 					$('#contacts_import_status').html(data.message);
@@ -131,7 +134,7 @@ OC.ContactsPlus.Import =  {
 				$('#contacts_import_addressbook').attr('disabled', 'disabled');
 				$('#contacts_import_overwrite').attr('disabled', 'disabled');
 				OC.ContactsPlus.Import.Core.send();
-				window.setTimeout('OC.ContactsPlus.Import.Dialog.update()', 250);
+				window.setTimeout('OC.ContactsPlus.Import.Dialog.update()', 100);
 			}
 		},
 		send: function(){
@@ -140,13 +143,16 @@ OC.ContactsPlus.Import =  {
 			{progresskey: OC.ContactsPlus.Import.Store.progresskey, method: String (OC.ContactsPlus.Import.Store.method), overwrite: String (OC.ContactsPlus.Import.Store.overwrite), addressbookname: String (OC.ContactsPlus.Import.Store.addressbookname), path: String (OC.ContactsPlus.Import.Store.path), file: String (OC.ContactsPlus.Import.Store.file), id: String (OC.ContactsPlus.Import.Store.id), isDragged:String (OC.ContactsPlus.Import.Store.isDragged)}, function(data){
 				if(data.status == 'success'){
 					$('#contacts_import_progressbar').progressbar('option', 'value', 100);
+					$('#contacts_import_progressbar > div').css('background-color', '#FF2626');
 					OC.ContactsPlus.Import.Store.percentage = 100;
+					$('#contacts_import_progressbar').hide();
 					$('#contacts_import_done').css('display', 'block');
 					$('#contacts_import_status').html(data.message);
 				}else{
 					$('#contacts_import_progressbar').progressbar('option', 'value', 100);
 					$('#contacts_import_progressbar > div').css('background-color', '#FF2626');
 					$('#contacts_import_status').html(data.message);
+						
 				}
 			});
 		},

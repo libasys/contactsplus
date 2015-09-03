@@ -305,7 +305,68 @@ color:#000;
 	background-color: transparent;
 }
 
+#app-navigation .app-navigation-entry-utils-menu-button {
+	display:block;
+	position:absolute;
+	float:none;
+	
+	right:0px;
+}
+#app-navigation .app-navigation-entry-utils-menu-button button{
+	position:relative;
+	top:-4px;
+	height:24px;
+	
+}
 
+#app-navigation .app-navigation-entry-menu{
+	width:120px;
+	margin-top:2px;
+	margin-right:22px;
+	position:fixed;
+	
+}
+
+#cAddressbooks .dropcontainerAddressBook.inActive{
+	font-style:italic;
+	color:#999;
+}
+
+.app-navigation-entry-menu ul li{
+	float:left;
+	width:24px;
+	line-height:30px;
+	height:30px;
+	cursor:pointer;
+	text-align:center;
+}
+.app-navigation-entry-menu ul li.ioc{
+	font-size:18px;
+	width:24px;
+}
+
+#app-navigation .app-navigation-entry-edit{
+	display:none;
+	float:left;
+	
+}
+#app-navigation .app-navigation-entry-edit:hover{
+	background:transparent;
+	
+}
+#app-navigation .app-navigation-entry-edit input[type="text"] {
+	padding:0;
+	padding-left:5px;
+	width: 194px;
+	height:30px;
+}
+
+#app-navigation .app-navigation-entry-edit button,
+	#app-navigation .app-navigation-entry-edit input[type="submit"] {
+		width: 36px;
+		height: 32px;
+		float: left;
+	}
 
 #leftsidebar h3{
 	height:30px;
@@ -320,6 +381,46 @@ color:#000;
 	font-weight:normal;
 }
 
+#showMap:hover .ioc,
+#showMap.isMap .ioc{
+	color:#008000;
+}
+#importAddrStart{
+	font-size:30px;
+	cursor:pointer;
+}
+#drop-area{
+	display:none;
+	width:200px;
+	left:20px;
+	position:relative;
+	float:left;
+	padding:5px;
+	padding-top:10px;
+	
+	font-size:16px;
+	vertical-align:middle;
+	text-align:center;
+	height:60px;
+	border:1px solid #ccc;
+	letter-spacing:2px;
+	background-color:rgba(0,0,0,0.3);
+	border-radius:4px;
+	color:#fff;
+	cursor:move;
+	margin-bottom:5px;
+}
+
+#leftsidebar h3 .ioc-add{
+	float:right;
+	position:absolute;
+	right:55px;
+	font-size:18px;
+	cursor:pointer;
+	
+	
+}
+
 #leftsidebar h3 .ioc-sort{
 	float:right;
 	position:absolute;
@@ -329,6 +430,7 @@ color:#000;
 	
 	
 }
+#leftsidebar h3 .ioc-upload,
 #leftsidebar h3 .ioc-refresh{
 	float:right;
 	position:absolute;
@@ -347,7 +449,11 @@ color:#000;
 #leftsidebar h3 .ioc-sort:hover{
 	color:#008000;
 }
-
+#leftsidebar h3 .ioc-upload:hover,
+#leftsidebar h3 .ioc-refresh:hover,
+#leftsidebar h3 .ioc-add:hover{
+	color:#000;
+}
 ul#cAddressbooks{
 	margin:0;
 	padding:0;
@@ -381,12 +487,18 @@ ul#cgroups li span.groupcounter,ul#cAddressbooks li span.groupcounter{
 	width:30px;
 	text-align:right;
 }
-ul#cgroups li span.groupname,ul#cAddressbooks li span.groupname{
+ul#cgroups li span.groupname,
+ul#cAddressbooks li span.groupname,
+ul#cAddressbooks li span.groupinactive{
 	display:inline-block;
 	
 	display:block;
 	float:left;
 	cursor:pointer;
+}
+ul#cAddressbooks li span.groupinactive{
+	font-style:italic;
+	color:#999;
 }
 
 .isActiveGroup,.isActiveABook{
@@ -533,19 +645,34 @@ li.contactsrow .rowHeader,li.contactsrow.listview .rowHeader{
 	border-bottom:1px solid #ccc;
 	box-shadow:-1px 0px 2px #ccc;
 }
-li.contactsrow .rowHeader .head-picture input.contact-select{
+li.contactsrow .rowHeader .head-check{
+	float:left;
+	display:inline-block;
+	width:22px;
+	height:20px;
+}
+li.contactsrow .head-check .is-checkbox{
 	display:none;
 	position:relative;
-	z-index:4;
-	top:0px;
-	margin-top:-17px;
-	left:12px;
+	margin-top:2px;
+	margin-left:4px;
+	
+	
 }
-li.contactsrow .rowHeader .head-picture:hover .contact-select,
-li.contactsrow .rowHeader .head-picture input[checked="checked"]
-{
+li.contactsrow.listview .head-check .is-checkbox{
 	display:none;
+	position:relative;
+	margin-top:4px;
+	margin-left:0px;
 }
+
+
+li.contactsrow:hover .head-check .is-checkbox,
+li.contactsrow .rowHeader  .head-check .is-checkbox.ui-selected
+{
+	display:block;
+}
+
 li.contactsrow .rowHeader .head-picture,
 li.contactsrow .rowHeader .tel,
 li.contactsrow .rowHeader .email
@@ -569,6 +696,25 @@ li.contactsrow .fullname{
 	cursor:move;
 	
 }
+li.contactsrow .rowBody .fullname{
+	display:none;
+	width:70%;
+	float:left;
+}
+li.contactsrow .lastname,
+li.contactsrow .surname{
+	padding-left:5px;
+	white-space: nowrap;
+   text-overflow: ellipsis; 
+   -o-text-overflow: ellipsis;
+   overflow:hidden;
+	float:left;
+	cursor:move;
+	display:none;
+}
+li.contactsrow .surname{
+	width:30%;
+}
 li.contactsrow span.rowBody{
 	cursor:pointer;
 	
@@ -581,7 +727,7 @@ li.contactsrow .categories{
 	background:transparent;
 	display:block;
 	right:58px;
-	width:55px;
+	width:80px;
 	position:absolute;
 	text-align:right;
 	height:24px;
@@ -741,12 +887,18 @@ li.contactsrow .name{
 	
 }
 /*ADDING LISTVIEW*/
+.listview-header .head-check,
 .listview-header .fullname,
 .listview-header .tel,
 .listview-header .email,
 .listview-header .group{
 	float:left;
 	display:block;
+}
+.listview-header .head-check label{
+	margin-top:4px;
+	margin-left:-18px;
+	margin-right:4px;
 }
 .listview-header .fullname{
 	width:38%;
@@ -821,7 +973,7 @@ li.contactsrow.listview .rowHeader .tel,
 li.contactsrow.listview .rowHeader .email{
 	display:inline-block;
 	float:left;
-	width:33%;
+	width:29%;
 	
 }
 li.contactsrow.listview .name{
@@ -1295,7 +1447,7 @@ label {
 
 .regular-checkbox:checked + label:after, .isActiveUserCal:after,.isSelectedCheckbox:after {
 	font-family:fontello;
-	content: '\e81f';
+	content: '\e815';
 	font-size: 16px;
 	position: absolute;
 	top: -3px;
@@ -1451,7 +1603,9 @@ table#allAddressbooks{
 		width:210px;
 		
 	}
-	
+#controls #first-group{
+	padding-left:20px;
+}	
 @media only screen and (max-width: 768px) {
 	
 	 img#contacts_details_photo{
@@ -1505,7 +1659,7 @@ table#allAddressbooks{
 	}
 	
 	li.contactsrow.listview .fullname {
-		width:70%;
+		width:60%;
 		margin-bottom:5px;
 	}
 	li.contactsrow.listview .categories{
