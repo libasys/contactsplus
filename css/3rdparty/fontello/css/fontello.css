@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'fontello';
-  src: url('../font/fontello.eot?33738297');
-  src: url('../font/fontello.eot?33738297#iefix') format('embedded-opentype'),
-       url('../font/fontello.woff?33738297') format('woff'),
-       url('../font/fontello.ttf?33738297') format('truetype'),
-       url('../font/fontello.svg?33738297#fontello') format('svg');
+  src: url('../font/fontello.eot?35464952');
+  src: url('../font/fontello.eot?35464952#iefix') format('embedded-opentype'),
+       url('../font/fontello.woff?35464952') format('woff'),
+       url('../font/fontello.ttf?35464952') format('truetype'),
+       url('../font/fontello.svg?35464952#fontello') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -14,12 +14,12 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'fontello';
-    src: url('../font/fontello.svg?33738297#fontello') format('svg');
+    src: url('../font/fontello.svg?35464952#fontello') format('svg');
   }
 }
 */
  
- [class^="ioc-"]:before, [class*=" ioc-"]:before {
+  [class^="ioc-"]:before, [class*=" ioc-"]:before {
   font-family: "fontello";
   font-style: normal;
   font-weight: normal;
@@ -86,35 +86,38 @@ filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
 {
   filter: none;
 }
- 
+
 .ioc-book:before { content: '\e800'; } /* '' */
-.ioc-th-list:before { content: '\e801'; } /* '' */
-.ioc-th-large:before { content: '\e802'; } /* '' */
-.ioc-cog:before { content: '\e803'; } /* '' */
-.ioc-star:before { content: '\e804'; } /* '' */
-.ioc-close:before { content: '\e805'; } /* '' */
-.ioc-refresh:before { content: '\e806'; } /* '' */
-.ioc-user:before { content: '\e807'; } /* '' */
-.ioc-users:before { content: '\e808'; } /* '' */
-.ioc-spinner:before { content: '\e809'; } /* '' */
-.ioc-sort:before { content: '\e80a'; } /* '' */
-.ioc-delete:before { content: '\e80b'; } /* '' */
-.ioc-edit:before { content: '\e80c'; } /* '' */
-.ioc-share:before { content: '\e80d'; } /* '' */
-.ioc-add:before { content: '\e80e'; } /* '' */
-.ioc-upload:before { content: '\e80f'; } /* '' */
-.ioc-publiclink:before { content: '\e810'; } /* '' */
-.ioc-info:before { content: '\e811'; } /* '' */
-.ioc-upload-cloud:before { content: '\e812'; } /* '' */
-.ioc-download-cloud:before { content: '\e813'; } /* '' */
-.ioc-export:before { content: '\e814'; } /* '' */
-.ioc-search:before { content: '\e815'; } /* '' */
-.ioc-mobile:before { content: '\e816'; } /* '' */
-.ioc-phone:before { content: '\e817'; } /* '' */
-.ioc-mail:before { content: '\e818'; } /* '' */
-.ioc-address:before { content: '\e819'; } /* '' */
-.ioc-down-open:before { content: '\e81a'; } /* '' */
-.ioc-left-open:before { content: '\e81b'; } /* '' */
-.ioc-right-open:before { content: '\e81c'; } /* '' */
-.ioc-up-open:before { content: '\e81d'; } /* '' */
-.ioc-checkmark:before { content: '\e81f'; } /* '' */
+.ioc-export:before { content: '\e801'; } /* '' */
+.ioc-search:before { content: '\e802'; } /* '' */
+.ioc-th-list:before { content: '\e803'; } /* '' */
+.ioc-th-large:before { content: '\e804'; } /* '' */
+.ioc-mobile:before { content: '\e805'; } /* '' */
+.ioc-phone:before { content: '\e806'; } /* '' */
+.ioc-cog:before { content: '\e807'; } /* '' */
+.ioc-star:before { content: '\e808'; } /* '' */
+.ioc-mail:before { content: '\e809'; } /* '' */
+.ioc-address:before { content: '\e80a'; } /* '' */
+.ioc-close:before { content: '\e80b'; } /* '' */
+.ioc-refresh:before { content: '\e80c'; } /* '' */
+.ioc-down-open:before { content: '\e80d'; } /* '' */
+.ioc-left-open:before { content: '\e80e'; } /* '' */
+.ioc-user:before { content: '\e80f'; } /* '' */
+.ioc-users:before { content: '\e810'; } /* '' */
+.ioc-right-open:before { content: '\e811'; } /* '' */
+.ioc-up-open:before { content: '\e812'; } /* '' */
+.ioc-spinner:before { content: '\e813'; } /* '' */
+.ioc-sort:before { content: '\e814'; } /* '' */
+.ioc-checkmark:before { content: '\e815'; } /* '' */
+.ioc-delete:before { content: '\e816'; } /* '' */
+.ioc-edit:before { content: '\e817'; } /* '' */
+.ioc-share:before { content: '\e818'; } /* '' */
+.ioc-add:before { content: '\e819'; } /* '' */
+.ioc-upload:before { content: '\e81a'; } /* '' */
+.ioc-publiclink:before { content: '\e81b'; } /* '' */
+.ioc-info:before { content: '\e81c'; } /* '' */
+.ioc-upload-cloud:before { content: '\e81d'; } /* '' */
+.ioc-download-cloud:before { content: '\e81e'; } /* '' */
+.ioc-globe:before { content: '\e81f'; } /* '' */
+.ioc-money:before { content: '\e820'; } /* '' */
+.ioc-user-1:before { content: '\e821'; } /* '' */
