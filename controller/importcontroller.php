@@ -87,9 +87,14 @@ class ImportController extends Controller {
 		
 		
 		if (isset($pProgresskey) && isset($pGetprogress)) {
+				$percent = \OC::$server->getCache()->get($pProgresskey);
+				
+				if($percent ==''){
+					$percent = 0;
+				}
 				$params = [
 					'status' => 'success',
-					'percent' => \OC::$server->getCache()->get($pProgresskey),
+					'percent' =>$percent ,
 				];
 				$response = new JSONResponse($params);
 				return $response;	
@@ -162,6 +167,7 @@ class ImportController extends Controller {
 				return $response;		
 		}
 		$count = $import->getCount();
+		$errorCount = $import->getErrorCount();
 		if($count == 0) {
 			if($newAddressbook) {
 				Addressbook::delete($id);
@@ -184,7 +190,7 @@ class ImportController extends Controller {
 			}else{
 				$params = [
 					'status' => 'success',
-					'message' => $count . ' ' . $this->l10n -> t('vcards has been saved in your addressbook'),
+					'message' => $errorCount.' Error - '.$count . ' ' . $this->l10n -> t('vcards has been saved in your addressbook'),
 				];
 				
 				$response = new JSONResponse($params);
