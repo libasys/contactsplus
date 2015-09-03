@@ -447,7 +447,7 @@
                 $('body').off('keyup.webui-popover').on('keyup.webui-popover', $.proxy(this.escapeHandler, this));
                 $('body').off('click.webui-popover').on('click.webui-popover', $.proxy(this.bodyClickHandler, this));
             }
-            $('#rightcontent').scroll(function() {
+            $('#rightcontent, #map').scroll(function() {
             	this.reCalcPos();
             }.bind(this));
         },
