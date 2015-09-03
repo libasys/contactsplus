@@ -104,9 +104,9 @@ class Addressbook {
 		$activeaddressbooks = self::all($uid);
 		$returnArray=array();
 		foreach($activeaddressbooks as $addressbook) {
-			$sql="SELECT COUNT(id) AS COUNTER FROM `".App::ContactsTable."` WHERE addressbookid=?";
+			$sql="SELECT COUNT(id) AS COUNTER FROM `".App::ContactsTable."` WHERE `addressbookid`=? AND `component`= ?";
 			$stmt = \OCP\DB::prepare($sql);
-			$result = $stmt->execute(array($addressbook['id']));
+			$result = $stmt->execute(array($addressbook['id'],'VCARD'));
 			$row = $result->fetchRow();
 			$returnArray[$addressbook['id']]=$row['COUNTER'];
 			//\OCP\Util::writeLog(App::$appname,'COUNTER: '.$row['COUNTER'], \OCP\Util::DEBUG);
