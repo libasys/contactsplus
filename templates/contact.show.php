@@ -18,17 +18,25 @@
 	</div>
 	<iframe name="file_upload_target" id="file_upload_target" src=""></iframe>	
  </span>
-	
+
+<?php 
+$firm = $_['firm'];
+$name = $_['anrede'].' '.$_['fname'].' '.$_['lname'];
+if($_['bShowCompany']){
+	$firm = $_['anrede'].' '.$_['fname'].' '.$_['lname'];
+	$name = $_['firm'];
+}
+?>	
  	
 
-<span class="labelFullname"><?php p($_['anrede'].' '); ?><?php p($_['fname'].' '); ?><?php p($_['lname']); ?></span>
-
+<span class="labelFullname"><?php p($name); ?></span>
+<span class="labelFirm" style="line-height:20px;"><?php  p($firm); ?></span>
 <?php if($_['nickname']!=''){ ?>  
 	<span style="padding-left:10px;line-height:20px;">
 	<?php p('"'.$_['nickname'].'"'); ?>
 	</span>
 <?php } ?>
-<span class="labelFirm">
+<span class="labelFirm" style="padding-top:0px;">
 	<?php 
 	if($_['position']!='')	{
 		p($_['position'].' - ');
@@ -37,10 +45,10 @@
 		p($_['department']);
 		?>
 		<br>
-		<span>
+	<span>
 		<?php
 	}
-	p($_['firm']);
+	
 	 ?>
 	 </span>
 </span>

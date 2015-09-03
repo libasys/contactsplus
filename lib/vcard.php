@@ -68,7 +68,7 @@ class VCard {
 			
 		if(is_array($id) && count($id)) {
 			$id_sql = join(',', array_fill(0, count($id), '?'));
-			$sql = "SELECT ". $qfields ." FROM `".App::ContactsTable."` WHERE `addressbookid` IN (".$id_sql.") ".$addWhere." ORDER BY LOWER(`fullname`) ";
+			$sql = "SELECT * FROM `".App::ContactsTable."` WHERE `addressbookid` IN (".$id_sql.") ".$addWhere." ORDER BY LOWER(`fullname`) ";
 			try {
 				$stmt = \OCP\DB::prepare($sql, $limit, $offset);
 				$result = $stmt->execute($id);
@@ -82,7 +82,7 @@ class VCard {
 			}
 		} elseif(is_int($id) || is_string($id)) {
 			try {
-				$sql = "SELECT ". $qfields ." FROM `".App::ContactsTable."` WHERE `addressbookid` = ? ".$addWhere."  ORDER BY LOWER(`fullname`) ";
+				$sql = "SELECT * FROM `".App::ContactsTable."` WHERE `addressbookid` = ? ".$addWhere."  ORDER BY LOWER(`fullname`) ";
 				$stmt = \OCP\DB::prepare($sql, $limit, $offset);
 				$result = $stmt->execute(array($id));
 				if (\OCP\DB::isError($result)) {
@@ -101,7 +101,17 @@ class VCard {
 		$cards = array();
 		if(!is_null($result)) {
 			while( $row = $result->fetchRow()) {
-				$row['sortFullname'] = mb_substr($row['fullname'],0,3,"UTF-8");
+				
+				if($row['bcompany']){
+					$row['sortFullname'] = mb_substr($row['fullname'],0,3,"UTF-8");
+				}else{
+				  	if($row['lastname'] !== ''){	
+				  		$row['sortFullname'] = mb_substr($row['lastname'],0,3,"UTF-8");
+					}else{
+						$row['sortFullname'] = mb_substr($row['surename'],0,3,"UTF-8");
+					}
+				}
+				
 				$cards[] = $row;
 				
 			}
@@ -109,7 +119,11 @@ class VCard {
 		usort($cards, array('\OCA\ContactsPlus\Vcard', 'compareContactsFullname'));
 		return $cards;
 	}
-
+	
+	public static function compareContactsLastname($a, $b) {
+			return \OCP\Util::naturalSortCompare($a['sortLastname'], $b['sortLastname']);
+	}
+	
 	public static function compareContactsFullname($a, $b) {
 			return \OCP\Util::naturalSortCompare($a['sortFullname'], $b['sortFullname']);
 	}
@@ -586,10 +600,10 @@ class VCard {
 	
 			
 			if(isset($card->N)){
+				
 				$temp=explode(';',$card->N);
 				if(!empty($temp[0])){	
 					if($fn === ''){
-							
 						$fn = $temp[0].' '.$temp[1];
 						$card->FN = $fn;
 					}
@@ -597,17 +611,28 @@ class VCard {
 					$surename = $temp[1];	
 				}
 			}
-	
-		if(isset($card->ORG) && $fn === '' && $lastname === ''){
-			$temp=explode(';',$card->ORG);		
-			$fn = $temp[0];
-			if(!isset($card->FN)){
-				 $card->FN = $temp[0];
+		
+		$organization = '';
+		if(isset($card->ORG)){
+			$temp=explode(';',$card->ORG);	
+			$organization = 	$temp[0];
+		}
+		
+		$bCompany = isset($card->{'X-ABSHOWAS'}) ? 1 : 0;
+		if($bCompany && $organization !== ''){
+			$card->FN = $organization;
+			$fn = $organization;
+		}else{
+			if($lastname !== ''){	
+				$card->FN = $surename.' '.$lastname;
+				$fn = $surename.' '.$lastname;
 			}
 		}
 		
-		
 		$bGroup = isset($card->CATEGORIES) ? 1 : 0;
+		if($bGroup){
+			$card->CATEGORIES = stripslashes($card->CATEGORIES);	
+		}
 		
 		$uid = $card->UID;
 		if(!isset($card->UID)){
@@ -626,9 +651,9 @@ class VCard {
 			
        }
 		
-		$stmt = \OCP\DB::prepare( 'INSERT INTO `'.App::ContactsTable.'` (`addressbookid`,`fullname`,`surename`,`lastname`,`carddata`,`uri`,`lastmodified`,`component`, `bcategory`) VALUES(?,?,?,?,?,?,?,?,?)' );
+		$stmt = \OCP\DB::prepare( 'INSERT INTO `'.App::ContactsTable.'` (`addressbookid`,`fullname`,`surename`,`lastname`,`carddata`,`uri`,`lastmodified`,`component`, `bcategory`,`organization`,`bcompany`) VALUES(?,?,?,?,?,?,?,?,?,?,?)' );
 		try {
-			$result = $stmt->execute(array($aid, $fn,$surename,$lastname, $data, $uri, time(),$sComponent,$bGroup));
+			$result = $stmt->execute(array($aid, $fn,$surename,$lastname, $data, $uri, time(),$sComponent,$bGroup,$organization,$bCompany));
 			if (\OCP\DB::isError($result)) {
 				\OCP\Util::writeLog(App::$appname, __METHOD__. 'DB error: ' . \OCP\DB::getErrorMessage($result), \OCP\Util::ERROR);
 				return false;
@@ -785,18 +810,26 @@ class VCard {
 				$lastname = $temp[0];
 				$surename = $temp[1];
 				if($fn === ''){
-					$fn = $lastname.' '.$surename;
+					$fn = $surename.' '.$lastname;
 					$card->FN = $fn;
 				}
 				
 			}
 		}
 
+		$organization = '';
 		if(isset($card->ORG)){
-			$temp=explode(';',$card->ORG);		
-			$fn = $temp[0];
-			if(!isset($card->FN)){
-				 $card->FN = $fn;
+			$temp=explode(';',$card->ORG);	
+			$organization = 	$temp[0];
+		}
+		
+		$bCompany = isset($card->{'X-ABSHOWAS'}) ? 1 : 0;
+		if($bCompany && $organization !== ''){
+			$card->FN = $organization;
+			$fn = $organization;
+		}else{
+			if($lastname !== ''){	
+				$fn = $surename.' '.$lastname;
 			}
 		}
 		
@@ -805,9 +838,9 @@ class VCard {
 		$card->REV = $now->format(\DateTime::W3C);
 
 		$data = $card->serialize();
-		$stmt = \OCP\DB::prepare( 'UPDATE `'.App::ContactsTable.'` SET `fullname` = ?,`surename` = ?,`lastname` = ?,`carddata` = ?, `lastmodified` = ?, `component` = ? ,`bcategory` = ? WHERE `id` = ?' );
+		$stmt = \OCP\DB::prepare( 'UPDATE `'.App::ContactsTable.'` SET `fullname` = ?,`surename` = ?,`lastname` = ?,`carddata` = ?, `lastmodified` = ?, `component` = ? ,`bcategory` = ?,`organization` = ?,`bcompany` = ? WHERE `id` = ?' );
 		try {
-			$result = $stmt->execute(array($fn,$surename, $lastname, $data, time(), $sComponent, $bGroup, $id));
+			$result = $stmt->execute(array($fn,$surename, $lastname, $data, time(), $sComponent, $bGroup,$organization,$bCompany, $id));
 			if (\OCP\DB::isError($result)) {
 				\OCP\Util::writeLog(App::$appname, __METHOD__. 'DB error: ' . \OCP\DB::getErrorMessage($result), \OCP\Util::ERROR);
 				return false;
@@ -898,8 +931,10 @@ class VCard {
 					}
 					\OCP\Util::writeLog(App::$appname,'IOS GROUP Something happens'.$oldCardCount.':'.$newCardCount, \OCP\Util::DEBUG);
 				}
-			}	
-				
+			}
+			//give vcard one format;	
+			//$davInfo = self::structureContact($vcard);
+			//$newVcard = self::prepareVCard($davInfo,$vcard);	
 			self::edit($oldcard['id'], $vcard);
 			
 			
@@ -1065,7 +1100,7 @@ class VCard {
 	 */
 	public static function structureContact($vcard) {
 		$details = array();
-
+		if(is_array($vcard->children)){
 		foreach($vcard->children as $property) {
 			$pname = $property->name;
 			$temp = self::structureProperty($property);
@@ -1080,6 +1115,9 @@ class VCard {
 						$temp['label'] = App::$l10n->t('HomePage');
 					}
 				}
+				if(isset($vcard->{$property->group.'.X-ABSHOWAS'})) {
+					$temp['SHOWAS'] = $vcard->{$property->group.'.X-ABSHOWAS'}->getValue();
+				}
 				if(array_key_exists($pname, $details)) {
 					$details[$pname][] = $temp;
 				}
@@ -1088,7 +1126,10 @@ class VCard {
 				}
 			}
 		}
-		return $details;
+			return $details;
+		}else{
+			return false;
+		}
 	}
 	
 	/**
@@ -1121,9 +1162,18 @@ class VCard {
 		$value = $property->getValue();
 		if($property->name == 'ADR' || $property->name == 'N' || $property->name == 'ORG' || $property->name == 'CATEGORIES') {
 			$value = $property->getParts();
+			if($property->name == 'CATEGORIES'){
+				$value = str_replace(';', ',', $value);
+			}
+			if($property->name == 'N'){
+				
+				//$value = stripslashes($value);
+				//	\OCP\Util::writeLog('contactsplus','NAME VAL: '.$value, \OCP\Util::DEBUG);	
+				
+			}
 			$value = array_map('trim', $value);
-		}
-		elseif($property->name == 'BDAY') {
+			
+		}elseif($property->name == 'BDAY') {
 			if(strlen($value) >= 8
 				&& is_int(substr($value, 0, 4))
 				&& is_int(substr($value, 4, 2))
@@ -1216,7 +1266,7 @@ class VCard {
 	 *
 	 */
 	public static function moveToAddressBook($aid, $id, $isAddressbook = false) {
-		Addressbook::find($aid);
+		
 		$addressbook = Addressbook::find($aid);
 		if ($addressbook['userid'] != \OCP\User::getUser()) {
 			$sharedAddressbook = \OCP\Share::getItemSharedWithBySource(App::SHAREADDRESSBOOK, App::SHAREADDRESSBOOKPREFIX. $aid);
@@ -1290,5 +1340,204 @@ class VCard {
 		//\OC_Hook::emit('\OCA\Contacts\VCard', 'post_moveToAddressbook', array('aid' => $aid, 'id' => $id));
 		Addressbook::touch($aid);
 		return true;
+	}
+
+     /*
+	  * @param $importInfo structureContact
+	  * @param $vcard  vcard object
+	  */
+	public static function prepareVCard(array $importInfo, $vcard){
+		
+		if(isset($importInfo['N'][0]['value']) && count($importInfo['N'][0]['value'])>0){
+			$aName=array();	
+			
+			foreach($importInfo['N'][0]['value'] as $key => $val){
+				
+				$aName[$key] = $val;
+			}	
+			$vcard->N = $aName;
+		}
+		 if(isset($importInfo['ORG'][0]['value']) && count($importInfo['ORG'][0]['value'])>0){
+			$aOrg=array();
+			 foreach($importInfo['ORG'][0]['value'] as $key => $val){
+			 	$aOrg[$key] = $val;
+			 }	
+			$vcard->ORG = $aOrg;
+		 }
+		 
+		 if(isset($importInfo['NICKNAME'][0]['value']) && !empty($importInfo['NICKNAME'][0]['value'])){
+		 	$vcard->NICKNAME = $importInfo['NICKNAME'][0]['value'];
+		 }
+		 
+		 if(isset($importInfo['TITLE'][0]['value']) && !empty($importInfo['TITLE'][0]['value'])){
+		 	$vcard->TITLE= $importInfo['TITLE'][0]['value'];
+		 }
+		 
+		  if(isset($importInfo['BDAY'][0]['value']) && !empty($importInfo['BDAY'][0]['value'])){
+				$date = New \DateTime($importInfo['BDAY'][0]['value']);
+			    $value = $date->format('Ymd');
+				$vcard->BDAY = $value;
+				$vcard->BDAY->add('VALUE', 'DATE');
+		  }
+
+		 if(array_key_exists('CATEGORIES', $importInfo)){
+		 	unset($vcard->CATEGORIES);
+			 $sCat = '';
+			 foreach($importInfo['CATEGORIES'] as $catInfo){
+			 	foreach($catInfo['value'] as $key => $val){
+			 		$sCat .=($sCat === '' )?$val:','.$val;
+			 	}	
+			 	
+			 }
+			 $vcard->CATEGORIES = $sCat;
+		 }
+
+		 if(array_key_exists('ADR', $importInfo)){
+		 	unset($vcard->ADR);
+			 	
+		 	foreach($importInfo['ADR'] as  $addrInfo){
+		 		$PREF = 0;	
+		 		if(array_key_exists('PREF', $addrInfo['parameters'])){
+					$PREF =1;
+				}
+				
+				$VAL = array();
+				foreach($addrInfo['value'] as $key => $val){	
+						$VAL[$key] = $val;	
+				}
+				
+				$sType ='';	
+				if(array_key_exists('TYPE', $addrInfo['parameters'])){
+					foreach($addrInfo['parameters']['TYPE'] as $typeInfo){
+						$typeInfo = strtoupper($typeInfo);
+						if($typeInfo != 'PREF' && $typeInfo !== ''){
+							$sType .=($sType === '' )?$typeInfo:','.$typeInfo;
+						}
+						if($typeInfo === 'PREF'){
+							$PREF =1;
+						}
+					}
+				}
+				
+				if($sType == ''){
+					$sType = 'HOME';
+				}
+				
+				if($PREF ===1){
+					$vcard->add('ADR',$VAL,array('type'=>$sType,'pref' =>'1'));
+				}else{
+					$vcard->add('ADR',$VAL,array('type'=>$sType));
+				}
+		 	}
+		 }
+
+		if(array_key_exists('TEL', $importInfo)){
+		 	unset($vcard->TEL);
+			 	
+		 	foreach($importInfo['TEL'] as  $telInfo){
+		 		$PREF = 0;	
+		 		if(array_key_exists('PREF', $telInfo['parameters'])){
+					$PREF =1;
+				}
+				
+				$VAL = $telInfo['value'];
+				
+				$sType ='';	
+				if(array_key_exists('TYPE', $telInfo['parameters'])){
+					foreach($telInfo['parameters']['TYPE'] as $typeInfo){
+						$typeInfo = strtoupper($typeInfo);
+						if($typeInfo != 'PREF' && $typeInfo !== ''){
+							$sType .=($sType === '' )?$typeInfo:','.$typeInfo;
+						}
+						if($typeInfo === 'PREF'){
+							$PREF =1;
+						}
+					}
+				}
+				if($sType == ''){
+					$sType = 'WORK,VOICE';
+				}
+				if($PREF === 1){
+					$vcard->add('TEL',$VAL,array('type'=>$sType,'pref' =>'1'));
+				}else{
+					$vcard->add('TEL',$VAL,array('type'=>$sType));
+				}
+		 	}
+		 }
+		
+		 if(array_key_exists('EMAIL', $importInfo)){
+		 	unset($vcard->EMAIL);
+			 	
+		 	foreach($importInfo['EMAIL'] as  $emailInfo){
+		 		$PREF = 0;	
+		 		if(array_key_exists('PREF', $emailInfo['parameters'])){
+					$PREF =1;
+				}
+				
+				$VAL = $emailInfo['value'];
+				
+				$sType ='';	
+				if(array_key_exists('TYPE', $emailInfo['parameters'])){
+					foreach($emailInfo['parameters']['TYPE'] as $typeInfo){
+						$typeInfo = strtoupper($typeInfo);
+						if($typeInfo != 'PREF' && $typeInfo !== ''){
+							$sType .=($sType === '' )?$typeInfo:','.$typeInfo;
+						}
+						if($typeInfo === 'PREF'){
+							$PREF = 1;
+						}
+					}
+				}
+				
+				if($sType == ''){
+					$sType = 'OTHER';
+				}
+				
+				if($PREF === 1){
+					$vcard->add('EMAIL',$VAL,array('type'=>$sType,'pref' =>'1'));
+				}else{
+					$vcard->add('EMAIL',$VAL,array('type'=>$sType));
+				}
+		 	}
+		 }
+		 
+		if(array_key_exists('URL', $importInfo)){
+		 	unset($vcard->URL);
+			 	
+		 	foreach($importInfo['URL'] as  $urlInfo){
+		 		$PREF = 0;	
+		 		if(array_key_exists('PREF', $urlInfo['parameters'])){
+					$PREF =1;
+				}
+				
+				$VAL = $urlInfo['value'];
+				
+				$sType ='';	
+				if(array_key_exists('TYPE', $urlInfo['parameters'])){
+					foreach($urlInfo['parameters']['TYPE'] as $typeInfo){
+						$typeInfo = strtoupper($typeInfo);
+						if($typeInfo != 'PREF' && $typeInfo !== ''){
+							$sType .=($sType === '' )?$typeInfo:','.$typeInfo;
+						}
+						if($typeInfo === 'PREF'){
+							$PREF =1;
+						}
+					}
+				}
+				
+				if($sType == ''){
+					$sType = 'OTHER';
+				}
+				
+				if($PREF === 1){
+					$vcard->add('URL',$VAL,array('type'=>$sType,'pref' =>'1'));
+				}else{
+					$vcard->add('URL',$VAL,array('type'=>$sType));
+				}
+		 	}
+		 }
+		
+		 return $vcard;	
+		
 	}
 }

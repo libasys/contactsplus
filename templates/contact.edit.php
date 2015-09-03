@@ -37,6 +37,14 @@
  </span>
 </span>	
 
+  	<?php 
+		    $sChecked='';
+			if($_['bCompany'] == 'true'){
+				 $sChecked='checked="checked"';
+			}
+		  ?> 
+  	<input type="checkbox" style="margin-left:5px;" name="bcompany" <?php print_unescaped($sChecked); ?>  /> <?php p($l->t('Show as company')); ?>
+
 <input type="text" placeholder="<?php p($l->t('First name')); ?>" value="<?php p($_['fname']); ?>" maxlength="100" id="fname"  name="fname" />
 <input type="text" placeholder="<?php p($l->t('Last name')); ?>" value="<?php p($_['lname']); ?>" maxlength="100" id="lname"  name="lname" />
   <?php 
@@ -44,6 +52,7 @@ $isAnredeActive='';
 if($_['anrede']!='') $isAnredeActive=' activeAddFieldEdit';
  ?>
 
+ 
 <span class="additionalField<?php p($isAnredeActive); ?>" data-addfield="gender">
   	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Title')); ?></span><input style="width:210px;" type="text" placeholder="<?php p($l->t('Title')); ?>" value="<?php p($_['anrede']); ?>" maxlength="100" id="gender"  name="gender" />
  </span>  

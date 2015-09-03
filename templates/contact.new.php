@@ -13,7 +13,9 @@
 ?>
 </select>
 <br style="clear:both;">   
-
+ <span class="fullWidth">
+ 	<span class="labelLeft" style="text-align:right;padding-right:30px;">&nbsp;</span> <input type="checkbox" style="margin-left:5px;" name="bcompany"   /> <?php p($l->t('Show as company')); ?>
+</span>
 <span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('First name')); ?></span>	<input style="width:190px;" type="text" placeholder="<?php p($l->t('First name')); ?>" value="" maxlength="100" id="fname"  name="fname" />
 <span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Last name')); ?></span> 	<input style="width:190px;" type="text" placeholder="<?php p($l->t('Last name')); ?>" value="" maxlength="100" id="lname"  name="lname" />
 <br style="clear:both;"><br>
