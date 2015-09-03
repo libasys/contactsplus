@@ -2,6 +2,7 @@ OC.L10N.register(
                  "contactsplus",
                  {
                  "Error (de)activating addressbook." : "(De-)Aktivierung des Adressbuches fehlgeschlagen",
+                 "more Contacts" : "weitere Kontakte",
                  "id is not set." : "ID ist nicht angegeben.",
                  "Cannot update addressbook with an empty name." : "Das Adressbuch kann nicht mit einem leeren Namen aktualisiert werden.",
                  "No category name given." : "Kein Kategoriename angegeben.",
@@ -21,6 +22,9 @@ OC.L10N.register(
                  "Something went FUBAR. " : "Irgendwas ist hier so richtig schiefgelaufen. ",
                  "Cannot save property of type \"%s\" as array" : "Eigenschaften vom Typ \"%s\" können nicht als Array gespeichert werden",
                  "Missing IM parameter." : "IM-Parameter fehlt.",
+                  "Add new contact" : "Neuen Kontakt hinzufügen",
+				    "Show as company" : "Als Firma anzeigen",
+				    "Import addressbook per Drag & Drop":"Adressbuch per Drag & Drop importieren",
                  "Unknown IM: " : "IM unbekannt:",
                  "No contact ID was submitted." : "Es wurde keine Kontakt-ID übermittelt.",
                  "Error reading contact photo." : "Fehler beim Auslesen des Kontaktfotos.",
@@ -266,6 +270,7 @@ OC.L10N.register(
                  "Would you like copy or move the contact to the addressbook?" : "Möchten Sie den Kontakt in das Addressbuch verschieben oder kopieren?",
                  "Do you really want to delete this address book?" : "Wollen Sie das Addressbuch wirklich löschen",
                  "Delete Addressbook" : "Addressbuch löschen",
+                  "Add a new contact or import existing contacts from a file (VCF) per Drag & Drop." : "Fügen Sie einen neuen Kontakt hinzu oder importieren Sie existierende Kontakte aus einer Datei (VCF) per Drag & Drop.",
                  "%1$s (%2$s)" : "%1$s (%2$s)"
 },
 "nplurals=2; plural=(n != 1);");
