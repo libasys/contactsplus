@@ -52,23 +52,13 @@ class PageController extends Controller {
 	 */
 	public function index() {
 			
-		\OCP\Util::addscript('core','tags');
-
-		\OCP\Util::addStyle($this->appName,'style');
-		\OCP\Util::addStyle($this->appName, 'jquery.Jcrop');
-		\OCP\Util::addStyle($this->appName, '3rdparty/fontello/css/animation');
-		\OCP\Util::addStyle($this->appName, '3rdparty/fontello/css/fontello');
-		\OCP\Util::addStyle($this->appName, '3rdparty/jquery.webui-popover');		
-		\OCP\Util::addscript($this->appName, 'app');
-		\OCP\Util::addscript($this->appName, '3rdparty/jquery.webui-popover');
-		\OCP\Util::addscript($this->appName,'settings');
-		\OCP\Util::addscript($this->appName,'loader');
-		\OCP\Util::addscript($this->appName,'jquery.scrollTo.min');
-		\OCP\Util::addscript($this->appName,'jquery.nicescroll.min');
-		\OCP\Util::addscript('files', 'jquery.fileupload');
-		\OCP\Util::addscript($this->appName, 'jquery.Jcrop');
+		
 		
 		$iosSupport= $this->configInfo->getUserValue($this->userId, $this->appName,'iossupport');
+		
+		$activeView = $this->configInfo->getUserValue($this->userId, $this->appName,'view','listview');
+		
+		$lastSelectedBook = $this->configInfo->getUserValue($this->userId, $this->appName, 'currentbook', 0);
 		
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize('/');
 		
@@ -84,6 +74,8 @@ class PageController extends Controller {
 			'uploadMaxHumanFilesize' => 	\OCP\Util::humanFileSize($maxUploadFilesize),
 			'iossupport' => $iosSupport,
 			'addressbooks' => $addressbooks,
+			'activeView' => $activeView,
+			'lastSelectedBook' => $lastSelectedBook,
 		];
 		
 		$csp = new \OCP\AppFramework\Http\ContentSecurityPolicy();
