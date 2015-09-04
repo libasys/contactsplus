@@ -780,6 +780,7 @@ class ContactsController extends Controller {
 		 $bPhoto=0;
 		 $imgSrc='';
 		 $imgMimeType='';
+		 $tmpkey = uniqid('photo-') ;
 		 $thumb = '<div id="noimage" class="ioc ioc-user"></div>';
 		 if (isset($vcard->PHOTO)){
 		 	$bPhoto=1;
@@ -788,7 +789,7 @@ class ContactsController extends Controller {
 			 $image->loadFromData((string)$vcard->PHOTO);
 			 $imgSrc=$image->__toString();
 			 $imgMimeType=$image->mimeType();
-			 $tmpkey = uniqid('photo-') ;
+			 
 			 \OC::$server->getCache()->set($tmpkey, $image -> data(), 600);
 			 
 		}
