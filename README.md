@@ -7,7 +7,7 @@ Sebastian Döll
 
 Version Info:
 ============
-1.0.3
+1.0.5
 
 Setup Info:
 ===========
@@ -44,6 +44,7 @@ Features:
 - export single contact
 - export single addressbook
 - import vcf file per drag & drop
+- batch (delete contact, delete groups from contact, move, copy contacts)
 
 
 
