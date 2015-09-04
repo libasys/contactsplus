@@ -113,6 +113,9 @@ SQL;
 			$j['data']['id'] = $id;
 			$j['data']['metadata'] = $row;
 			$j['data']['photo'] = false;
+			if(isset($vcard->BDAY)){
+				$j['data']['birthday'] = $vcard->BDAY;
+			} 
 			if(isset($vcard->PHOTO) || isset($vcard->LOGO)) {
 				$j['data']['photo'] = true;
 				$url = \OC::$server->getURLGenerator()->linkToRoute('contactsplus.contacts.getContactPhoto',array('id' => $id));
@@ -140,8 +143,10 @@ SQL;
 	* @return mixed
 	*/
 	public function delete($id) {
+		
 		VCard::delete($id);
 	}
+	
 	
 	
 	/**

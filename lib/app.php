@@ -1187,7 +1187,8 @@ class App{
 				     'N'   => array($dummySure,$dummyLast, '', '', ''),
 				     'UID'=>$uid
 				));
-				
+				$vcard->FN = $dummySure.' '.$dummyLast;
+				$vcard->CATEGORIES = 'familie';
 				$vcard->add('TEL', '+1 555 34567 456', array('type' => 'fax'));
 				$vcard->add('TEL', '+1 555 34567 457', array('type' => 'voice','pref'=>1));
 				$vcard->add('EMAIL', 'info@dummy.de', array('type' => 'work'));
@@ -1236,11 +1237,23 @@ class App{
 		$lname=isset($sRequest['lname']) && !empty($sRequest['lname'])?$sRequest['lname']:'';
 		$fname=isset($sRequest['fname']) && !empty($sRequest['fname'])?$sRequest['fname']:'';
 		$gender=isset($sRequest['gender']) && !empty($sRequest['gender'])?$sRequest['gender']:'';
-		$categorySelection=$sRequest['selectedContactgroup'];
+		$categorySelection = $sRequest['selectedContactgroup'];
 		
 		if($categorySelection !== 'all' && $categorySelection !== 'none' && $categorySelection !== 'fav'){
-			if(!empty($categorySelection)){	
-				$vcard->CATEGORIES=$categorySelection;
+			
+			if(isset($vcard->CATEGORIES)){
+				$property = $vcard->select('CATEGORIES');
+				$property = array_shift($property);
+				$oldValue = stripslashes($property->getValue());
+				
+				if(!stristr($oldValue,$categorySelection)){
+					$newValue=(string) $oldValue.','.$value;
+					$property->setValue((string) $newValue);	
+				}
+			}	
+				
+			if(!empty($categorySelection) && !isset($vcard->CATEGORIES)){	
+				$vcard->CATEGORIES= $categorySelection;
 			}
 		}
 		if(isset($sRequest['bcompany'])){
@@ -1255,7 +1268,7 @@ class App{
 		}else{
 			unset($vcard->GEO);
 		}
-		
+		//\OCP\Util::writeLog(self::$appname,'GEO: '.$vcard->GEO, \OCP\Util::DEBUG);
 		if($lname!='' || $fname!='') {
 			$vcard->N = array($lname,$fname,'',$gender,'');
 		}

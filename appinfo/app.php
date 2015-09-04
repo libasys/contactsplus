@@ -30,9 +30,6 @@ if (\OCP\User::isLoggedIn()) {
 \OCP\Share::registerBackend(ContactsApp::SHARECONTACT, 'OCA\ContactsPlus\Share\Backend\Contact');
 
 
-\OCP\Util::connectHook('OCA\CalendarPlus', 'getSources', 'OCA\ContactsPlus\Hooks', 'getCalenderSources');
-\OCP\Util::connectHook('OCA\CalendarPlus', 'getCalendars', 'OCA\ContactsPlus\Hooks', 'getBirthdayCalender');
-\OCP\Util::connectHook('OCA\CalendarPlus', 'getEvents', 'OCA\ContactsPlus\Hooks', 'getBirthdayEvents');
 \OCP\Util::connectHook('OC_User', 'post_deleteUser', '\OCA\ContactsPlus\Hooks', 'deleteUser');
 
 if (\OCP\User::isLoggedIn() && !\OCP\App::isEnabled('contacts')) {

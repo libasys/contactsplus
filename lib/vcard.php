@@ -591,22 +591,14 @@ class VCard {
 			$card->add('PRODID', $prodid);
 		}
 		$sComponent='VCARD';
+		
 		$fn = '';
-		if(isset($card->FN)){
-			$fn = $card->FN;
-		}
 		$lastname = '';
 		$surename = '';	
-	
-			
-			if(isset($card->N)){
 				
+			if(isset($card->N)){
 				$temp=explode(';',$card->N);
 				if(!empty($temp[0])){	
-					if($fn === ''){
-						$fn = $temp[0].' '.$temp[1];
-						$card->FN = $fn;
-					}
 					$lastname = $temp[0];
 					$surename = $temp[1];	
 				}
@@ -796,9 +788,6 @@ class VCard {
        }
 	   
 	   $fn = '';
-		if(isset($card->FN)){
-			$fn = $card->FN;
-		}
 		$lastname = '';
 		$surename = '';	
 	
@@ -806,14 +795,8 @@ class VCard {
 		if(isset($card->N)){
 			$temp=explode(';',$card->N);
 			if(!empty($temp[0])){	
-				
 				$lastname = $temp[0];
 				$surename = $temp[1];
-				if($fn === ''){
-					$fn = $surename.' '.$lastname;
-					$card->FN = $fn;
-				}
-				
 			}
 		}
 
@@ -830,6 +813,7 @@ class VCard {
 		}else{
 			if($lastname !== ''){	
 				$fn = $surename.' '.$lastname;
+				$card->FN = $fn;
 			}
 		}
 		
@@ -838,6 +822,8 @@ class VCard {
 		$card->REV = $now->format(\DateTime::W3C);
 
 		$data = $card->serialize();
+		
+		
 		$stmt = \OCP\DB::prepare( 'UPDATE `'.App::ContactsTable.'` SET `fullname` = ?,`surename` = ?,`lastname` = ?,`carddata` = ?, `lastmodified` = ?, `component` = ? ,`bcategory` = ?,`organization` = ?,`bcompany` = ? WHERE `id` = ?' );
 		try {
 			$result = $stmt->execute(array($fn,$surename, $lastname, $data, time(), $sComponent, $bGroup,$organization,$bCompany, $id));

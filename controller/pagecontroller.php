@@ -67,7 +67,7 @@ class PageController extends Controller {
 			Addressbook::addDefault($this->userId);
 			$addressbooks = Addressbook::all($this->userId);
 		}
-		//ContactsApp::addingDummyContacts(50);
+		//ContactsApp::addingDummyContacts(1000);
 
 		$params = [
 			'uploadMaxFilesize' => $maxUploadFilesize,
