@@ -52,6 +52,7 @@
 		<i id="addAddr" title="<?php p($l->t('New Addressbook')) ?>" class="toolTip ioc ioc-add"></i>
 		</h3>
 	<div id="drop-area"><?php p($l->t('Import addressbook per Drag & Drop')); ?></div>
+	<br style="clear:both;" />
 	<ul id="cAddressbooks">
 		
 	</ul>
@@ -59,7 +60,7 @@
 	<h3><i class="ioc ioc-users"></i> <?php p($l->t('Groups')); ?><i  id="addGroup" class="ioc ioc-add toolTip" title="<?php p($l->t('Add new group')); ?>"></i>  <i id="sortGroups" title="<?php p($l->t('Sort Groups')); ?>" class="toolTip ioc ioc-sort"></i><i id="refreshGroups" title="<?php p($l->t('Refresh Groups')); ?>" class="toolTip ioc ioc-refresh"></i></h3>
 	<ul id="cgroups">
 
-</ul>
+	</ul>
 </div>
 <div id="app-settings">
 		<div id="app-settings-header">

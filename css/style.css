@@ -466,7 +466,7 @@ ul#cgroups{
 
 ul#cgroups li,ul#cAddressbooks li.dropcontainerAddressBook{
 	width:98%;
-	height:30px;
+	
 	line-height:30px;
 	display:block;
 	float:left;
@@ -475,7 +475,7 @@ ul#cgroups li,ul#cAddressbooks li.dropcontainerAddressBook{
 	
 }
 ul#cgroups li:hover,ul#cAddressbooks li:hover{
-	background:#e7e7e7;
+	background-color:#e7e7e7;
 }
 
 
@@ -486,15 +486,51 @@ ul#cgroups li span.groupcounter,ul#cAddressbooks li span.groupcounter{
 	position:absolute;
 	width:30px;
 	text-align:right;
+	
+}
+ul#cgroups li span.groupcounter{
+	float:left;
+	position:relative;
 }
 ul#cgroups li span.groupname,
 ul#cAddressbooks li span.groupname,
 ul#cAddressbooks li span.groupinactive{
-	display:inline-block;
-	
 	display:block;
 	float:left;
 	cursor:pointer;
+	right:10px;
+	white-space: nowrap;
+   text-overflow: ellipsis; 
+   overflow:hidden;
+}
+ul#cgroups li span.groupname{
+	right:0;
+	width:140px;
+}
+ul#cgroups li .ioc-delete,
+ul#cgroups li .ioc-edit{
+	width:24px;
+	cursor:pointer;
+	opacity:0;
+	float:left;
+	
+} 
+ul#cgroups li .placeholder{
+	width:48px;
+	float:left;
+}
+
+ul#cgroups li:hover .ioc-delete,
+ul#cgroups li:hover .ioc-edit{
+	opacity:0.6;
+}
+
+ul#cgroups li.ioc-delete:hover ,
+ul#cgroups li .ioc-edit:hover {
+	opacity:1;
+}
+ul#cgroups li .ioc-delete:hover{
+	color:red;
 }
 ul#cAddressbooks li span.groupinactive{
 	font-style:italic;
@@ -581,32 +617,30 @@ li.contactsrow{
 	position:relative;
 }
 .draggingContact{
-	background:#000;
+	background:rgba(0,0,0,0.7);
 	color:white;
-	padding:5px 10px;;
-	border-radius:8px;
+	padding:4px 8px;
+	border-radius:4px;
 }
 #cgroups .dropcontainer.dropHover{
-	font-size:16px;
-	background:#fff;
-	font-weight:normal;
+	background:#FCEFA1;
 }
 
 #cgroups .dropcontainer.activeHover{
-	color:#C24733;
-	
+	border:1px solid #ccc;
+	margin:1px;	
 }
-
+#cgroups .dropcontainer.activeHover .groupname{
+	width:135px;
+}
 /*activeHoverAddr*/
 #cAddressbooks .dropcontainerAddressBook.activeHoverAddr{
-	color:#0098E4;
-
+	border:1px solid #ccc;
+	margin:1px;
 }
 
 #cAddressbooks .dropcontainerAddressBook.dropHoverAddr{
-	font-size:16px;
-	background:#fff;
-	font-weight:normal;
+	background:#FCEFA1;
 }
 
 .listview-header{

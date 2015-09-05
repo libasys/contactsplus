@@ -24,6 +24,7 @@ $application->registerRoutes($this, ['routes' => [
 	['name' => 'contacts#copyContact', 'url' => '/copycontact', 'verb' => 'POST'],
 	['name' => 'contacts#moveContact', 'url' => '/movecontact', 'verb' => 'POST'],
 	['name' => 'contacts#getContactCards', 'url' => '/getcontactcards', 'verb' => 'POST'],
+	['name' => 'contacts#updateTag', 'url' => '/updatetag', 'verb' => 'GET'],
 	['name' => 'export#exportContacts', 'url' => '/exportcontacts', 'verb' => 'GET'],	
 	['name' => 'export#exportBirthdays', 'url' => '/exportbirthdays', 'verb' => 'GET'],
 	['name' => 'import#getImportDialogTpl', 'url' => '/getimportdialogtplcontacts', 'verb' => 'POST'],	

@@ -1112,6 +1112,27 @@ class ContactsController extends Controller {
 		
 		return $cardslist;
     }
+	  /**
+     * @NoAdminRequired
+	   * 
+	   * @param $grpid tag id
+	   * @param $newname new name for tag
+     */
+	public function updateTag($grpid,$newname){
+			
+		if(\OC::$server->getTagManager()-> load($this->appName)->rename($grpid,$newname)){
+			$params = [
+			'status' => 'success',
+			];
+		}else{
+			$params = [
+				'status' => 'error',
+			];
+		}
+		
+		$response = new JSONResponse($params);
+		return $response;
+	}
 	
 	private function prepareAddress($aLocationInfo){
 			

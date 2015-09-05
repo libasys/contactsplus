@@ -77,11 +77,7 @@ OC.ContactsPlus ={
 			}
 			
 		});
-		$(document).on('keydown', '#adrbookname', function(event) {
-			if (event.which == 13){
-				OC.ContactsPlus.saveAddrBook($(event.target).parent().data('addr'));
-			}
-		});
+		
 		
 		$('#chk-all').on('change',function(){
 			if($(this).is(':checked')){
@@ -417,7 +413,7 @@ OC.ContactsPlus ={
 			
 			$('#addAddr').on('click',function(){
 				
-				if($('.app-navigation-entry-edit').length === 1){
+				if($('.addrclone').length === 1){
 					
 					var addrId = 'new';
 					var myClone = $('#addr-clone').clone();
@@ -425,7 +421,16 @@ OC.ContactsPlus ={
 					$('#cAddressbooks').prepend(myClone);
 					myClone.attr('data-addr',addrId).show();
 					myClone.find('input[name="carddavuri"]').hide();
-					myClone.find('input[name="adrbookname"]').focus();
+					myClone.find('input[name="adrbookname"]')
+					.bind('keydown', function(event){
+						if (event.which == 13){
+							if(myClone.find('input[name="adrbookname"]').val()!==''){
+							OC.ContactsPlus.saveAddrBook(addrId);
+							}else{
+								myClone.remove();
+							}
+						}
+					}).focus();
 					
 					myClone.on('keyup',function(evt){
 						if (evt.keyCode===27){
@@ -445,7 +450,7 @@ OC.ContactsPlus ={
 			
 			//edit  Calendar		
 			$('.app-navigation-entry-menu li.ioc-edit').on('click',function(){
-				if($('.app-navigation-entry-edit').length === 1){
+				if($('.addrclone').length === 1){
 					 $('.app-navigation-entry-menu').removeClass('open');
 					var adrId =$(this).closest('.app-navigation-entry-menu').data('adrbid');
 					var name = $(this).closest('.app-navigation-entry-menu').data('name');
@@ -454,8 +459,17 @@ OC.ContactsPlus ={
 					myClone.attr('data-addr',adrId).show();
 					$('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').hide();
 					myClone.find('input[name="carddavuri"]').hide();
-					myClone.find('input[name="adrbookname"]').val($('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').data('name')).focus();
-					myClone.find('input[name="adrbookname"]');
+					myClone.find('input[name="adrbookname"]')
+					.bind('keydown', function(event){
+						if (event.which == 13){
+							if(myClone.find('input[name="adrbookname"]').val()!==''){
+							OC.ContactsPlus.saveAddrBook(adrId);
+							}else{
+								myClone.remove();
+							}
+						}
+					})
+					.val($('li.dropcontainerAddressBook[data-adrbid="'+adrId+'"]').data('name')).focus();
 					
 					myClone.on('keyup',function(evt){
 						if (evt.keyCode===27){
@@ -464,7 +478,9 @@ OC.ContactsPlus ={
 						}
 					});
 					myClone.find('button.icon-checkmark').on('click',function(){
-						OC.ContactsPlus.saveAddrBook(adrId);
+						if(myClone.find('input[name="adrbookname"]').val()!==''){
+							OC.ContactsPlus.saveAddrBook(adrId);
+						}
 					});
 				}
 			});
@@ -483,21 +499,19 @@ OC.ContactsPlus ={
 			 $('.toolTip').tipsy({
 				html : true
 			});
-			
-					
 						  
-					$(".dropcontainerAddressBook").droppable({
-							activeClass: "activeHoverAddr",
-							hoverClass: "dropHoverAddr",
-							accept:'li.contactsrow .fullname',
-							over: function( event, ui ) {
-								
-							},
-							drop: function( event, ui ) {
-								OC.ContactsPlus.showDialogAddressbook($(this).attr('data-adrbid'),ui.draggable.attr('data-id'));
-								
-							}
-				   });
+			$(".dropcontainerAddressBook").droppable({
+					activeClass: "activeHoverAddr",
+					hoverClass: "dropHoverAddr",
+					accept:'li.contactsrow .fullname',
+					over: function( event, ui ) {
+						
+					},
+					drop: function( event, ui ) {
+						OC.ContactsPlus.showDialogAddressbook($(this).attr('data-adrbid'),ui.draggable.attr('data-id'));
+						
+					}
+		   });
 				   
 			 OC.Share.loadIcons('cpladdrbook');
 			
@@ -1746,11 +1760,7 @@ OC.ContactsPlus ={
       		 OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Operation not permitted'));
       	}
 	},
-	categoriesChanged:function(newcategories){
-			
-			 OC.ContactsPlus.getGroups();
-		},
-		getGroups:function(){
+	getGroups:function(){
 			$.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/getcategoriesaddrbook'),function(jsondata){
 					if(jsondata.status === 'success'){
 						
@@ -1760,9 +1770,9 @@ OC.ContactsPlus ={
 			});
 		},
 	  buildGroupList:function(aGroups){
-			//	var htmlCat='<li data-id="all" data-grpid="all" data-id="all"><span class="colCal">&nbsp;</span><span class="groupname">&nbsp;Alle</span><span class="groupcounter">0</span></li>';
-				OC.ContactsPlus.groups = aGroups;
+				
 				var htmlCat='';
+				$('#cgroups').html('');
 				
 				$.each(aGroups,function(i, elem) {
 					
@@ -1770,20 +1780,159 @@ OC.ContactsPlus ={
 					if(elem.id === 'all' || elem.id === 'none' || elem.id === 'fav'){
 						sName=elem.id;
 					}
-					
+					var groupoption ='<i class="ioc ioc-edit"></i><i class="ioc ioc-delete">';
 					var sIcon='<div class="colCal" style="cursor:pointer;background-color:'+elem.bgcolor+';color:'+elem.color+';">'+elem.name.substring(0,1)+'</div>';
 					if(elem.id === 'fav'){
+						groupoption = '<span class="placeholder">&nbsp;</span>';
 						sIcon='<i class="ioc ioc-star" style="float:left;margin-left:5px;margin-top:-3px; font-size:22px;color:#D8C101;"></i>';
 					}
 					if(elem.id === 'all'){
+						groupoption = '<span class="placeholder">&nbsp;</span>';
 						sIcon='<i class="ioc ioc-users" style="float:left;margin-left:5px;margin-top:-4px;margin-right:5px;font-size:16px;"></i> ';
 					}
 					
-					htmlCat+='<li class="dropcontainer" data-grpid="'+elem.id+'" data-id="'+sName+'">'+sIcon+' <span class="groupname">&nbsp;'+elem.name+'</span><span class="groupcounter">'+elem.icount+'</span></li>';
+					if(elem.id === 'none'){
+						groupoption = '<span class="placeholder">&nbsp;</span>';
+					}
+					
+					htmlCat+='<li class="dropcontainer" data-grpid="'+elem.id+'" data-id="'+sName+'">'+sIcon+' <span class="groupname">&nbsp;'+elem.name+'</span>'+groupoption+'</i><span class="groupcounter">'+elem.icount+'</span></li>';
 				});
-			//	htmlCat+='<li data-id="none" data-grpid="none" data-id="none"><span class="colCal">&nbsp;</span><span class="groupname">&nbsp;Nicht gruppiert</span><span class="groupcounter">0</span></li>';
+				//our clone
+				htmlCat+='<li class="app-navigation-entry-edit groupclone" id="group-clone" data-group="">'
+								+'<input type="text" name="group" id="group" value="" placeholder="groupname" />'
+								+'<button class="icon-checkmark"></button>'
+								+'</li>';
+				
 				$('#cgroups').html(htmlCat);
 				
+				$('#addGroup').on('click',function(){
+				
+				if($('.groupclone').length === 1){
+					
+					var grpId = 'new';
+					var myClone = $('#group-clone').clone();
+					
+					$('#cgroups').prepend(myClone);
+					myClone.attr('data-group',grpId).show();
+					myClone.find('input[name="group"]').bind('keydown', function(event){
+						if (event.which == 13){
+							if(myClone.find('input[name="group"]').val()!==''){
+								var saveForm = $('.app-navigation-entry-edit[data-group="'+grpId+'"]');
+								var groupname = saveForm.find('input[name="group"]').val();
+								OC.Tags.addTag(groupname,OC.ContactsPlus.appName).then(function(tags){
+									myClone.remove();
+									OC.ContactsPlus.getGroups();
+									return false;
+								});
+								
+							}else{
+								myClone.remove();
+							}
+						}
+					}).focus();
+					
+					myClone.on('keyup',function(evt){
+						if (evt.keyCode===27){
+							myClone.remove();
+						}
+					});
+					
+					myClone.find('button.icon-checkmark').on('click',function(){
+						if(myClone.find('input[name="group"]').val()!==''){
+							var saveForm = $('.app-navigation-entry-edit[data-group="'+grpId+'"]');
+							var groupname = saveForm.find('input[name="group"]').val();
+							OC.Tags.addTag(groupname,OC.ContactsPlus.appName).then(function(tags){
+								myClone.remove();
+								OC.ContactsPlus.getGroups();
+								return false;
+							});
+							
+						}else{
+							myClone.remove();
+						}
+					});
+				}
+				return false;
+			});
+			
+			$('#cgroups li .ioc-edit').on('click',function(){
+				
+				if($('.groupclone').length === 1){
+					
+					var grpId =$(this).parent().data('grpid');
+					var grpName = $(this).parent().data('id');
+					var myClone = $('#group-clone').clone();
+					$('li.dropcontainer[data-grpid="'+grpId+'"]').after(myClone);
+					myClone.attr('data-group',grpId).show();
+					$('li.dropcontainer[data-grpid="'+grpId+'"]').hide();
+					
+					myClone.find('input[name="group"]')
+					.bind('keydown', function(event){
+						if (event.which == 13){
+							if(myClone.find('input[name="group"]').val()!==''){
+								var saveForm = $('.groupclone[data-group="'+grpId+'"]');
+								var groupname = saveForm.find('input[name="group"]').val();
+								
+								$.getJSON(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/updatetag'), {
+									grpid:grpId,
+									newname:groupname
+								}, function(jsondata) {
+									if(jsondata.status == 'success'){
+										OC.ContactsPlus.getGroups();
+										myClone.remove();
+									}
+									if(jsondata.status == 'error'){
+										alert('could not update tag');
+									}
+									
+									});
+								
+							}else{
+								myClone.remove();
+								$('li.dropcontainer[data-grpid="'+grpId+'"]').show();
+							}
+						}
+					})
+					.val(grpName).focus();
+					
+					
+					myClone.on('keyup',function(evt){
+						if (evt.keyCode===27){
+							myClone.remove();
+							$('li.dropcontainer[data-grpid="'+grpId+'"]').show();
+						}
+					});
+					myClone.find('button.icon-checkmark').on('click',function(){
+						var saveForm = $('.groupclone[data-group="'+grpId+'"]');
+						var groupname = saveForm.find('input[name="group"]').val();
+						if(myClone.find('input[name="group"]').val()!==''){
+							$.getJSON(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/updatetag'), {
+								grpid:grpId,
+								newname:groupname
+							}, function(jsondata) {
+								if(jsondata.status == 'success'){
+									OC.ContactsPlus.getGroups();
+									myClone.remove();
+								}
+								if(jsondata.status == 'error'){
+									alert('could not update tag');
+								}
+								
+							});
+						}
+						
+					});
+				}
+			});
+			
+			$('#cgroups li .ioc-delete').on('click',function(){
+				var groupname = $(this).parent().data('id');
+				OC.Tags.deleteTags(groupname,OC.ContactsPlus.appName).then(function(tags){
+					$('li.dropcontainer[data-id="'+groupname+'"]').remove();
+					
+				});
+			});	
+			
 				$(".dropcontainer").droppable({
 						activeClass: "activeHover",
 						hoverClass: "dropHover",
@@ -1811,14 +1960,16 @@ OC.ContactsPlus ={
 						disabled: true,
 						placeholder: "ui-state-highlight"
 				});
-				
-			$('#cgroups li').on('click',function(){
+			
+			
+			
+			$('#cgroups li .groupname').on('click',function(){
 			
 			var disabled = $("#cgroups").sortable( "option", "disabled" );
 				if(disabled === true){	
 			  	  $('#cgroups li').removeClass('isActiveGroup');
-			  	  $(this).addClass('isActiveGroup');
-			  	  OC.ContactsPlus.loadContacts($('#cAddressbooks li.isActiveABook').attr('data-adrbid'),$(this).attr('data-id'),0,0);
+			  	  $(this).parent().addClass('isActiveGroup');
+			  	  OC.ContactsPlus.loadContacts($('#cAddressbooks li.isActiveABook').attr('data-adrbid'),$(this).parent().attr('data-id'),0,0);
 		  	 }
 		  });
 		 
@@ -2317,12 +2468,12 @@ $(document).ready(function(){
 		$("#leftsidebar").niceScroll();
 		  	
      
-     
+    /*
      $('#addGroup').on('click', function () {
 			//OC.ContactsPlus.oldGroup=groupsSel;
 			OC.Tags.edit(OC.ContactsPlus.appName);
 			 return false;
-	 });
+	 });*/
     $('#addContact').on('click', function () {
 			var addrPerm=$('#cAddressbooks li.isActiveABook').attr('data-perm');
 			if(addrPerm & OC.PERMISSION_CREATE){
@@ -2363,12 +2514,12 @@ $(document).ready(function(){
 		existLetter=$(el).attr('data-scroll');
 		$('#rightcontentSideBar li[data-letter="'+existLetter+'"]').addClass('bLetterActive');
 	});
-	
+	/*
      $(OC.Tags).on('change', function(event, data) {
 		if(data.type === OC.ContactsPlus.appName) {
 		   OC.ContactsPlus.categoriesChanged(data.tags);
 		}
-	});	
+	});	*/
 		
      $('input#contactphoto_fileupload').fileupload({
 		dataType : 'json',

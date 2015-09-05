@@ -172,7 +172,7 @@ class AddressbookController extends Controller {
 
 		 }
 
-		$output.='<li class="app-navigation-entry-edit" id="addr-clone" data-addr="">
+		$output.='<li class="app-navigation-entry-edit addrclone" id="addr-clone" data-addr="">
 				<input type="text" name="adrbookname" id="adrbookname" value="" placeholder="'.$this->l10n->t('Displayname').'" />
 				<input type="text" name="carddavuri" readonly="readonly" value="" />
 				<button class="icon-checkmark"></button>
