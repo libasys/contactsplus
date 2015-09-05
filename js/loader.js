@@ -100,6 +100,7 @@ OC.ContactsPlus.Import =  {
  					OC.ContactsPlus.Import.Store.percentage = parseInt(data.percent);
 					$('#contacts_import_progressbar').progressbar('option', 'value', parseInt(data.percent));
 					$('#contacts_import_progressbar > div').css('background-color', '#FF2626');
+					$('#contacts_import_process_message').text(data.currentmsg);
 					if(data.percent < 100 ){
 						window.setTimeout('OC.ContactsPlus.Import.Dialog.update()', 100);
 					}else{
@@ -146,6 +147,7 @@ OC.ContactsPlus.Import =  {
 					$('#contacts_import_progressbar > div').css('background-color', '#FF2626');
 					OC.ContactsPlus.Import.Store.percentage = 100;
 					$('#contacts_import_progressbar').hide();
+					$('#contacts_import_process_message').text('').hide();
 					$('#contacts_import_done').css('display', 'block');
 					$('#contacts_import_status').html(data.message);
 				}else{

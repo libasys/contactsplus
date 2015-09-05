@@ -87,7 +87,13 @@ class ImportController extends Controller {
 		
 		
 		if (isset($pProgresskey) && isset($pGetprogress)) {
-				$percent = \OC::$server->getCache()->get($pProgresskey);
+				$aCurrent = \OC::$server->getCache()->get($pProgresskey);
+				$aCurrent = json_decode($aCurrent);
+				
+				$numVC = $aCurrent->{'all'};
+				$currentVCCount = $aCurrent->{'current'};
+				$currentFn = $aCurrent->{'currentFn'};
+				$percent = (int)$aCurrent->{'percent'};
 				
 				if($percent ==''){
 					$percent = 0;
@@ -95,6 +101,7 @@ class ImportController extends Controller {
 				$params = [
 					'status' => 'success',
 					'percent' =>$percent ,
+					'currentmsg' => $currentFn.' '.$percent.'% ('.$currentVCCount.'/'.$numVC.')'
 				];
 				$response = new JSONResponse($params);
 				return $response;	
@@ -122,9 +129,8 @@ class ImportController extends Controller {
 		
 		$import = new Import($file);
 		$import->setUserID($this->userId);
-		//$import->setTimeZone(CalendarApp::$tz);
-		$import->enableProgressCache();
 		$import->setProgresskey($pProgresskey);
+		$import->enableProgressCache();
 		
 		\OCP\Util::writeLog($this->appName,' PROG: '.$pProgresskey, \OCP\Util::DEBUG);
 		

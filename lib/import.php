@@ -64,7 +64,9 @@ class Import{
 	 */
 	private $progresskey;
 
+	private $numofcomponents;
 	
+	private $currentFn;
 
 	/*
 	 * @brief var saves the userid
@@ -136,7 +138,7 @@ class Import{
 		if(!$this->isValid()) {
 			return false;
 		}
-		$numofcomponents = count($this->vcardobject);
+		$this->numofcomponents = count($this->vcardobject);
 		
 		
 		if($this->overwrite) {
@@ -166,7 +168,7 @@ class Import{
 				VCard::delete($insertid);
 				$this->abscount--;
 			}
-			$this->updateProgress(intval(($this->abscount / $numofcomponents)*100));
+			$this->updateProgress(intval(($this->abscount / $this->numofcomponents)*100));
 		}
 		\OC::$server->getCache()->remove($this->progresskey);
 		return true;
@@ -216,6 +218,14 @@ class Import{
 	 */
 	public function enableProgressCache() {
 		$this->cacheprogress = true;
+		$currentIntArray=[
+			'percent' => 0,
+			'all' => 0,
+			'current' => 0,
+			'currentFn' => ''
+		];
+		$currentIntArray = json_encode($currentIntArray);	
+		\OC::$server->getCache()->set($this->progresskey,$currentIntArray, 300);
 		return true;
 	}
 
@@ -304,8 +314,11 @@ class Import{
 	
 	private function parseVCard(array $importInfo, $vcard){
 		
+		if(isset($importInfo['FN'][0]['value'])){
+			$this->currentFn = $importInfo['FN'][0]['value'];
+		}
 		
-		
+	
 		if(isset($importInfo['N'][0]['value']) && count($importInfo['N'][0]['value'])>0){
 			$aName=array();	
 			
@@ -594,7 +607,15 @@ class Import{
 	private function updateProgress($percentage) {
 		$this->progress = $percentage;
 		if($this->cacheprogress) {
-			\OC::$server->getCache()->set($this->progresskey, $this->progress, 300);
+			$currentIntArray=[
+			'percent' => $this->progress,
+			'all' => $this->numofcomponents,
+			'current' => $this->abscount,
+			'currentFn' => $this->currentFn
+		];
+		
+			$currentIntArray = json_encode($currentIntArray);	
+			\OC::$server->getCache()->set($this->progresskey, $currentIntArray, 300);
 		}
 		return true;
 	}
