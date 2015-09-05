@@ -90,19 +90,20 @@ class ImportController extends Controller {
 				$aCurrent = \OC::$server->getCache()->get($pProgresskey);
 				$aCurrent = json_decode($aCurrent);
 				
-				$numVC = $aCurrent->{'all'};
-				$currentVCCount = $aCurrent->{'current'};
-				$currentFn = $aCurrent->{'currentFn'};
-				$percent = (int)$aCurrent->{'percent'};
+					$numVC = (isset($aCurrent->{'all'})?$aCurrent->{'all'}:0);
+					$currentVCCount = (isset($aCurrent->{'current'})?$aCurrent->{'current'}:0);
+					$currentFn = (isset($aCurrent->{'currentFn'})?$aCurrent->{'currentFn'}:'');
+					$percent = (isset($aCurrent->{'percent'})?$aCurrent->{'percent'}:'');
+					
+					if($percent ==''){
+						$percent = 0;
+					}
+					$params = [
+						'status' => 'success',
+						'percent' =>$percent ,
+						'currentmsg' => $currentFn.' '.$percent.'% ('.$currentVCCount.'/'.$numVC.')'
+					];
 				
-				if($percent ==''){
-					$percent = 0;
-				}
-				$params = [
-					'status' => 'success',
-					'percent' =>$percent ,
-					'currentmsg' => $currentFn.' '.$percent.'% ('.$currentVCCount.'/'.$numVC.')'
-				];
 				$response = new JSONResponse($params);
 				return $response;	
 		}
