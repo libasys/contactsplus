@@ -111,7 +111,10 @@ class VCard {
 						$row['sortFullname'] = mb_substr($row['surename'],0,3,"UTF-8");
 					}
 				}
-				
+				if($row['fullname'] == '' && $row['lastname'] == ''){
+					$row['fullname'] = 'unknown';
+					$row['sortFullname'] = mb_substr($row['fullname'],0,3,"UTF-8");
+				}
 				$cards[] = $row;
 				
 			}
@@ -600,7 +603,10 @@ class VCard {
 				$temp=explode(';',$card->N);
 				if(!empty($temp[0])){	
 					$lastname = $temp[0];
-					$surename = $temp[1];	
+					$surename = $temp[1].' ';	
+				}
+				if(empty($temp[0])){
+					$surename = $temp[1].' ';	
 				}
 			}
 		
@@ -615,9 +621,9 @@ class VCard {
 			$card->FN = $organization;
 			$fn = $organization;
 		}else{
-			if($lastname !== ''){	
-				$card->FN = $surename.' '.$lastname;
-				$fn = $surename.' '.$lastname;
+			if($lastname !== '' || $surename!== ''){	
+				$card->FN = $surename.$lastname;
+				$fn = $surename.$lastname;
 			}
 		}
 		
@@ -645,7 +651,7 @@ class VCard {
 		
 		$stmt = \OCP\DB::prepare( 'INSERT INTO `'.App::ContactsTable.'` (`addressbookid`,`fullname`,`surename`,`lastname`,`carddata`,`uri`,`lastmodified`,`component`, `bcategory`,`organization`,`bcompany`) VALUES(?,?,?,?,?,?,?,?,?,?,?)' );
 		try {
-			$result = $stmt->execute(array($aid, $fn,$surename,$lastname, $data, $uri, time(),$sComponent,$bGroup,$organization,$bCompany));
+			$result = $stmt->execute(array($aid, $fn,trim($surename),$lastname, $data, $uri, time(),$sComponent,$bGroup,$organization,$bCompany));
 			if (\OCP\DB::isError($result)) {
 				\OCP\Util::writeLog(App::$appname, __METHOD__. 'DB error: ' . \OCP\DB::getErrorMessage($result), \OCP\Util::ERROR);
 				return false;
@@ -787,7 +793,7 @@ class VCard {
        	   $sComponent='GROUP';
        }
 	   
-	   $fn = '';
+	    $fn = '';
 		$lastname = '';
 		$surename = '';	
 	
@@ -796,7 +802,10 @@ class VCard {
 			$temp=explode(';',$card->N);
 			if(!empty($temp[0])){	
 				$lastname = $temp[0];
-				$surename = $temp[1];
+				$surename = $temp[1].' ';
+			}
+			if(empty($temp[0])){
+				$surename = $temp[1].' ';
 			}
 		}
 
@@ -811,8 +820,8 @@ class VCard {
 			$card->FN = $organization;
 			$fn = $organization;
 		}else{
-			if($lastname !== ''){	
-				$fn = $surename.' '.$lastname;
+			if($lastname !== '' || $surename !== ''){	
+				$fn = $surename.$lastname;
 				$card->FN = $fn;
 			}
 		}
@@ -826,7 +835,7 @@ class VCard {
 		
 		$stmt = \OCP\DB::prepare( 'UPDATE `'.App::ContactsTable.'` SET `fullname` = ?,`surename` = ?,`lastname` = ?,`carddata` = ?, `lastmodified` = ?, `component` = ? ,`bcategory` = ?,`organization` = ?,`bcompany` = ? WHERE `id` = ?' );
 		try {
-			$result = $stmt->execute(array($fn,$surename, $lastname, $data, time(), $sComponent, $bGroup,$organization,$bCompany, $id));
+			$result = $stmt->execute(array($fn,trim($surename), $lastname, $data, time(), $sComponent, $bGroup,$organization,$bCompany, $id));
 			if (\OCP\DB::isError($result)) {
 				\OCP\Util::writeLog(App::$appname, __METHOD__. 'DB error: ' . \OCP\DB::getErrorMessage($result), \OCP\Util::ERROR);
 				return false;
