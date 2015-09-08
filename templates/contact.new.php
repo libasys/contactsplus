@@ -34,7 +34,7 @@
 	<span class="labelLeft"><?php p($l->t('Department')); ?></span> 	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Department')); ?>" value="" maxlength="100" id="department"  name="department" />
 </span>
 <span class="additionalField" data-addfield="bday">
-	<span class="labelLeft"><?php p($l->t('Birthday')); ?></span><input class="mobil-input-full" type="text" placeholder="tt.mm.jjjj" value="<?php p($_['sBday']); ?>" maxlength="100" id="bday"  name="bday" />
+	<span class="labelLeft"><?php p($l->t('Birthday')); ?></span><input class="mobil-input-full" type="text" placeholder="tt.mm.jjjj" value="" maxlength="100" id="bday"  name="bday" />
 </span>
 
 <br style="clear:both;"><br>
