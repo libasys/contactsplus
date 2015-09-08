@@ -6,7 +6,7 @@
 	<author>Döll Sebastian</author>
 	<shipped>false</shipped>
 	<description>Contacts with carddav support</description>
-	<version>1.0.7</version>
+	<version>1.0.8</version>
 	<namespace>ContactsPlus</namespace>
 	<category>productivity</category>
 	<default_enable/>
