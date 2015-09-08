@@ -161,7 +161,7 @@ class PhotoController extends Controller {
 		$path = $this -> params('path');	
 		
 		$localpath = \OC\Files\Filesystem::getLocalFile($path);
-		$tmpkey = uniqid('photo-') ;
+		$tmpkey = 'editphoto' ;
 		$size = getimagesize($localpath, $info);
 		$exif = @exif_read_data($localpath);
 		$image = new \OCP\Image();
@@ -173,6 +173,7 @@ class PhotoController extends Controller {
 		
 		$imgString = $image -> __toString();
 		$imgMimeType = $image -> mimeType();
+		 \OC::$server->getCache()->remove($tmpkey);
 		if (\OC::$server->getCache()->set($tmpkey, $image -> data(), 600)) {
 			
 		    $resultData = array(
@@ -238,7 +239,7 @@ class PhotoController extends Controller {
 		}
 
 		if(file_exists($file['tmp_name'])) {
-			$tmpkey = uniqid('photo-') ;
+			$tmpkey =  'editphoto' ;
 			$size = getimagesize($file['tmp_name'], $info);
 		    $exif = @exif_read_data($file['tmp_name']);
 			$image = new \OCP\Image();
@@ -250,7 +251,7 @@ class PhotoController extends Controller {
 				if(!$image->fixOrientation()) { // No fatal error so we don't bail out.
 					\OCP\Util::writeLog($this->appName,'Couldn\'t save correct image orientation: '.$tmpkey,\OCP\Util::DEBUG);
 				}
-				
+					 \OC::$server->getCache()->remove($tmpkey);
 					if(\OC::$server->getCache()->set($tmpkey, $image->data(), 600)) {
 					$imgString=$image->__toString();
 	

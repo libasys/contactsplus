@@ -79,6 +79,8 @@ class PageController extends Controller {
 		];
 		
 		$csp = new \OCP\AppFramework\Http\ContentSecurityPolicy();
+		$csp->addAllowedImageDomain('\'self\'');
+		$csp->addAllowedImageDomain('data:');
 		$csp->addAllowedImageDomain('*');
 		$csp->addAllowedFrameDomain('*');	
 		$response = new TemplateResponse($this->appName, 'index');

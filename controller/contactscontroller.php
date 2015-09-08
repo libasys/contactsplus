@@ -405,8 +405,9 @@ class ContactsController extends Controller {
 				 $image->loadFromData((string)$vcard->PHOTO);
 				 $imgSrc=$image->__toString();
 				 $imgMimeType=$image->mimeType();
-				  \OC::$server->getCache()->remove('kontakte-photo-' . $pId);
-				 \OC::$server->getCache()->set('kontakte-photo-' . $pId, $image -> data(), 600);
+				 
+				  \OC::$server->getCache()->remove('editphoto');
+				 \OC::$server->getCache()->set('editphoto', $image -> data(), 600);
 			 }
 			 	
 		$TELTYPE = ContactsApp::getTypesOfProperty('TEL');
@@ -431,7 +432,7 @@ class ContactsController extends Controller {
 			'oldaddressbookid' => $oldaddressbookid,
 			'addressbooks' => $active_addressbooks,
 			'addressbooksPerm' => $addressBookPerm,
-			'tmpkey' =>  'kontakte-photo-' . $pId,
+			'tmpkey' =>  'editphoto',
 			'isPhoto' => $bPhoto,
 			'bCompany' => $bCompany,
 			'thumbnail' => $thumb,
@@ -736,7 +737,8 @@ class ContactsController extends Controller {
 
 		 $sNotice='';
 		if(isset($editInfoCard['NOTE'][0]['value']) && !empty($editInfoCard['NOTE'][0]['value'])){
-		 	$sNotice=$editInfoCard['NOTE'][0]['value'];
+		 	$sNotice=stripcslashes($editInfoCard['NOTE'][0]['value']);
+			$sNotice = str_replace( "\n", '<br />', $sNotice ); 
 		 }
 
 		 $sNickname='';
@@ -780,7 +782,7 @@ class ContactsController extends Controller {
 		 $bPhoto=0;
 		 $imgSrc='';
 		 $imgMimeType='';
-		 $tmpkey = uniqid('photo-') ;
+		 $tmpkey = 'editphoto';
 		 $thumb = '<div id="noimage" class="ioc ioc-user"></div>';
 		 if (isset($vcard->PHOTO)){
 		 	$bPhoto=1;
@@ -789,7 +791,7 @@ class ContactsController extends Controller {
 			 $image->loadFromData((string)$vcard->PHOTO);
 			 $imgSrc=$image->__toString();
 			 $imgMimeType=$image->mimeType();
-			 
+			  \OC::$server->getCache()->remove($tmpkey);
 			 \OC::$server->getCache()->set($tmpkey, $image -> data(), 600);
 			 
 		}

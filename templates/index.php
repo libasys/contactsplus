@@ -103,7 +103,7 @@
 	<div id="controls">
 	<div id="first-group"  class="button-group" style="float:left;">	
 		
-		<button class="button" id="addContact"><i class="ioc ioc-add"></i> <?php p($l->t('Contact')); ?></button>
+		<button class="button toolTip" id="addContact" title="<?php p($l->t('New Contact')); ?>"><i class="ioc ioc-add"></i> <i class="ioc ioc-user-1"></i> </button>
 
 	</div>
 	<div id="second-group" class="button-group"  style="float:left;">
@@ -124,8 +124,16 @@
 	</div>	
 	
 </div>
+<div class="batch-actions">
+<span class="head-check"><input class="regular-checkbox chk-all" type="checkbox" id="chk-all" /><label  class="is-checkbox-all toolTip" for="chk-all" title="<?php p($l->t('Select/ unselect all cards')); ?>"></label></span>
+<span class="info toolTip" title="<?php p($l->t('You can drag your selected contacts <br /> to a group or copy/ move to a addressbook')); ?>"><i class="ioc ioc-info"></i></span>
+<span class="deletegroups">
+	<a id="batch-group" class="">
+		<?php p($l->t('Delete all groups from selected contacts or delete selected contacts')); ?> (<span class="counter"></span>)
+		</a>
+	</span>
+</div>
 <div class="listview-header">
-	<span class="head-check"><input class="regular-checkbox" type="checkbox" id="chk-all" /><label  class="is-checkbox-all toolTip" for="chk-all" title="<?php p($l->t('Select/ unselect all cards')); ?>"></label></span>
 	 <span class="fullname" id="sortName"><?php p($l->t('Displayname')); ?></span>
 	 <span class="tel"><?php p($l->t('Phone')); ?></span>
 	 <span class="email"><?php p($l->t('Email')); ?></span>
@@ -133,14 +141,10 @@
 	 <span class="opt">&nbsp;</span>
 </div>
 <div id="map" style="display:none;"></div>
-	<div id="rightcontent">
+	<div id="rightcontent"></div>
 	
-	
-	</div>
 	<div id="rightcontentSideBar">
-			<ul id="alphaScroll">
-
-	</ul>
+			<ul id="alphaScroll"></ul>
 	</div>	
 </div>
 <div id="contact_details" style="display:none;"></div>

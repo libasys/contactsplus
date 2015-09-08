@@ -245,22 +245,14 @@ color:#000;
 .isRelative{
 	position:relative;
 }
-#rightcontentTop{
-	position:relative;
-	width:98%;
-	top:46px;
-	
-	padding-bottom:5px;
-	padding-left:20px;
-	height:auto;
-}
+
 
 #rightcontent{
 	position:relative;
 	width:auto;
 	top:45px;
 	overflow:auto;
-	height:86%;
+	height:85%;
 	margin-left:auto;
 	margin-right:auto;
 }
@@ -383,7 +375,7 @@ color:#000;
 
 #showMap:hover .ioc,
 #showMap.isMap .ioc{
-	color:#008000;
+	color:#000;
 }
 #importAddrStart{
 	font-size:30px;
@@ -488,10 +480,7 @@ ul#cgroups li span.groupcounter,ul#cAddressbooks li span.groupcounter{
 	text-align:right;
 	
 }
-ul#cgroups li span.groupcounter{
-	float:left;
-	position:relative;
-}
+
 ul#cgroups li span.groupname,
 ul#cAddressbooks li span.groupname,
 ul#cAddressbooks li span.groupinactive{
@@ -622,6 +611,13 @@ li.contactsrow{
 	padding:4px 8px;
 	border-radius:4px;
 }
+
+.ui-state-highlight {
+ height: 1.5em;
+  line-height: 1.2em; 
+background:#FFFABC;
+}
+
 #cgroups .dropcontainer.dropHover{
 	background:#FCEFA1;
 }
@@ -643,20 +639,112 @@ li.contactsrow{
 	background:#FCEFA1;
 }
 
+.batch-actions,
 .listview-header{
 	top:45px;
-	width:92%;
+	width:auto;
 	position:relative;
 	padding-left:40px;
-	float:left;
+	height:30px;
 	line-height:30px;
 	border-bottom:1px solid #ccc;
 	display:none;
 	color:#999;
 }
 
+/*ADDING LISTVIEW*/
+.listview-header .head-check,
+.listview-header .fullname,
+.listview-header .tel,
+.listview-header .email,
+.listview-header .group{
+	position:relative;
+	float:left;
+	display:block;
+	
+}
+.listview-header .head-check label{
+	margin-top:4px;
+	margin-left:-18px;
+	margin-right:4px;
+}
+.listview-header .fullname{
+	width:38%;
+}
+.listview-header .tel{
+	width:20%;
+}
+.listview-header .email{
+	width:34%;
+}
+.listview-header .group{
+	width:4%;
+}
 
+.batch-actions{
+	background-color:#f4f4f4;
+	height:30px;
+}
+/*ADDING LISTVIEW*/
+.batch-actions .head-check,
+.batch-actions .info,
+.batch-actions .deletegroups{
+	display:block;
+	position:relative;
+	
+	float:left;
+}
+.batch-actions .head-check label{
+		
+	margin-top:4px;
+	margin-left:-18px;
+	margin-right:4px;
+}
+.batch-actions .info{
+	
+	width:20px;
+	text-decoration:underline;
+}
+.batch-actions .info .ioc-info{
+	font-size:20px;
+	color:#008000;
+}
 
+.batch-actions .deletegroups{
+	float:left;
+	width:85%;
+	display:inline-block;
+	
+	text-align:center;
+	
+}
+.batch-actions a{
+	overflow:hidden;
+	display:block;
+	width:auto;
+	text-decoration:underline;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+}
+
+.batch-actions .counter{
+	font-weight:bold;
+	text-decoration: none;
+}
+
+ul#contacts-list{
+	padding-left:10px;
+	float:left;
+	margin:0;
+	position:relative;
+	padding-right:24px;
+}
+#rightcontent{
+	margin:0;
+	display:inline-block;
+	overflow:auto;
+   overflow-x:hidden;
+}
 li.contactsrow .container{
 	display:block;
 	float:left;
@@ -761,7 +849,7 @@ li.contactsrow .categories{
 	background:transparent;
 	display:block;
 	right:58px;
-	width:80px;
+	min-width:80px;
 	position:absolute;
 	text-align:right;
 	height:24px;
@@ -879,7 +967,8 @@ li.contactsrow .address{
 }
 li.contactsrow .address{
 	padding-left:20px;
-	width:70%;
+	width:66%;
+	
 }
 li.contactsrow .clouding,
 li.contactsrow .impp{
@@ -920,32 +1009,7 @@ li.contactsrow .name{
 	font-weight:bold;
 	
 }
-/*ADDING LISTVIEW*/
-.listview-header .head-check,
-.listview-header .fullname,
-.listview-header .tel,
-.listview-header .email,
-.listview-header .group{
-	float:left;
-	display:block;
-}
-.listview-header .head-check label{
-	margin-top:4px;
-	margin-left:-18px;
-	margin-right:4px;
-}
-.listview-header .fullname{
-	width:38%;
-}
-.listview-header .tel{
-	width:20%;
-}
-.listview-header .email{
-	width:34%;
-}
-.listview-header .group{
-	width:4%;
-}
+
 li.contactsrow.listview{
 	width:98%;
 }
@@ -1089,14 +1153,14 @@ li span.noitem{
 
 #rightcontentSideBar{
 	position:fixed;
-	top:94px;
-	width:40px;
+	top:120px;
+	width:28px;
 	text-align:center;
 	background:transparent;
 	
 	overflow:auto;
 	
-	right:0;
+	right:20px;
 	display:block;
 	float:left;
 }
@@ -1132,13 +1196,12 @@ li span.noitem{
 	
 }
 
-#show-settings #dropdown{
-position:absolute;
-left:0;
-z-index:44;
+#new-contact,
+#edit-contact{
+	height:400px;
 }
 
-#edit-contact,#new-contact,#show-contact,#show-settings{
+#edit-contact,#new-contact,#show-contact{
 	position:relative;
 	background:#fff;
 	
@@ -1155,10 +1218,33 @@ z-index:44;
 	font-size:80px;
 	color:#C0C0C0;
 }
+
+button#editContact-morefields,
+button#newContact-morefields{
+	font-size:18px;
+	line-height:20px;
+	padding:8px 4px;
+}
+
+#new-contact #actions i.ioc,
+#edit-contact #actions i.ioc,
 #show-contact #actions i.ioc{
 	font-size:30px;
 	color:#555;
 }
+#edit-contact #actions button#editContact-morefields i.ioc,
+#new-contact #actions button#newContact-morefields i.ioc{
+		margin-right:5px;
+		font-size:20px;
+}
+
+#new-contact #actions,
+#edit-contact #actions,
+#show-contact #actions{
+	position:absolute;
+	bottom:0;
+}
+
 #show-contact #actions button:hover i.ioc-delete{
 	color:#AD0D00;
 }
@@ -1192,12 +1278,11 @@ z-index:44;
 	height:auto;
 	max-height:250px;
 }
-
-
-#show-settings .innerContactontent{
-	height:auto;
-	
+#show-contact{
+	height:330px;
 }
+
+
 
 
 
@@ -1215,15 +1300,37 @@ z-index:44;
 	margin-left:5px;
 }
 
-#new-contact .labelLeft,#edit-contact .labelLeft,#show-contact  .labelLeft{
+#new-contact .labelLeft,#edit-contact .labelLeft,#show-contact .labelLeft{
 	display:block;
 	float:left;
-	width:140px;
+	width:170px;
 	line-height:24px;
-	
+	text-align:right;
+}
+#new-contact .labelLeft{
+	width:160px;
+	padding-right:10px;
 }
 
-
+#new-contact .phone-container .labelLeft,
+#new-contact .addr-container .labelLeft,
+#new-contact .im-container .labelLeft,
+#new-contact .url-container .labelLeft,
+#new-contact .cloud-container .labelLeft,
+#new-contact .email-container .labelLeft{
+text-align:left;
+width:140px;
+padding-right:0px;
+}
+#new-contact .addr-container .labelLeft.mobil-view-hide{
+	width:167px;
+}
+#new-contact .addr-container .addr-val-postal{
+	width:60px;
+}
+#new-contact .addr-container .addr-val-city{
+	width:130px;
+}
 
 #show-contact  .labelLeft{
 	text-align:right;
@@ -1357,7 +1464,7 @@ z-index:44;
 
 .combobox .arrow-down:after {
 	position: absolute;
-	top: -10px;
+	top: -15px;
 	right: 7px;
 	color: #99a1a7;
 	content: '\25BE';
@@ -1647,16 +1754,18 @@ table#allAddressbooks{
 		height:60px;
 		
 	}
+	#rightcontent{
+		padding:0;
+		margin:0;
+	}
 	
 	#show-contact .spacer{
 		margin-left:0;
 		width:100%;
 	}
-	#rightcontent{
-		width:86%;
-	}
+	
 	li.contactsrow,li.contactsrow.listview {
-		width:95%;
+		width:100%;
 		margin-bottom:5px;
 	}
 
@@ -1671,13 +1780,36 @@ table#allAddressbooks{
 	.listview-header .opt{
 		display:none;
 	}
+	
+	
+	li.contactsrow.listview .categories{
+		display:none;
+	}
+}
+#show-contact .labelLeft{
+	width:120px;
+}
+#edit-contact .labelLeft{
+		width:160px;
+		padding-right:10px;
+		text-align:right;
+		line-height:30px;
+}
+#edit-contact .labelLeft.mobil-view{
+	padding-right:0px;
+	text-align:left;
+	width:140px;
+}
+#edit-contact .labelLeft.mobil-view-hide{
+		width:170px;
+		padding-right:0px;
 }
 
+
+
 @media only screen and (max-width: 480px){
-	#controls #first-group button:first-child {
-		display:none;
-		
-	}
+	
+	
 	.app-contactsplus #searchresults {
 		width:100%;
 		padding:0;
@@ -1687,45 +1819,157 @@ table#allAddressbooks{
 		display:none;
 	}
 	
-	#new-contact input[type="text"],#new-contact select,#edit-contact input[type="text"],#edit-contact select{
-		width:160px;
-		margin-left:20px;
+	#new-contact input[type="text"],
+	#new-contact select,
+	#edit-contact input[type="text"],
+	#edit-contact select{
+		width:80%;
+		margin-left:0px;
 	}
-	
+	li.contactsrow.listview{
+		padding-left:0;
+	}
 	li.contactsrow.listview .fullname {
 		width:60%;
 		margin-bottom:5px;
 	}
+	li.contactsrow.listview .head-check,
 	li.contactsrow.listview .categories{
 		display:none;
 	}
-	
+	#controls #first-group{
+		padding-left:0;
+	}
 	li.contactsrow.listview .rowHeader .email,
 	li.contactsrow.listview .rowHeader .tel {
 		display:none;
 	}
 	.listview-header .email,
-	.listview-header .tel{
+	.listview-header .tel,
+	.listview-header .fullname{
+		display:none;
+	
+	}
+	
+	li.letter{
 		display:none;
 	}
-	
+	ul#contacts-list{
+		padding-right:5px;
+	}
+	#rightcontentSideBar{
+		display:none;
+	}
+	.listview-header{
+			height:0;
+	}
+	#edit-contact #contactPhoto #phototools{
+		top:30px;
+	}
+	#new-contact .labelLeft,
+	#edit-contact .labelLeft{
+		width:98%;
+		text-align:center;
+		font-weight:bold;
+		padding-right:0;
+	}
+	 #edit-contact img#contacts_details_photo{
+		width:250px;
+		height:250px;
+		
+	}
+	#edit-contact .labelLeft.mobil-view{
+		text-align:left;
+		padding-right:0;
+		width:98%;
+	}
+	#new-contact .fullWidth,
+	#edit-contact .fullWidth{
+		border-top:1px solid #ccc;
+		padding-top:5px;
+		padding-bottom:5px;
+	}
+	#new-contact .labelLeft .combobox,
+	#edit-contact .labelLeft .combobox{
+		width:200px;
+	}
+	#new-contact .labelLeft .combobox .comboSelHolder,
+	#edit-contact .labelLeft .combobox .comboSelHolder{
+		width:200px;
+	}
+	#new-contact .labelLeft .combobox .selector,
+	#edit-contact .labelLeft .combobox .selector{
+		width:160px;
+	}
+	#new-contact .labelLeft .combobox li,
+	#edit-contact .labelLeft .combobox li{
+		width:180px;
+	}
 	#edit-contact input.inputMobil{
-		width:140px;
+		width:68%;
 		margin-left:0;
 	}
+	#new-contact label,
+	#edit-contact label{
+		margin-right:5px;
+	}
+	#edit-contact input.mobil-input-full,
+	#edit-contact input.mobil-input{
+		width:80%;
+	}
+	#new-contact .labelLeft.mobil-view-hide,
+	#edit-contact .labelLeft.mobil-view-hide{
+		display:none;
+	}
 	#edit-contact input.marginLeft20{
-		margin-left:20px;
+		margin-left:0px;
+	}
+	#new-contact select{
+		width:95%;
+	}
+	#new-contact .labelLeft.show-comp{
+		display:none;
+	}
+	#new-contact input.mobil-input-full,
+	#new-contact input.addr-val-country,
+	#new-contact input.addr-val-state{
+		width:93%;
+	}
+	#new-contact .addr-container input.addr-val-city{
+		width:66%;
+	}
+	#new-contact input.inputMobil{
+		width:68%;
 	}
 	
-	#edit-contact .combobox, #new-contact .combobox{
-		font-size:12px;
+	#new-contact .phone-container .labelLeft,
+	#new-contact .addr-container .labelLeft,
+	#new-contact .im-container .labelLeft,
+	#new-contact .url-container .labelLeft,
+	#new-contact .cloud-container .labelLeft,
+	#new-contact .email-container .labelLeft{
+		text-align:left;
+		width:98%;
+	}
+	
+	li.contactsrow,li.contactsrow.listview {
+		width:100%;
+		margin-bottom:5px;
+	}
+	
+	
+	
+	#show-contact .labelLeft{
 		width:80px;
 	}
-	#new-contact .combobox .selector, #edit-contact .combobox .selector{
-		width:46px;
+	
+	#show-contact .innerContactontent  a{
+	width:50%;
+	overflow: hidden;
+	-moz-box-sizing: none; 
+	box-sizing: none;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 	}
 	
-	#new-contact .combobox .comboSelHolder, #edit-contact .combobox .comboSelHolder{
-		width:70px;
-	}
 }

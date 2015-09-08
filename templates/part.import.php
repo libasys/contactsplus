@@ -36,13 +36,13 @@ $contacts_options = OCA\ContactsPlus\Addressbook::all(OCP\USER::getUser());
 				
 		$addressbookChoose[]= array(
 				'id' => $contacts_options[$i]['id'],
-				'displayname' => OCP\Util::sanitizeHTML($contacts_options[$i]['displayname'])
+				'displayname' => $contacts_options[$i]['displayname']
 				);
 			
 		}
 		$addressbookChoose[] = array('id'=>'newaddressbook', 'displayname'=>$l->t('create a new addressbook'));
 		
-		print_unescaped(OCP\html_select_options($addressbookChoose, $addressbookChoose[0]['id'], array('value'=>'id', 'label'=>'displayname')));
+		print_unescaped(OCP\Template::html_select_options($addressbookChoose, $addressbookChoose[0]['id'], array('value'=>'id', 'label'=>'displayname')));
 		?>
 		</select>
 		<br><br>

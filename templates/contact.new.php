@@ -4,7 +4,7 @@
     <input type="hidden" name="hiddenfield" value="" />
     <input type="hidden" name="selectedContactgroup" id="selectedContactgroup" value="" />
    
- <span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Addressbook')); ?></span>
+ <span class="labelLeft"><?php p($l->t('Addressbook')); ?></span>
 <select name="addressbooks">	
 <?php foreach($_['addressbooks'] as $addressbook) {
 	
@@ -14,24 +14,28 @@
 </select>
 <br style="clear:both;">   
  <span class="fullWidth">
- 	<span class="labelLeft" style="text-align:right;padding-right:30px;">&nbsp;</span> <input type="checkbox" style="margin-left:5px;" name="bcompany"   /> <?php p($l->t('Show as company')); ?>
+ 	<span class="labelLeft show-comp">&nbsp;</span> <input type="checkbox" style="margin-left:5px;" name="bcompany"   /> <?php p($l->t('Show as company')); ?>
 </span>
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('First name')); ?></span>	<input style="width:190px;" type="text" placeholder="<?php p($l->t('First name')); ?>" value="" maxlength="100" id="fname"  name="fname" />
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Last name')); ?></span> 	<input style="width:190px;" type="text" placeholder="<?php p($l->t('Last name')); ?>" value="" maxlength="100" id="lname"  name="lname" />
-<br style="clear:both;"><br>
+<span class="labelLeft"><?php p($l->t('First name')); ?></span>	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('First name')); ?>" value="" maxlength="100" id="fname"  name="fname" />
+<span class="labelLeft"><?php p($l->t('Last name')); ?></span> 	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Last name')); ?>" value="" maxlength="100" id="lname"  name="lname" />
+<span class="labelLeft"><?php p($l->t('Organization')); ?></span> 	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Organization')); ?>" value="" maxlength="100" id="firm"  name="firm" />
+
+<br style="clear:both;">
 <span class="additionalField" data-addfield="gender">
-  <span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Title')); ?></span>	<input style="width:190px;" type="text" placeholder="<?php p($l->t('Title')); ?>" value="" maxlength="100" id="gender"  name="gender" />
+  <span class="labelLeft"><?php p($l->t('Title')); ?></span>	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Title')); ?>" value="" maxlength="100" id="gender"  name="gender" />
  </span>  
 <span class="additionalField" data-addfield="nickname">
-	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Nickname')); ?></span> 	<input style="width:190px;" type="text" placeholder="<?php p($l->t('Nickname')); ?>" value="" maxlength="100" id="nickname"  name="nickname" />
+	<span class="labelLeft"><?php p($l->t('Nickname')); ?></span> 	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Nickname')); ?>" value="" maxlength="100" id="nickname"  name="nickname" />
 </span>
 <span class="additionalField" data-addfield="position">
-	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Position')); ?></span> 	<input style="width:190px;" type="text" placeholder="<?php p($l->t('Position')); ?>" value="" maxlength="100" id="position"  name="position" />
+	<span class="labelLeft"><?php p($l->t('Position')); ?></span> 	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Position')); ?>" value="" maxlength="100" id="position"  name="position" />
 </span>
 <span class="additionalField" data-addfield="department">
-	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Department')); ?></span> 	<input style="width:190px;"  type="text" placeholder="<?php p($l->t('Department')); ?>" value="" maxlength="100" id="department"  name="department" />
+	<span class="labelLeft"><?php p($l->t('Department')); ?></span> 	<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Department')); ?>" value="" maxlength="100" id="department"  name="department" />
 </span>
-	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Organization')); ?></span> 	<input style="width:190px;" type="text" placeholder="<?php p($l->t('Organization')); ?>" value="" maxlength="100" id="firm"  name="firm" />
+<span class="additionalField" data-addfield="bday">
+	<span class="labelLeft"><?php p($l->t('Birthday')); ?></span><input class="mobil-input-full" type="text" placeholder="tt.mm.jjjj" value="<?php p($_['sBday']); ?>" maxlength="100" id="bday"  name="bday" />
+</span>
 
 <br style="clear:both;"><br>
 <span class="fullWidth phone-container" data-id="0" id="phone-container-0">
@@ -57,7 +61,7 @@
 		  &nbsp;<input type="radio" class="phone-pref regular-radio"  value="phone_0" id="phonePref-0" name="phonePref" checked="checked" />
 		  <label style="float:left;margin-top:5px;" class="phone-labelpref" for="phonePref-0"></label>
 
-          <input id="phone-0"  name="phone[0]" type="text" class="inputMobil phone-val" style="width:190px;" placeholder="<?php p($l->t('Phone')); ?>" value=""  />
+          <input id="phone-0"  name="phone[0]" type="text" class="inputMobil phone-val" placeholder="<?php p($l->t('Phone')); ?>" value=""  />
           <i class="ioc ioc-add add-phone" data-add="0"></i>
           <i class="ioc ioc-delete delete-phone" data-del="0"></i>
    		
@@ -84,7 +88,7 @@
 		
 	  &nbsp;<input type="radio" class="email-pref regular-radio"  value="email_0" id="emailPref-0"  name="emailPref" checked="checked" />
 	 <label style="float:left;margin-top:5px;" class="email-labelpref" for="emailPref-0"></label>
-      <input class="inputMobil email-val" style="width:190px;" id="email-0"  name="email[0]" type="text" placeholder="<?php p($l->t('Email')); ?>"  value="" maxlength="100"  />
+      <input class="inputMobil email-val" id="email-0"  name="email[0]" type="text" placeholder="<?php p($l->t('Email')); ?>"  value="" maxlength="100"  />
      
       <i class="ioc ioc-add add-email" data-add="0"></i>
       <i class="ioc ioc-delete delete-email" data-del="0"></i>
@@ -108,9 +112,9 @@
 			    </ul>
 			</div>
 		</span> 
-			&nbsp;<input type="radio" class="url-pref regular-radio"  value="url_0" id="urlPref-0"  name="urlPref"  />
+			&nbsp;<input type="radio" class="url-pref regular-radio"  value="url_0" id="urlPref-0"  name="urlPref" checked="checked" />
 			<label style="float:left;margin-top:5px;" class="url-labelpref" for="urlPref-0"></label> 
-          <input class="inputMobil url-val" id="url-0" style="width:190px;" name="url[0]" type="text" placeholder="<?php p($l->t('Homepage')); ?>"  value="" maxlength="100"  />
+          <input class="inputMobil url-val" id="url-0" name="url[0]" type="text" placeholder="<?php p($l->t('Homepage')); ?>"  value="" maxlength="100"  />
          
           <i class="ioc ioc-add add-url" data-add="0"></i>
           <i class="ioc ioc-delete delete-url" data-del="0"></i>
@@ -134,17 +138,18 @@
 	    </ul>
 	</div>
 </span>
-&nbsp;<input type="radio" class="addr-pref regular-radio" style="margin-left:-13px;" value="addr_0" id="addrPref-0" name="addrPref" checked="checked" />
+&nbsp;<input type="radio" class="addr-pref regular-radio"  value="addr_0" id="addrPref-0" name="addrPref" checked="checked" />
 <label style="float:left;margin-top:5px;" class="addr-labelpref" for="addrPref-0"></label>  
-<input name="addr[0][street]" class="addr-val-street inputMobil marginLeft20" style="width:190px;" type="text" placeholder="<?php p($l->t('Street Address')); ?>" value="" maxlength="100" />
+<input name="addr[0][street]" class="addr-val-street inputMobil marginLeft20" type="text" placeholder="<?php p($l->t('Street Address')); ?>" value="" maxlength="100" />
 
  <i class="ioc ioc-add add-addr" data-add="0"></i>
 <i class="ioc ioc-delete delete-addr" data-del="0"></i>
  <br style="clear:both;">
-<span class="labelLeft" style="width:170px;">&nbsp;</span> <input class="addr-val-postal" name="addr[0][postal]" type="text" style="width:68px;" placeholder="<?php p($l->t('Postal Code')); ?>" value="" maxlength="100"   />
- <input class="addr-val-city" name="addr[0][city]" type="text" style="width:100px;" placeholder="<?php p($l->t('City')); ?>" value="" maxlength="100"  />
-<span class="labelLeft" style="width:170px;">&nbsp;</span> <input style="width:190px;" class="addr-val-state" name="addr[0][state]" type="text" placeholder="<?php p($l->t('State')); ?>" value="" maxlength="100"   />
-<span class="labelLeft" style="width:170px;">&nbsp;</span> <input style="width:190px;" class="addr-val-country" name="addr[0][country]" type="text" placeholder="<?php p($l->t('Country')); ?>" value="" maxlength="100"   />
+<span class="labelLeft mobil-view-hide" >&nbsp;</span> 
+<input class="addr-val-postal" name="addr[0][postal]" type="text"  placeholder="<?php p($l->t('Postal Code')); ?>" value="" maxlength="100"   />
+ <input class="addr-val-city" name="addr[0][city]" type="text" placeholder="<?php p($l->t('City')); ?>" value="" maxlength="100"  />
+<span class="labelLeft mobil-view-hide" >&nbsp;</span> <input class="addr-val-state" name="addr[0][state]" type="text" placeholder="<?php p($l->t('State')); ?>" value="" maxlength="100"   />
+<span class="labelLeft mobil-view-hide" >&nbsp;</span> <input class="addr-val-country" name="addr[0][country]" type="text" placeholder="<?php p($l->t('Country')); ?>" value="" maxlength="100"   />
  </span>
  
  <span class="fullWidth im-container"  data-id="0" id="im-container-0">		
@@ -168,7 +173,7 @@
 	</span>
 	&nbsp;<input type="radio" class="im-pref regular-radio" id="imPref-0" value="im_0"  name="imPref" checked="checked" />
 	<label style="float:left;margin-top:5px;" class="im-labelpref" for="imPref-0"></label>   
-	<input type="text" style="width:190px;" placeholder="<?php p($l->t('Messenger')); ?>" class="inputMobil im-val" value="" maxlength="100" id="im-0"  name="im[0]" />
+	<input type="text" placeholder="<?php p($l->t('Messenger')); ?>" class="inputMobil im-val" value="" maxlength="100" id="im-0"  name="im[0]" />
     <i class="ioc ioc-add add-im" data-add="0"></i>
      <i class="ioc ioc-delete delete-im" data-del="0"></i>
 </span>
@@ -193,13 +198,13 @@
 </span> 
 	 &nbsp;<input type="radio" class="cloud-pref regular-radio"  value="cloud_0"  id="cloudPref-0" name="cloudPref" checked="checked" />
 	 <label style="float:left;margin-top:5px;" class="cloud-labelpref" for="cloudPref-0"></label> 
-  <input id="cloud-0"  name="cloud[0]" type="text" style="width:190px;" placeholder="<?php p($l->t('Federated-Cloud-ID')); ?>" class="inputMobil cloud-val" value="" maxlength="100"  />
+  <input id="cloud-0"  name="cloud[0]" type="text" placeholder="<?php p($l->t('Federated-Cloud-ID')); ?>" class="inputMobil cloud-val" value="" maxlength="100"  />
  
   <i class="ioc ioc-add add-cloud" data-add="0"></i>
   <i class="ioc ioc-delete delete-cloud" data-del="0"></i>
 </span>
 
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Notice')); ?></span> <textarea style="width:190px;" placeholder="<?php p($l->t('Notice')); ?>"  id="notice"  name="notice"></textarea>
+<span class="labelLeft"><?php p($l->t('Notes')); ?></span> <textarea placeholder="<?php p($l->t('Notes')); ?>"  id="notice"  name="notice"></textarea>
 
    </form>	
   </div>
@@ -212,13 +217,13 @@
 			?>
 	    </ul>
  </div>  
-<div id="actions" style="border-top:1px solid #bbb;height:50px;line-height:50px;width:100%;">
+<div id="actions" style="border-top:1px solid #bbb;width:100%;">
 	<div  class="button-group" style="margin: 7px 5px;float:left;width:30%;">
-	<button id="newContact-morefields" class="button"><?php p($l->t('Add Field')); ?></button> 
+	<button id="newContact-morefields" class="button" title="<?php p($l->t('Add Field')); ?>"><i class="ioc ioc-add"></i> <?php p($l->t('Field')); ?></button> 
     </div>
  <div  class="button-group" style="margin: 7px 5px;float:right;">	
-		<button id="newContact-cancel" class="button"><?php p($l->t("Cancel"));?></button> 
-		<button id="newContact-submit" class="button"  style="min-width:60px;"><?php p($l->t("OK"));?></button>
+		<button id="newContact-cancel" class="button" title="<?php p($l->t('Cancel')); ?>"><i class="ioc ioc-close" ></i></button> 
+		<button id="newContact-submit" class="button"  title="<?php p($l->t('OK')); ?>" style="min-width:60px;"><i class="ioc ioc-checkmark" ></i></button>
 	   </div>
 	</div>
 </div>

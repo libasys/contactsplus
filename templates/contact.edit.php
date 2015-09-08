@@ -13,7 +13,7 @@
     <input type="hidden" name="selectedContactgroup" id="selectedContactgroup" value="" />
  
 
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Addressbook')); ?></span>
+<span class="labelLeft" ><?php p($l->t('Addressbook')); ?></span>
 <select name="addressbooks">	
 <?php foreach($_['addressbooks'] as $addressbook) {
 	$selected='';
@@ -23,9 +23,11 @@
 ?>
 </select>
 <br style="clear:both;">
-<span class="labelLeft" style="min-height:120px;padding-right:30px;text-align:center;">
+<span class="labelLeft" style="min-height:120px;text-align:center;">
+	
 	<span class="labelPhoto" id="contactPhoto"><?php print_unescaped($_['thumbnail']); ?>
   <div class="tip"  id="contacts_details_photo_wrapper" title="<?php p($l->t('Drop photo to upload')); ?> (max <?php p($_['uploadMaxHumanFilesize']); ?>)" data-element="PHOTO">
+	
 	<ul id="phototools" class="transparent hidden"  style="margin-top:30px;">
 		<li><a class="delete" title="<?php p($l->t('Delete current photo')); ?>"><i class="ioc ioc-delete"></i></a></li>
 		<li><a class="edit" title="<?php p($l->t('Edit current photo')); ?>"><i class="ioc ioc-edit"></i></a></li>
@@ -45,8 +47,10 @@
 		  ?> 
   	<input type="checkbox" style="margin-left:5px;" name="bcompany" <?php print_unescaped($sChecked); ?>  /> <?php p($l->t('Show as company')); ?>
 
-<input type="text" placeholder="<?php p($l->t('First name')); ?>" value="<?php p($_['fname']); ?>" maxlength="100" id="fname"  name="fname" />
-<input type="text" placeholder="<?php p($l->t('Last name')); ?>" value="<?php p($_['lname']); ?>" maxlength="100" id="lname"  name="lname" />
+<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('First name')); ?>" value="<?php p($_['fname']); ?>" maxlength="100" id="fname"  name="fname" />
+<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Last name')); ?>" value="<?php p($_['lname']); ?>" maxlength="100" id="lname"  name="lname" />
+<input class="mobil-input-full" type="text" placeholder="<?php p($l->t('Organization')); ?>" value="<?php p($_['firm']); ?>" maxlength="100" id="firm"  name="firm" />
+
   <?php 
 $isAnredeActive='';
 if($_['anrede']!='') $isAnredeActive=' activeAddFieldEdit';
@@ -54,7 +58,8 @@ if($_['anrede']!='') $isAnredeActive=' activeAddFieldEdit';
 
  
 <span class="additionalField<?php p($isAnredeActive); ?>" data-addfield="gender">
-  	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Title')); ?></span><input style="width:210px;" type="text" placeholder="<?php p($l->t('Title')); ?>" value="<?php p($_['anrede']); ?>" maxlength="100" id="gender"  name="gender" />
+  	<span class="labelLeft" ><?php p($l->t('Title')); ?></span>
+  	<input class="mobil-input" type="text" placeholder="<?php p($l->t('Title')); ?>" value="<?php p($_['anrede']); ?>" maxlength="100" id="gender"  name="gender" />
  </span>  
 
   <?php 
@@ -62,32 +67,35 @@ $isNickActive='';
 if($_['nickname']!='') $isNickActive=' activeAddFieldEdit';
  ?>  
 <span class="additionalField<?php p($isNickActive); ?>" data-addfield="nickname">
-	 	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Nickname')); ?></span><input style="width:210px;" type="text" placeholder="<?php p($l->t('Nickname')); ?>" value="<?php p($_['nickname']); ?>" maxlength="100" id="nickname"  name="nickname" />
+	 	<span class="labelLeft" ><?php p($l->t('Nickname')); ?></span>
+	 	<input class="mobil-input"  type="text" placeholder="<?php p($l->t('Nickname')); ?>" value="<?php p($_['nickname']); ?>" maxlength="100" id="nickname"  name="nickname" />
 </span>
 <?php 
 $isBdayActive='';
 if($_['sBday']!='') $isBdayActive=' activeAddFieldEdit';
  ?>
 <span class="additionalField<?php p($isBdayActive); ?>" data-addfield="bday">
-	<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Birthday')); ?></span><input style="width:210px;" type="text" placeholder="tt.mm.jjjj" value="<?php p($_['sBday']); ?>" maxlength="100" id="bday"  name="bday" />
+	<span class="labelLeft" ><?php p($l->t('Birthday')); ?></span>
+	<input class="mobil-input" type="text" placeholder="tt.mm.jjjj" value="<?php p($_['sBday']); ?>" maxlength="100" id="bday"  name="bday" />
 </span>
   <?php 
 $isPositionActive='';
 if($_['position']!='') $isPositionActive=' activeAddFieldEdit';
  ?>  
 <span class="additionalField<?php p($isPositionActive); ?>" data-addfield="position">
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Position')); ?></span>	<input style="width:210px;" type="text" placeholder="<?php p($l->t('Position')); ?>" value="<?php p($_['position']); ?>" maxlength="100" id="position"  name="position" />
+<span class="labelLeft" ><?php p($l->t('Position')); ?></span>	
+<input class="mobil-input" type="text" placeholder="<?php p($l->t('Position')); ?>" value="<?php p($_['position']); ?>" maxlength="100" id="position"  name="position" />
 </span>
 <?php 
 $isDActive='';
 if($_['department']!='') $isDActive=' activeAddFieldEdit';
  ?>
 <span class="additionalField<?php p($isDActive); ?>" data-addfield="department">
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Department')); ?></span><input style="width:210px;" type="text" placeholder="<?php p($l->t('Department')); ?>" value="<?php p($_['department']); ?>" maxlength="100" id="department"  name="department" />
+<span class="labelLeft" ><?php p($l->t('Department')); ?></span>
+<input class="mobil-input" type="text" placeholder="<?php p($l->t('Department')); ?>" value="<?php p($_['department']); ?>" maxlength="100" id="department"  name="department" />
 </span>
- 	<input type="text" placeholder="<?php p($l->t('Organization')); ?>" value="<?php p($_['firm']); ?>" maxlength="100" id="firm"  name="firm" />
-
-<br style="clear:both;"><br>
+ 
+<br style="clear:both;"><br />
 
 
 <?php
@@ -96,7 +104,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 			<span class="fullWidth phone-container" data-id="<?php p($iCount); ?>" id="phone-container-<?php p($iCount); ?>">
 			 
 			 <input type="hidden" class="phone-type" name="phonetype[<?php p($iCount); ?>]" id="phonetype-<?php p($iCount); ?>" value="<?php p($VALUE['type']); ?>" />
-			<span class="labelLeft">
+			<span class="labelLeft mobil-view">
 			 <i class="ioc ioc-phone icon-descr"></i>
 			<div id="phone-typeselect-<?php p($iCount); ?>" class="phone-select combobox">
 				<div class="comboSelHolder">	
@@ -139,7 +147,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 			 <span class="fullWidth email-container" data-id="<?php p($iECount); ?>" id="email-container-<?php p($iECount); ?>">
 			 <input type="hidden" class="email-type" name="emailtype[<?php p($iECount); ?>]" id="emailtype-<?php p($iECount); ?>" value="<?php p($VALUE['type']); ?>" />
 			 
-			<span class="labelLeft">
+			<span class="labelLeft mobil-view">
 			<i class="ioc ioc-mail icon-descr"></i>	
 			<div id="email-typeselect-<?php p($iECount); ?>" class="combobox email-select">
 				<div class="comboSelHolder">	
@@ -180,7 +188,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 			 <span class="fullWidth url-container" data-id="<?php p($iUrlCount); ?>" id="url-container-<?php p($iUrlCount); ?>">
 			 <input type="hidden" class="url-type" name="urltype[<?php p($iUrlCount); ?>]" id="urltype-<?php p($iUrlCount); ?>" value="<?php p($VALUE['type']); ?>" />
 			 
-			<span class="labelLeft">
+			<span class="labelLeft mobil-view">
 			<i class="ioc ioc-publiclink icon-descr"></i>	
 			<div id="url-typeselect-<?php p($iUrlCount); ?>" class="combobox url-select">
 				<div class="comboSelHolder">	
@@ -222,7 +230,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
      <span class="fullWidth addr-container" data-id="<?php p($iACount); ?>" id="addr-container-<?php p($iACount); ?>">
     <input type="hidden" class="addr-type" name="addrtype[<?php p($iACount); ?>]" id="addrtype-<?php p($iACount); ?>" value="<?php p($VALUE['type']); ?>" />
     
-    <span class="labelLeft">
+    <span class="labelLeft mobil-view">
     <i class="ioc ioc-address icon-descr"></i>	
 	<div id="addr-typeselect-<?php p($iACount); ?>" class="combobox addr-select">
 		<div class="comboSelHolder">	
@@ -246,16 +254,16 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 	?>
 
 &nbsp;<input type="radio" class="addr-pref regular-radio"  value="addr_<?php p($iACount); ?>"  name="addrPref" id="addrPref-<?php p($iACount); ?>" <?php print_unescaped($sChecked); ?> /><label class="addr-labelpref" style="float:left;margin-top:5px;" for="addrPref-<?php p($iACount); ?>"></label>
-<input name="addr[<?php p($iACount); ?>][street]" class="addr-val-street inputMobil marginLeft20" style="width:210px;" type="text" placeholder="<?php p($l->t('Street Address')); ?>" value="<?php p($VALUE['val']['street']); ?>" maxlength="100" />
+<input name="addr[<?php p($iACount); ?>][street]" class="addr-val-street inputMobil marginLeft20"  type="text" placeholder="<?php p($l->t('Street Address')); ?>" value="<?php p($VALUE['val']['street']); ?>" maxlength="100" />
 <?php if($iACount == 0){ ?>
           <i class="ioc ioc-add add-addr" data-add="<?php p($iACount); ?>"></i>
            <?php } ?>
 <i class="ioc ioc-delete delete-addr" data-del="<?php p($iACount); ?>"></i>
  <br style="clear:both;">
-<span class="labelLeft" style="width:170px;">&nbsp;</span> <input class="addr-val-postal" name="addr[<?php p($iACount); ?>][postal]" type="text" style="width:58px;" placeholder="<?php p($l->t('Postal Code')); ?>" value="<?php p($VALUE['val']['postalcode']); ?>" maxlength="100"   />
+<span class="labelLeft mobil-view-hide">&nbsp;</span> <input class="addr-val-postal" name="addr[<?php p($iACount); ?>][postal]" type="text" style="width:58px;" placeholder="<?php p($l->t('Postal Code')); ?>" value="<?php p($VALUE['val']['postalcode']); ?>" maxlength="100"   />
  <input class="addr-val-city" name="addr[<?php p($iACount); ?>][city]" type="text" style="width:130px;" placeholder="<?php p($l->t('City')); ?>" value="<?php p($VALUE['val']['city']); ?>" maxlength="100"  />
-<span class="labelLeft" style="width:170px;">&nbsp;</span> <input style="width:210px;" class="addr-val-state" name="addr[<?php p($iACount); ?>][state]" type="text" placeholder="<?php p($l->t('State')); ?>" value="<?php p($VALUE['val']['state']); ?>" maxlength="100"   />
-<span class="labelLeft" style="width:170px;">&nbsp;</span> <input style="width:210px;" class="addr-val-country" name="addr[<?php p($iACount); ?>][country]" type="text" placeholder="<?php p($l->t('Country')); ?>" value="<?php p($VALUE['val']['country']); ?>" maxlength="100"   />
+<span class="labelLeft mobil-view-hide">&nbsp;</span> <input  class="addr-val-state" name="addr[<?php p($iACount); ?>][state]" type="text" placeholder="<?php p($l->t('State')); ?>" value="<?php p($VALUE['val']['state']); ?>" maxlength="100"   />
+<span class="labelLeft mobil-view-hide">&nbsp;</span> <input  class="addr-val-country" name="addr[<?php p($iACount); ?>][country]" type="text" placeholder="<?php p($l->t('Country')); ?>" value="<?php p($VALUE['val']['country']); ?>" maxlength="100"   />
  </span>
 
  <?php 
@@ -272,7 +280,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 	<span class="fullWidth im-container"  data-id="<?php p($iMCount); ?>" id="im-container-<?php p($iMCount); ?>">		
 			 <input type="hidden" class="im-type" name="imtype[<?php p($iMCount); ?>]" id="imtype-<?php p($iMCount); ?>" value="<?php p($VALUE['type']); ?>" />
 			
-			<span class="labelLeft">
+			<span class="labelLeft mobil-view">
 			<i class="ioc ioc-users icon-descr"></i>	
 			<div id="im-typeselect-<?php p($iMCount); ?>" class="combobox im-select">
 				<div class="comboSelHolder">	
@@ -314,7 +322,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 			 <span class="fullWidth cloud-container"  data-id="<?php p($iClCount); ?>" id="cloud-container-<?php p($iClCount); ?>">		
 			 <input type="hidden" class="cloud-type" name="cloudtype[<?php p($iClCount); ?>]" id="cloudtype-<?php p($iClCount); ?>" value="<?php p($VALUE['type']); ?>" />
 			
-			<span class="labelLeft">
+			<span class="labelLeft mobil-view">
 			<i class="ioc ioc-upload-cloud icon-descr"></i>	
 			<div id="cloud-typeselect-<?php p($iClCount); ?>" class="combobox cloud-select">
 				<div class="comboSelHolder">	
@@ -351,7 +359,7 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
  <?php 
       $iClCount++;
       } ?>              
-<span class="labelLeft" style="text-align:right;padding-right:30px;"><?php p($l->t('Notice')); ?></span> <textarea style="width:210px;" placeholder="<?php p($l->t('Notice')); ?>"  id="notice"  name="notice"><?php p($_['sNotice']); ?></textarea>
+<span class="labelLeft" ><?php p($l->t('Notes')); ?></span> <textarea  placeholder="<?php p($l->t('Notes')); ?>"  id="notice"  name="notice"><?php p($_['sNotice']); ?></textarea>
 
    </form>	
   </div>
@@ -364,18 +372,18 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 			?>
 	    </ul>
  </div>  
-<div id="actions" style="border-top:1px solid #bbb;height:50px;line-height:50px;width:100%;">
+<div id="actions" style="border-top:1px solid #bbb;width:100%;">
 	
 <?php if($_['addressbooksPerm']['permissions'] & OCP\PERMISSION_UPDATE) { ?>	
 <div  class="button-group" style="margin: 7px 5px;float:left;width:30%;">
-	<button id="editContact-morefields" class="button"><?php p($l->t('Add Field')); ?></button> 
+	<button id="editContact-morefields" class="button" title="<?php p($l->t('Add Field')); ?>"><i class="ioc ioc-add"></i> <?php p($l->t('Field')); ?></button> 
 </div>
 <?php } ?>
 <div  class="button-group" style="margin: 7px 5px;float:right;">
 	
-		<button id="editContact-cancel" class="button"><?php p($l->t("Cancel"));?></button> 
+		<button id="editContact-cancel" class="button" title="<?php p($l->t('Cancel')); ?>"><i class="ioc ioc-close" ></i></button> 
 <?php if($_['addressbooksPerm']['permissions'] & OCP\PERMISSION_UPDATE) { ?>	
-<button id="editContact-submit" class="button"  style="min-width:60px;"><?php p($l->t("OK"));?></button>
+<button id="editContact-submit" class="button"  title="<?php p($l->t('OK')); ?>" style="min-width:60px;"><i class="ioc ioc-checkmark" ></i></button>
 <?php } ?>
 	   </div>
 	</div>

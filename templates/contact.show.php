@@ -164,7 +164,7 @@ if($_['bShowCompany']){
 
 <?php if($_['sNotice']!='') {  ?>
 	<br style="clear:both;">
-	<span class="labelLeft"><i class="ioc ioc-info"></i> <?php p($l->t("Notice"));?></span> <?php p($_['sNotice']); ?>
+	<span class="labelLeft"><i class="ioc ioc-info"></i> <?php p($l->t("Notice"));?></span><br /> <?php print_unescaped($_['sNotice']); ?>
 	<br style="clear:both;">
 <?php } ?>
   <br />

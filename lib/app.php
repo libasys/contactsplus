@@ -927,7 +927,7 @@ class App{
 				
 				
 				  $oldLetter='';
-				  $buildingOutput='<ul>';
+				  $buildingOutput='<ul id="contacts-list">';
 				  foreach($aLetter as $letterInfo){
 				  	
 					    $bFound = false;
@@ -950,7 +950,7 @@ class App{
 				   $buildingOutput.='<li><span class="noitem hidden">'.(string)self::$l10n->t('No Cards found!').'</span></li>';
 				   $buildingOutput.='</ul>';
 				   }else{
-				   	$buildingOutput='<ul>';
+				   	$buildingOutput='<ul id="contacts-list">';
 					  foreach($aLetter as $letterInfo){
 					  	$buildingOutput.='<li class="letter hidden" data-scroll="'.$letterInfo.'"><span>'.$letterInfo.'</span></li>';
 					  }
