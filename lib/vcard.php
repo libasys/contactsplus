@@ -267,6 +267,30 @@ class VCard {
 
 		return $result->fetchRow();
 	}
+	
+	/**
+	 * @brief finds  cards by its DAV Data
+	 * @param integer $aid Addressbook id
+	 * @param array $uris
+	 * @return associative array or false.
+	 */
+	public static function getMultipleCardsDavData($aid, $uris){
+			
+		$query = 'SELECT id`, `uri`, `lastmodified` FROM `'.App::ContactsTable.'` WHERE `addressbookid` = ? AND `uri` = IN (';
+        // Inserting a whole bunch of question marks
+        $query.=implode(',', array_fill(0, count($uris), '?'));
+        $query.=')';
+
+        $stmt = \OCP\DB::prepare($query);
+        $stmt->execute(array_merge([$aid], $uris));
+        $result = [];
+        while($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            
+            $result[] = $row;
+        }
+		
+		return $result;
+	}
 
 	/**
 	* VCards with version 2.1, 3.0 and 4.0 are found.
@@ -764,10 +788,7 @@ class VCard {
 		// inside the lib files to prevent any redundancies with sharing checks
 		$addressbook = Addressbook::find($oldcard['addressbookid']);
 		if ($addressbook['userid'] != \OCP\User::getUser()) {
-			$sharedAddressbook = \OCP\Share::getItemSharedWithBySource(
-				App::SHAREADDRESSBOOK,
-				App::SHAREADDRESSBOOKPREFIX.$oldcard['addressbookid'],
-				\OCP\Share::FORMAT_NONE, null, true);
+			$sharedAddressbook = \OCP\Share::getItemSharedWithBySource(App::SHAREADDRESSBOOK,App::SHAREADDRESSBOOKPREFIX.$oldcard['addressbookid'],\OCP\Share::FORMAT_NONE, null, true);
 			$sharedContact = \OCP\Share::getItemSharedWithBySource(App::SHARECONTACT, App::SHAREADDRESSBOOKPREFIX.$id, \OCP\Share::FORMAT_NONE, null, true);
 			$addressbook_permissions = 0;
 			$contact_permissions = 0;
@@ -1155,11 +1176,9 @@ class VCard {
 			return;
 		}
 		$value = $property->getValue();
-		if($property->name == 'ADR' || $property->name == 'N' || $property->name == 'ORG' || $property->name == 'CATEGORIES') {
+		if($property->name == 'ADR' || $property->name == 'N' || $property->name == 'ORG') {
 			$value = $property->getParts();
-			if($property->name == 'CATEGORIES'){
-				$value = str_replace(';', ',', $value);
-			}
+			
 			if($property->name == 'N'){
 				
 				//$value = stripslashes($value);
