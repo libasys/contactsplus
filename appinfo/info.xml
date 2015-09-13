@@ -1,12 +1,12 @@
 <?xml version="1.0"?> 
 <info>
 	<id>contactsplus</id>
-	<name>Contacts+</name>
+	<name>Contacts Plus</name>
 	<licence>AGPL</licence>
 	<author>Döll Sebastian</author>
 	<shipped>false</shipped>
 	<description>Contacts with carddav support</description>
-	<version>1.0.8</version>
+	<version>1.0.9</version>
 	<namespace>ContactsPlus</namespace>
 	<category>productivity</category>
 	<default_enable/>
