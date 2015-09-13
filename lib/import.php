@@ -356,18 +356,7 @@ class Import{
 				$vcard->BDAY->add('VALUE', 'DATE');
 		  }
 
-		 if(array_key_exists('CATEGORIES', $importInfo)){
-		 	unset($vcard->CATEGORIES);
-			 $sCat = '';
-			 foreach($importInfo['CATEGORIES'] as $catInfo){
-			 	foreach($catInfo['value'] as $key => $val){
-			 		$sCat .=($sCat === '' )?$val:','.$val;
-			 	}	
-			 	
-			 }
-			 $vcard->CATEGORIES = $sCat;
-		 }
-
+		
 		 if(array_key_exists('ADR', $importInfo)){
 		 	unset($vcard->ADR);
 			 //$addressDefArray=array('0'=>'','1'=>'','2'=>'street','3'=>'city','4'=>'state','5'=>'postalcode','6'=>'country');
