@@ -204,5 +204,23 @@ class AddressBook extends \Sabre\CardDAV\AddressBook {
 		return $children;
 
 	}
+	
+	/**
+	 * This method receives a list of paths in it's first argument.
+	 * It must return an array with Node objects.
+	 *
+	 * If any children are not found, you do not have to return them.
+	 *
+	 * @return array
+	 */
+	function getMultipleChildren(array $paths) {
+		$objs = $this->carddavBackend->getMultipleCards($this->addressBookInfo['id'], $paths);
+		$children = [];
+		foreach($objs as $obj) {
 
+			$children[] = new Card($this->carddavBackend,$this->addressBookInfo,$obj);
+		}
+		return $children;
+	}
+	
 }
