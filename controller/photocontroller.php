@@ -140,7 +140,9 @@ class PhotoController extends Controller {
 						
 						
 						 \OC::$server->getCache()->remove($tmpkey);
+						 \OC::$server->getCache()->remove('show-contacts-foto-' . $id);
 						 \OC::$server->getCache()->set($tmpkey, $image->data(), 600);
+						  \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image->data(), 600);
 						 $response = new JSONResponse();
 						  $response -> setData($result);
 						  
@@ -163,7 +165,7 @@ class PhotoController extends Controller {
 		$localpath = \OC\Files\Filesystem::getLocalFile($path);
 		$tmpkey = 'editphoto' ;
 		$size = getimagesize($localpath, $info);
-		$exif = @exif_read_data($localpath);
+		//$exif = @exif_read_data($localpath);
 		$image = new \OCP\Image();
 		$image -> loadFromFile($localpath);
 		if ($image -> width() > 400 || $image -> height() > 400) {
@@ -241,7 +243,7 @@ class PhotoController extends Controller {
 		if(file_exists($file['tmp_name'])) {
 			$tmpkey =  'editphoto' ;
 			$size = getimagesize($file['tmp_name'], $info);
-		    $exif = @exif_read_data($file['tmp_name']);
+		    //$exif = @exif_read_data($file['tmp_name']);
 			$image = new \OCP\Image();
 			if($image->loadFromFile($file['tmp_name'])) {
 				

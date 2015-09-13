@@ -674,14 +674,23 @@ class ContactsController extends Controller {
 	     */
      
 		public function getContactPhoto($id){
-			$vcard = ContactsApp::getContactVCard($id);
-			
-			if (isset($vcard->PHOTO)){
+				
+			$data =  \OC::$server->getCache()->get('show-contacts-foto-' . $id);
+			if(!$data){
+				$vcard = ContactsApp::getContactVCard($id);
+				
+				if (isset($vcard->PHOTO)){
+					 $image = new \OCP\Image();
+					 $image->loadFromData((string)$vcard->PHOTO);
+					 \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image -> data(), 600);
+					 
+					 return $response = new ImageResponse($image);
+				}
+			}else{
 				 $image = new \OCP\Image();
-				 $image->loadFromData((string)$vcard->PHOTO);
-				 \OC::$server->getCache()->set('show-contacts-foto-' . $id, $image -> data(), 600);
-				 
-				 return $response = new ImageResponse($image);
+				 $image->loadFromData((string)$data);	
+				
+				return $response = new ImageResponse($image);
 			}
 		}
 	
@@ -795,8 +804,23 @@ class ContactsController extends Controller {
 			 \OC::$server->getCache()->set($tmpkey, $image -> data(), 600);
 			 
 		}
+		 $catOutput = '';
+		 if(isset($editInfoCard['CATEGORIES'][0]['value']) && count($editInfoCard['CATEGORIES'][0]['value'])>0){
+			
+			foreach($editInfoCard['CATEGORIES'] as $key => $catInfo){
+				if($key == 'value'){	
+					$aCatInfo = explode(',',$catInfo['value']);	
+					foreach($aCatInfo as $key => $val){
+						$backgroundColor=	ContactsApp::genColorCodeFromText(trim($val),80);
+						$color=ContactsApp::generateTextColor($backgroundColor);
+						$catOutput.='<span class="colorgroup toolTip" data-category="'.$val.'"  style="background-color:'.$backgroundColor.';color:'.$color.';" title="'.$val.'">'.mb_substr($val, 0,1,"UTF-8").'</span> ';
+						
+					}
+				}
+			}
+		}
 		 
-		 
+		 $addressBookName= $addressBookPerm['displayname'];
 		 
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize('/');
 		
@@ -807,6 +831,8 @@ class ContactsController extends Controller {
 			'addressbooksPerm' => $addressBookPerm,
 			'isPhoto' => $bPhoto,
 			'thumbnail' => $thumb,
+			'categories' => $catOutput,
+			'addressbookname' => $addressBookName,
 			'bShowCompany' => $bShowCompany,
 			'imgsrc' => $imgSrc,
 			'imgMimeType' => $imgMimeType,

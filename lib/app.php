@@ -889,12 +889,9 @@ class App{
 							$vcard = VObject\Reader::read($contact['carddata']);
 							
 							$details = VCard::structureContact($vcard);
-							$imgBuild='';
+							$imgBuild=false;
 							if($vcard->PHOTO){
-								$image = new \OCP\Image();
-								 $image->loadFromData((string)$vcard->PHOTO);
-								 $imgSrc=$image->__toString();
-								 $imgBuild='data:'.$image->mimeType().';base64,' .$imgSrc;
+								$imgBuild=true;
 							}
 							$sLetter=strtoupper(mb_substr($contact['sortFullname'],0,1,"UTF-8"));
 							
@@ -971,8 +968,9 @@ class App{
 		if(isset($CONTACTDATA['CATEGORIES'][0]['value']) && count($CONTACTDATA['CATEGORIES'][0]['value'])>0){
 			$hiddenClass ='';
 			foreach($CONTACTDATA['CATEGORIES'] as $key => $catInfo){
+				//\OCP\Util::writeLog(self::$appname,'CAT: '.$catInfo['value'], \OCP\Util::DEBUG);	
 				if($key == 'value'){	
-					$aCatInfo = explode(',',$catInfo['value'][0]);	
+					$aCatInfo = explode(',',$catInfo['value']);	
 					foreach($aCatInfo as $key => $val){
 						$backgroundColor=	self::genColorCodeFromText(trim($val),80);
 						$color=self::generateTextColor($backgroundColor);
@@ -1114,8 +1112,8 @@ class App{
 		$thumb=$favLink.'<i id="photo-id-'.$contactInfo['id'].'" class="nopic-row ioc ioc-user"></i>';
 		$thumbHead=$favLink.'<i id="photo-small-id-'.$contactInfo['id'].'" class="nopic-row ioc ioc-user"></i>';
 		if($contactInfo['photo']!=''){
-			$thumb=$favLink.'<img id="photo-id-'.$contactInfo['id'].'" class="svg" src="'.$contactInfo['photo'].'"  />';
-			$thumbHead=$favLink.'<img id="photo-small-id-'.$contactInfo['id'].'" class="svg" src="'.$contactInfo['photo'].'"  />';
+			$thumb=$favLink.'<img id="photo-id-'.$contactInfo['id'].'" class="svg" src="'.\OC::$server->getURLGenerator()->linkToRoute('contactsplus.contacts.getContactPhoto',array('id' => $contactInfo['id'])).'"  />';
+			$thumbHead=$favLink.'<img id="photo-small-id-'.$contactInfo['id'].'" class="svg" src="'.\OC::$server->getURLGenerator()->linkToRoute('contactsplus.contacts.getContactPhoto',array('id' => $contactInfo['id'])).'"  />';
 	
 		}
 		/**ADDRESSBOOK PERMISSIONS**/
