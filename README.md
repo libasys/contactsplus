@@ -7,7 +7,7 @@ Sebastian Döll
 
 Version Info:
 ============
-1.0.8
+1.0.9
 
 Setup Info:
 ===========
