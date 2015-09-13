@@ -7,7 +7,7 @@
    <input type="hidden" name="tmpkey" id="tmpkey" value="<?php p($_['tmpkey']); ?>" />
  <input type="hidden" name="selectedContactgroup" id="selectedContactgroup" value="" />
  
-	<span class="labelPhoto" id="contactPhoto"><?php print_unescaped($_['thumbnail']); ?>
+	<span style="padding-top:20px;" class="labelPhoto" id="contactPhoto"><?php print_unescaped($_['thumbnail']); ?>
   <div class="tip" id="contacts_details_photo_wrapper" title="<?php p($l->t('Drop photo to upload')); ?> (max <?php p($_['uploadMaxHumanFilesize']); ?>)" data-element="PHOTO">
 	<ul id="phototools" class="transparent hidden">
 		<li><a class="delete" title="<?php p($l->t('Delete current photo')); ?>"><i class="ioc ioc-delete "></i></a></li>
@@ -28,6 +28,10 @@ if($_['bShowCompany']){
 }
 ?>	
  	
+<div class="categories">
+	<i class="ioc ioc-book toolTip" title="<?php p($_['addressbookname']); ?>"></i>
+	<?php if($_['categories']!==''){   print_unescaped($_['categories']);  }?>
+</div>
 
 <span class="labelFullname"><?php p($name); ?></span>
 <span class="labelFirm" style="line-height:20px;"><?php  p($firm); ?></span>
@@ -100,7 +104,7 @@ if($_['bShowCompany']){
 			   			$iPref='<i class="ioc ioc-checkmark"></i>';	
 			   	} 
 		   	?>
-			 <span class="labelLeft">&nbsp;<a href="<?php p($VALUE['val']); ?>" target="_blank"><i class="ioc ioc-publiclink"></i></a> <?php p($VALUE['type']); ?></span><a href="<?php p($VALUE['val']); ?>" target="_blank"><?php p($VALUE['val']); ?></a> <?php print_unescaped($iPref); ?>
+			 <span class="labelLeft">&nbsp;<a href="<?php p($VALUE['val']); ?>" target="_blank"><i class="ioc ioc-publiclink"></i></a> <?php p($VALUE['type']); ?></span><a class="show-link" href="<?php p($VALUE['val']); ?>" target="_blank"><?php p($VALUE['val']); ?></a> <?php print_unescaped($iPref); ?>
 			<br style="clear:both;">
 		 <?php } ?>
 <span class="spacer">&nbsp;</span>
@@ -170,7 +174,7 @@ if($_['bShowCompany']){
   <br />
   </div>
 
-<div id="actions" style="border-top:1px solid #bbb;width:100%;">
+<div id="actions" style="border-top:1px solid #ddd;width:100%;">
 <div  class="button-group" style="margin: 5px 0px;float:left;width:48%;">
 <?php if($_['addressbooksPerm']['permissions'] & OCP\PERMISSION_DELETE) { ?>	
 	<button id="showContact-delete" class="button" title="<?php p($l->t("Delete"));?>">
@@ -186,7 +190,7 @@ if($_['bShowCompany']){
 		<button id="showContact-cancel" class="button" title="<?php p($l->t("Cancel"));?>"><i class="ioc ioc-close" ></i></button> 
 <?php if($_['addressbooksPerm']['permissions'] & OCP\PERMISSION_UPDATE) { ?>	
 	    
-		<button id="showContact-edit" class="button" title="<?php p($l->t("Edit"));?>"> <i class="ioc ioc-edit" ></i></button>
+		<button id="showContact-edit" class="button primary-button" title="<?php p($l->t("Edit"));?>"> <i class="ioc ioc-edit" ></i></button>
 	  <?php } ?>
 	   </div>
 	</div>

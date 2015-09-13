@@ -48,15 +48,13 @@ $contacts_options = OCA\ContactsPlus\Addressbook::all(OCP\USER::getUser());
 		<br><br>
 		<div id="contacts_import_newaddrform">
 			<input id="contacts_import_newaddressbook"  class="" type="text" placeholder="<?php p($l->t('Name of new Addressbook')); ?>" value="<?php p($guessedaddressbookname) ?>"><br>
-			
-			<!--<input id="calendar_import_generatename" type="button" class="button" value="<?php p($l->t('Take an available name!')); ?>"><br>-->
 			<div  id="contacts_import_mergewarning" class="hint"><?php p($l->t('A addressbook with this name already exists. If you continue anyhow, these addressbooks will be merged.')); ?></div>
 		<br style="clear:both;" />
 		</div>
 		<input type="checkbox" id="contacts_import_overwrite" value="1">
 		<label for="contacts_import_overwrite"><?php p($l->t('Remove all vcards from the selected addressbook')); ?></label>
 		<br>
-		<input id="contacts_import_submit" type="button" class="button" value="&raquo; <?php p($l->t('Import')); ?> &raquo;" id="startimport">
+		<button id="contacts_import_submit" class="button primary-button"><?php p($l->t('Import')); ?></button>
 	<form>
 </div>
 <div id="contacts_import_process">

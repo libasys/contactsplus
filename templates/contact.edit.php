@@ -372,18 +372,18 @@ if($_['department']!='') $isDActive=' activeAddFieldEdit';
 			?>
 	    </ul>
  </div>  
-<div id="actions" style="border-top:1px solid #bbb;width:100%;">
+<div id="actions" style="border-top:1px solid #ddd;width:100%;">
 	
 <?php if($_['addressbooksPerm']['permissions'] & OCP\PERMISSION_UPDATE) { ?>	
-<div  class="button-group" style="margin: 7px 5px;float:left;width:30%;">
+<div  class="button-group" style="margin: 7px 0px;float:left;width:30%;">
 	<button id="editContact-morefields" class="button" title="<?php p($l->t('Add Field')); ?>"><i class="ioc ioc-add"></i> <?php p($l->t('Field')); ?></button> 
 </div>
 <?php } ?>
-<div  class="button-group" style="margin: 7px 5px;float:right;">
+<div  class="button-group" style="margin: 7px 0px;float:right;">
 	
 		<button id="editContact-cancel" class="button" title="<?php p($l->t('Cancel')); ?>"><i class="ioc ioc-close" ></i></button> 
 <?php if($_['addressbooksPerm']['permissions'] & OCP\PERMISSION_UPDATE) { ?>	
-<button id="editContact-submit" class="button"  title="<?php p($l->t('OK')); ?>" style="min-width:60px;"><i class="ioc ioc-checkmark" ></i></button>
+<button id="editContact-submit" class="button primary-button"  title="<?php p($l->t('OK')); ?>" style="min-width:60px;"><i class="ioc ioc-checkmark" ></i></button>
 <?php } ?>
 	   </div>
 	</div>
