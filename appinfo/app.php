@@ -14,7 +14,7 @@ $navigationEntry = function () use ($c) {
 		'order' => 1,
 		'name' => $c->query('L10N')->t('Contacts+'),
 		'href' => $c->query('URLGenerator')->linkToRoute($c->getAppName().'.page.index'),
-		'icon' => $c->query('URLGenerator')->imagePath($c->getAppName(), 'contacts.svg'),
+		'icon' => $c->query('URLGenerator')->imagePath($c->getAppName(), 'contactsplus.svg'),
 	];
 };
 $c->getServer()->getNavigationManager()->add($navigationEntry);
@@ -25,6 +25,7 @@ if (\OCP\User::isLoggedIn()) {
 
 \OC::$server->getSearch()->registerProvider('OCA\ContactsPlus\Search\Provider', array('app' => $contactsAppName));
 
+\Sabre\VObject\Component\VCard::$propertyMap['CATEGORIES'] = '\OCA\ContactsPlus\VObject\StringPropertyCategories';
 
 \OCP\Share::registerBackend(ContactsApp::SHAREADDRESSBOOK, 'OCA\ContactsPlus\Share\Backend\Addressbook');
 \OCP\Share::registerBackend(ContactsApp::SHARECONTACT, 'OCA\ContactsPlus\Share\Backend\Contact');
