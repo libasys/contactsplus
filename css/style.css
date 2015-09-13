@@ -25,7 +25,7 @@
 	overflow: auto;
 	height:100%;
 	text-overflow: ellipsis;
-	width:400px;
+	width:380px;
 	right:0;
 	padding-top: 20px;
 	z-index:190;
@@ -34,6 +34,15 @@
 	margin-top: 0px;
 	
 }
+
+.app-contactsplus #searchresults #search-close{
+	font-size:24px;
+	position:absolute;
+	right:20px;
+	top:20px;
+	cursor:pointer;
+}
+
 .app-contactsplus #searchresults td.icon{
 		display:none;
 		width:0;
@@ -349,7 +358,7 @@ color:#000;
 #app-navigation .app-navigation-entry-edit input[type="text"] {
 	padding:0;
 	padding-left:5px;
-	width: 194px;
+	width: 174px;
 	height:30px;
 }
 
@@ -734,16 +743,17 @@ background:#FFFABC;
 
 ul#contacts-list{
 	padding-left:10px;
-	float:left;
 	margin:0;
+	display:block;
 	position:relative;
 	padding-right:24px;
 }
 #rightcontent{
 	margin:0;
 	display:inline-block;
+	width:100%;
 	overflow:auto;
-   overflow-x:hidden;
+  
 }
 li.contactsrow .container{
 	display:block;
@@ -845,7 +855,7 @@ li.contactsrow span.rowBody{
 	width:100%;
 }
 
-li.contactsrow .categories{
+li.contactsrow .categories,#show-contact .categories{
 	background:transparent;
 	display:block;
 	right:58px;
@@ -856,6 +866,29 @@ li.contactsrow .categories{
 	
 	line-height:24px;
 }
+#show-contact .categories{
+	z-index:500;
+	position:absolute;
+	top:0px;
+	right:10px;
+}
+#show-contact .categories .ioc{
+	font-size:24px;
+	float:right;
+	margin-right:5px;
+}
+#show-contact a.show-link{
+	line-height:20px;
+	height:20px;
+	overflow:hidden;
+	display:inline-block;
+	position:relative;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	width:260px;
+}
+
+
 li.contactsrow .option{
 	background:transparent;
 	display:block;
@@ -1242,7 +1275,22 @@ button#newContact-morefields{
 #edit-contact #actions,
 #show-contact #actions{
 	position:absolute;
-	bottom:0;
+	bottom:-5px;
+}
+
+.button.primary-button{
+	background-color: #35537a;
+	color: #ddd;
+}
+
+#new-contact #actions .button.primary-button i.ioc,
+#edit-contact #actions .button.primary-button i.ioc,
+#show-contact #actions .button.primary-button i.ioc{
+	color: #ddd;
+}
+.button.primary-button:hover{
+	color:#fff;
+	background-color: #35537a;
 }
 
 #show-contact #actions button:hover i.ioc-delete{
@@ -1369,7 +1417,7 @@ padding-right:0px;
 	margin-left:2%;
 	width:72%;
 	display:block;
-	padding-top:10px;
+	padding-top:20px;
 	float:left;
 }
 #show-contact .labelFirm{
@@ -1496,20 +1544,33 @@ padding-right:0px;
 	color:#999999;
 }
 #showAdditionalFieds{
-	background:#f4f4f4;
+	
+	background:#fff;
 	position:absolute;
 	bottom:50px;
-	left:100px;
-	
+	left:5px;
+	min-height:50px;
 	display:block;
 	width:120px;
-	padding:8px 8px;
-	font-size:14px;
-	border-radius:16px;
-	border:1px solid #bbb;
-	box-shadow:2px 2px 8px #333;
-	z-index:50;	
+	color: #333333;
+	border-radius: 3px; 
+	box-shadow: 0 0 7px #888888;
+	padding: 15px;
+	z-index: 500;
+	font-size: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	
 }
+.additionalFieldsRow{
+	line-height:26px;
+}
+.additionalFieldsRow:hover{
+	background-color:#ddd;
+	cursor:pointer;
+}
+
 .activeAddField:after{
 	content: '\2714';
 	position: relative;
@@ -1524,7 +1585,11 @@ padding-right:0px;
 	width:100%;
 }
 
-#edit_photo_dialog_img { display: block; min-width: 150; min-height: 200; }
+#edit_photo_dialog_img { 
+	display: block;
+	width:100%;
+	min-height: 200px; 
+}
 #file_upload_form { width: 0; height: 0; }
 #file_upload_target, #import_upload_target, #crop_target { display:none; }
 #file_upload_start, #import_upload_start { -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; filter:alpha(opacity=0); opacity:0; z-index:1001; width:0; height:0;}
@@ -1534,15 +1599,18 @@ padding-right:0px;
 .add,.edit,.delete,.mail, .globe, .upload, .download, .cloud, .share, .abo { cursor: pointer; width: 24px; height: 24px; margin: 0px; float: left; position:relative; opacity: 0.1; }
 .add:hover,.edit:hover,.delete:hover,.mail:hover, .globe:hover, .upload:hover, .download:hover, .cloud:hover,.share:hover ,.abo:hover{ opacity: 1.0 }
 
-#cropbox { margin: auto; }
+#cropbox {
+margin-left:auto;
+margin-right:auto; 
+}
 #contacts_details_photo_wrapper { width: 150px; background:red;}
 #contacts_details_photo_wrapper.wait { opacity: 0.6; filter:alpha(opacity=0.6); z-index:1000; background: url('%webroot%/core/img/loading.gif') no-repeat center center; cursor: wait; }
 .contacts_details_photo { border-radius: 0.5em; border: thin solid #bbb; margin: 0.3em; background: url('%webroot%/core/img/loading.gif') no-repeat center center; -moz-box-shadow: 0 1px 3px #777; -webkit-box-shadow: 0 1px 3px #777; box-shadow: 0 1px 3px #777; opacity: 1; }
 .contacts_details_photo:hover { background: #fff; cursor: default; }
 
 #phototools { position:absolute;top:5px;  width:auto;  padding:2px 5px; background-color:#fff; list-style-type:none; border-radius: 0.5em; -moz-box-shadow: 0 1px 3px #777; -webkit-box-shadow: 0 1px 3px #777; box-shadow: 0 1px 3px #777; }
-#phototools li { display: inline;  }
-#phototools li a { float:left; cursor:pointer;  opacity: 0.6;padding:3px; }
+#phototools li { display: block; float:left;  width:42px;}
+#phototools li a { float:left; cursor:pointer; display:inline-block; width:38px; opacity: 0.6;padding:1px; }
 #phototools li a i{font-size:24px;}
 #phototools li a:hover { opacity: 1; }
 
@@ -1749,9 +1817,9 @@ table#allAddressbooks{
 }	
 @media only screen and (max-width: 768px) {
 	
-	 img#contacts_details_photo{
-		width:60px;
-		height:60px;
+	 #show-contact  img#contacts_details_photo{
+		width:90px;
+		height:90px;
 		
 	}
 	#rightcontent{
@@ -1866,6 +1934,13 @@ table#allAddressbooks{
 	#edit-contact #contactPhoto #phototools{
 		top:30px;
 	}
+	
+	#show-contact  img#contacts_details_photo{
+		width:70px;
+		height:70px;
+		
+	}
+	
 	#new-contact .labelLeft,
 	#edit-contact .labelLeft{
 		width:98%;

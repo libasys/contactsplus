@@ -147,9 +147,6 @@
 			<ul id="alphaScroll"></ul>
 	</div>	
 </div>
-<div id="contact_details" style="display:none;"></div>
-<div id="dialogSmall" title="Basic dialog" style="top:0;left:0;display:none;"></div>
+
+
 <div id="dialogmore" title="Basic dialog" style="top:0;left:0;display:none;"></div>
-<div id="edit_photo_dialog" title="Edit photo">
-		<div id="edit_photo_dialog_img"></div>
-</div>

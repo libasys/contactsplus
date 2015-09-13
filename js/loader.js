@@ -27,8 +27,10 @@ OC.ContactsPlus.Import =  {
 		},
 		close: function(){
 			OC.ContactsPlus.Import.reset();
-			$('#contacts_import_dialog').dialog('destroy').remove();
+			$('#contacts_import_dialog').ocdialog('close');
+			$('#contacts_import_dialog').ocdialog('destroy').remove();
 			$('#contacts_import_dialog').remove();
+			
 			if($('#cAddressbooks').length > 0){
 				OC.ContactsPlus.getAddressBooks();
 			}
@@ -36,12 +38,13 @@ OC.ContactsPlus.Import =  {
 		},
 		init: function(){
 			//init dialog
-			$('#contacts_import_dialog').dialog({
-				width : 500,
-				resizable: false,
-				close : function() {
+			$('#contacts_import_dialog').ocdialog({
+					modal: true,
+					closeOnEscape: true,
+					height: 'auto', width:380,
+					close : function() {
 					OC.ContactsPlus.Import.Dialog.close();
-				}
+					}
 			});
 			//init buttons
 			$('#contacts_import_done').click(function(){
@@ -49,10 +52,13 @@ OC.ContactsPlus.Import =  {
 			});
 			$('#contacts_import_submit').click(function(){
 				OC.ContactsPlus.Import.Core.process();
+				
+				return false;
 			});
 			$('#contacts_import_mergewarning').click(function(){
 				$('#contacts_import_newaddressbook').attr('value', $('#contacts_import_availablename').val());
 				OC.ContactsPlus.Import.Dialog.mergewarning($('#contacts_import_newaddressbook').val());
+				return false;
 			});
 			$('#contacts_import_addressbook').change(function(){
 				if($('#contacts_import_addressbook option:selected').val() == 'newaddressbook'){

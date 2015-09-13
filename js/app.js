@@ -96,6 +96,18 @@ OC.ContactsPlus ={
 			}
 		});
 		
+		$(document).on('click', '#phototools li a', function(event) {
+			$(this).tipsy('hide');
+		});
+		$(document).on('mouseenter', '#contactPhoto', function(event) {
+			$('#phototools').show();
+			
+		});
+		$(document).on('mouseleave', '#contactPhoto', function(event) {
+			$('#phototools').hide();
+		});
+		
+		
 	},
 	ContactPhoto:{
 		loadPhoto:function(){
@@ -115,7 +127,7 @@ OC.ContactsPlus ={
 	
 			$('#noimage').remove();
 		
-			$('#contact_details').removeClass('forceOpen');
+			
 			
 		},
 		deletePhoto:function(){
@@ -199,7 +211,7 @@ OC.ContactsPlus ={
 		
 						$('#imgsrc').val(OC.ContactsPlus.imgSrc);
 						$('#imgmimetype').val(OC.ContactsPlus.imgMimeType);
-						$('#edit_photo_dialog_img').html(jsondata.page);
+						//$('#edit_photo_dialog_img').html(jsondata.page);
 					} else {
 						OC.dialogs.alert(jsondata.message, t(OC.ContactsPlus.appName, 'Error'));
 					}
@@ -229,11 +241,11 @@ OC.ContactsPlus ={
 					'id' : id,
 				},
 				success : function(data) {
+					$('body').append('<div id="edit_photo_dialog"><div id="edit_photo_dialog_img"></div></div>');
 					 $('#edit_photo_dialog_img').html(data);
 					
 					$('#cropbox').attr('src', 'data:' +OC.ContactsPlus.imgMimeType + ';base64,' +OC.ContactsPlus.imgSrc).show();
-	                //TODO SHOWCOORDS
-	                
+	              
 					$('#cropbox').Jcrop({
 						onChange :OC.ContactsPlus.ContactPhoto.showCoords,
 						onSelect : OC.ContactsPlus.ContactPhoto.showCoords,
@@ -246,14 +258,43 @@ OC.ContactsPlus ={
 						setSelect :[ 200, 200, 100, 100 ]//,
 						//aspectRatio: 0.8
 					});
+				
+					$('#edit_photo_dialog').ocdialog({
+						modal: true,
+						closeOnEscape: true,
+						title : t(OC.ContactsPlus.appName, 'Edit Photo'),
+						height: 'auto', 
+						width: 330,
+						buttons : [{
+						text: t(OC.ContactsPlus.appName, 'Cut Photo'),
+						click: function() {
+								OC.ContactsPlus.ContactPhoto.savePhoto(this);
+								$('#coords input').val('');
+								$('#cropbox').attr('src','');
+								
+							},
+							defaultButton: true
+						},
+						{
+						text: t(OC.ContactsPlus.appName, 'Cancel'),
+							click: function() { 
+								$(this).ocdialog('close');
+							}
+						}
+						],
+						close: function(/*event, ui*/) {
+							$('#edit_photo_dialog').ocdialog('destroy').remove();
+							$('#edit_photo_dialog').remove();
+						
+						},
+					});
+					
+					return false;
 				}
 				});
-			
-				if ($('#edit_photo_dialog').dialog('isOpen') == true) {
-					$('#edit_photo_dialog').dialog('moveToTop');
-				} else {
-					$('#edit_photo_dialog').dialog('open');
-				}
+				
+				
+				
 				
 			},
 			savePhoto:function() {
@@ -289,6 +330,8 @@ OC.ContactsPlus ={
 									$('span[data-contactid="'+response.data.id+'"] span.head-picture').append(newImgSmall);
 								}
 						 }
+						
+						$('#edit_photo_dialog').ocdialog('close');
 						
 					}else{
 						OC.dialogs.alert(response.data.message, t(OC.ContactsPlus.appName, 'Error'));
@@ -969,7 +1012,6 @@ OC.ContactsPlus ={
 				multi:false,
 				closeable:false,
 				arrow: bArrow,
-				animation:'pop',
 				placement:sPlacement,
 				constrain:sConstrain,
 				cache:false,
@@ -1153,7 +1195,6 @@ OC.ContactsPlus ={
 				multi:false,
 				closeable:false,
 				arrow: bArrow,
-				animation:'pop',
 				placement:sPlacement,
 				constrain:sConstrain,
 				cache:false,
@@ -1262,27 +1303,6 @@ OC.ContactsPlus ={
 					  		OC.ContactsPlus.ContactPhoto.loadActionPhotoHandlers();
 							OC.ContactsPlus.ContactPhoto.loadPhotoHandlers();
 							
-							
-							$('#phototools li a').click(function() {
-								$(this).tipsy('hide');
-							});
-							
-							$('#contactPhoto').on('mouseenter',function(){
-								$('#phototools').slideDown(200);
-							});
-							$('#contactPhoto').on('mouseleave',function(){
-								$('#phototools').slideUp(200);
-							});
-							
-								$('#phototools').hover(
-									function () {
-										$(this).removeClass('transparent');
-									},
-									function () {
-										$(this).addClass('transparent');
-									}
-								);
-								
 							 $('#edit-contact .innerContactontent').css('max-height',($('#edit-contact').height()-$('#edit-contact #actions').height()-5)+'px');	
 							 that.reCalcPos();	
 					   
@@ -1294,22 +1314,21 @@ OC.ContactsPlus ={
 		
 	},
 	deleteContact:function(iCardId){
-			
+			$('body').append('<div id="dialogSmall"></div>');
 			var iCount = 1;
 		 	if($('.visible .ui-selected').length>0){
 		 		iCount = $('.visible .ui-selected').length;
 		 	}	
-		 $( "#dialogSmall" ).html( t(OC.ContactsPlus.appName, 'Please choose: contact delete or remove all groups from contact'));
+		 var html = t(OC.ContactsPlus.appName, 'Please choose: contacts delete or remove all groups from contacts');
 	  	 
-	  	 
-	  	  $( "#dialogSmall" ).dialog({
-			resizable: false,
-			title : t(OC.ContactsPlus.appName, 'Delete Contact or From Groups'),
-			width:500,
-			height:200,
+	  	 $('#dialogSmall').html(html).ocdialog({
 			modal: true,
+			closeOnEscape: true,
+			title : t(OC.ContactsPlus.appName, 'Delete Contacts or From Groups'),
+			height: 'auto', 
+			width: 380,
 			buttons: [
-						 { text:t(OC.ContactsPlus.appName, 'Delete Contact')+' ('+iCount+')','class':'delButton', click: function() {
+						 { text:t(OC.ContactsPlus.appName, 'Delete Contacts')+' ('+iCount+')', click: function() {
 						 	
 						 	var oDialog=$(this);
 						 	var delId= 0;
@@ -1330,7 +1349,7 @@ OC.ContactsPlus ={
 								
 								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/deletecontact'),{'id':delId},function(jsondata){
 										if(jsondata.status == 'success'){
-											oDialog.dialog( "close" );
+											oDialog.ocdialog( "close" );
 											if(jsondata.data.count == 1){
 												if(jsondata.data.groups!=''){
 													temp=jsondata.data.groups.split(',');
@@ -1380,7 +1399,8 @@ OC.ContactsPlus ={
 											alert(jsondata.data.message);
 										}
 							        });
-						  	 }
+						  	 },
+						  	 defaultButton: true
 						 },
 						  { text:t(OC.ContactsPlus.appName, 'Delete From All Groups')+' ('+iCount+')', click: function() { 
 						  	  var oDialog=$(this);
@@ -1402,7 +1422,7 @@ OC.ContactsPlus ={
 								
 								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/deletecontactfromgroup'),{'id':delId},function(jsondata){
 										if(jsondata.status == 'success'){
-											oDialog.dialog( "close" );
+											oDialog.ocdialog( "close" );
 											if(jsondata.data.count == 1){
 												if(jsondata.data.scat !== ''){
 													temp=jsondata.data.scat.split(',');
@@ -1433,17 +1453,20 @@ OC.ContactsPlus ={
 											alert(jsondata.data.message);
 										}
 							        });
-						  	 }
-						},
-						{ text:t(OC.ContactsPlus.appName, 'Cancel'), click: function() { 
-							$( this ).dialog( "close" );
+						  	},
+						  	defaultButton: true
+						}],
+						 close: function(/*event, ui*/) {
+							$(this).ocdialog('destroy').remove();
+							$('#dialogSmall').remove();
 							if($('.visible .ui-selected').length>0){
 								OC.ContactsPlus.resetBatch();	
 							}
-						 } 
-						 }],
-		});
-  	 
+								
+						},
+			});
+	  	 
+	 
 		return false;
 	},
 	SubmitForm: function(VALUE, FormId, UPDATEAREA) {
@@ -1603,7 +1626,6 @@ OC.ContactsPlus ={
 				multi:false,
 				closeable:true,
 				arrow:bArrow,
-				animation:'pop',
 				placement:sPlacement,
 				constrain:sConstrain,
 				cache:false,
@@ -1621,7 +1643,9 @@ OC.ContactsPlus ={
 				
 				
 						$(".innerContactontent").niceScroll();
-						
+						 $('.toolTip').tipsy({
+								html : true
+							});
 						
 						 $('#selectedContactgroup').val($('#cgroups li.isActiveGroup').attr('data-id'));
 						 
@@ -1636,25 +1660,7 @@ OC.ContactsPlus ={
 							OC.ContactsPlus.ContactPhoto.loadPhoto();
 						}
 						
-						$('#phototools li a').click(function() {
-							$(this).tipsy('hide');
-						});
-							
-						$('#contactPhoto').on('mouseenter',function(){
-							$('#phototools').slideDown(200);
-						});
-						$('#contactPhoto').on('mouseleave',function(){
-							$('#phototools').slideUp(200);
-						});
 						
-						$('#phototools').hover(
-							function () {
-								$(this).removeClass('transparent');
-							},
-							function () {
-								$(this).addClass('transparent');
-							}
-						);
 						if(evt === null){
 							$('#showContact-edit').on('click',function(){
 								OC.ContactsPlus.popOverElem.webuiPopover('destroy');
@@ -2096,21 +2102,22 @@ OC.ContactsPlus ={
            });
 		},
 		showDialogAddressbook:function(addrId,CardId){
-			 $( "#dialogSmall" ).html(t(OC.ContactsPlus.appName, 'Would you like copy or move the contact to the addressbook?'));
-			 
-			 var iCount = 1;
+			$('body').append('<div id="dialogSmall"></div>');
+			
+			var iCount = 1;
 			 if($('.visible .ui-selected').length>0){
 			 		iCount = $('.visible .ui-selected').length;
 			 }
 			 
-			 $( "#dialogSmall" ).dialog({
-			resizable: false,
-			title : t(OC.ContactsPlus.appName, 'Copy or Move Contact to Addressbook')+' ('+iCount+')',
-			width:520,
-			height:200,
-			modal: true,
-			buttons: [
-						 { text:t(OC.ContactsPlus.appName, 'Copy Contact')+' ('+iCount+')', click: function() {
+			var html = t(OC.ContactsPlus.appName, 'Would you like copy or move the contacts to the addressbook?');
+			$('#dialogSmall').html(html).ocdialog({
+				modal: true,
+				closeOnEscape: true,
+				title : t(OC.ContactsPlus.appName, 'Copy or Move Contacts to Addressbook')+' ('+iCount+')',
+				height: 'auto', 
+				width:380,
+				buttons: [
+						 { text:t(OC.ContactsPlus.appName, 'Copy Contacts')+' ('+iCount+')', click: function() {
 						 	
 						 	 var oDialog=$(this);
 						 	 var moveId= 0;
@@ -2128,21 +2135,22 @@ OC.ContactsPlus ={
 							}
 						 	 
 						 	 
-								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/copycontact'),{'addrid':addrId,'id':moveId},function(jsondata){
-										if(jsondata.status === 'success'){
-											oDialog.dialog( "close" );
-											var iCounterAll = parseInt($('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text());
-											$('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text((iCounterAll + jsondata.data.count));
-											OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contact copied success!'));
-										}
-										if(jsondata.status === 'error'){
-											oDialog.dialog( "close" );
-											OC.ContactsPlus.showMeldung(jsondata.data.msg);
-										}
-							        });
-						  	 }
+							 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/copycontact'),{'addrid':addrId,'id':moveId},function(jsondata){
+									if(jsondata.status === 'success'){
+										oDialog.ocdialog( "close" );
+										var iCounterAll = parseInt($('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text());
+										$('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text((iCounterAll + jsondata.data.count));
+										OC.ContactsPlus.showMeldung(t(OC.ContactsPlus.appName,'Contact copied success!'));
+									}
+									if(jsondata.status === 'error'){
+										oDialog.ocdialog( "close" );
+										OC.ContactsPlus.showMeldung(jsondata.data.msg);
+									}
+						        });
+						  	 },
+							defaultButton: true
 						 },
-						  { text:t(OC.ContactsPlus.appName, 'Move Contact')+' ('+iCount+')', click: function() { 
+						  { text:t(OC.ContactsPlus.appName, 'Move Contacts')+' ('+iCount+')', click: function() { 
 						  	  var oDialog=$(this);
 						  	  	 var moveId= 0;
 						  	 	if($('.visible .ui-selected').length>0){
@@ -2159,7 +2167,7 @@ OC.ContactsPlus ={
 							}
 								 $.post(OC.generateUrl('apps/'+OC.ContactsPlus.appName+'/movecontact'),{'addrid':addrId,'id':moveId},function(jsondata){
 										if(jsondata.status === 'success'){
-											oDialog.dialog( "close" );
+											oDialog.ocdialog( "close" );
 											if(jsondata.data.count == 1){
 												 $('.container[data-contactid='+CardId+']').closest('li.contactsrow').remove();
 												 var iCounterAll=parseInt($('#cAddressbooks li[data-adrbid="'+addrId+'"]').find('.groupcounter').text());
@@ -2174,21 +2182,24 @@ OC.ContactsPlus ={
 											}
 										}
 										if(jsondata.status === 'error'){
-											oDialog.dialog( "close" );
+											oDialog.ocdialog( "close" );
 											OC.ContactsPlus.showMeldung(jsondata.data.msg);
 										}
 							        });
-						  	 }
-						},
-						{ text:t(OC.ContactsPlus.appName, 'Cancel'), click: function() { 
-							$( this ).dialog( "close" ); 
+						  	 },
+							defaultButton: true
+						}
+						 ],
+						 close: function(/*event, ui*/) {
+							$(this).ocdialog('destroy').remove();
+							$('#dialogSmall').remove();
 							if($('.visible .ui-selected').length>0){
 								OC.ContactsPlus.resetBatch();	
 							}
-							
-							} } 
-						 ],
-		});
+						},
+			
+			});
+			
   	    
 		return false;
 			 
@@ -2431,6 +2442,20 @@ $(document).ready(function(){
 			return false;
 		});
 		
+		$('#searchbox').on('keyup',function(){
+		if($('#searchbox').val().length>3){
+			if($('#searchresults #search-close').length ===0){
+				$('#searchresults').prepend($('<i />').attr({'class':'ioc ioc-close','id':'search-close'}));
+			}
+		}
+	});
+	
+	$(document).on('click','#searchresults #search-close',function(event){
+		$('#searchbox').val('');
+		OC.Search.hideResults();
+	});
+		
+		
 		$(document).on('click', 'a.share', function(event) {
 	//	if (!OC.Share.droppedDown) {
 		event.preventDefault();
@@ -2469,19 +2494,7 @@ $(document).ready(function(){
 				
 				return r;
 			};
-			/*
-			if($('#linkText').length > 0){
-				$('#linkText').val($('#linkText').val().replace('public.php?service='+sService+'&t=','index.php/apps/contactsplus/s/'));
-	
-				var target = OC.Share.showLink;
-				OC.Share.showLink = function() {
-					var r = target.apply(this, arguments);
-					
-					$('#linkText').val($('#linkText').val().replace('public.php?service='+sService+'&t=','index.php/apps/contactsplus/s/'));
-					
-					return r;
-				};
-			}*/
+			
 		})();
 		if (!$('#linkCheckbox').is(':checked')) {
 				$('#linkText').hide();
@@ -2517,15 +2530,6 @@ $(document).ready(function(){
 			 }
 		});
 		
-		//$("#leftsidebar").niceScroll();
-		  	
-     
-    /*
-     $('#addGroup').on('click', function () {
-			//OC.ContactsPlus.oldGroup=groupsSel;
-			OC.Tags.edit(OC.ContactsPlus.appName);
-			 return false;
-	 });*/
     $('#addContact').on('click', function (event) {
 			var addrPerm=$('#cAddressbooks li.isActiveABook').attr('data-perm');
 			if(addrPerm & OC.PERMISSION_CREATE){
@@ -2558,20 +2562,13 @@ $(document).ready(function(){
 	  	 
 	  	  OC.ContactsPlus.loadContacts(addrBookId,$(this).attr('data-id'),0,0);
 	  });
-		  
-	
 	
 	
 	$('.letter').each(function(i,el){
 		existLetter=$(el).attr('data-scroll');
 		$('#rightcontentSideBar li[data-letter="'+existLetter+'"]').addClass('bLetterActive');
 	});
-	/*
-     $(OC.Tags).on('change', function(event, data) {
-		if(data.type === OC.ContactsPlus.appName) {
-		   OC.ContactsPlus.categoriesChanged(data.tags);
-		}
-	});	*/
+	
 		
      $('input#contactphoto_fileupload').fileupload({
 		dataType : 'json',
@@ -2587,26 +2584,7 @@ $(document).ready(function(){
 		}
 	});
     
-     /* Initialize the photo edit dialog */
-		$('#edit_photo_dialog').dialog({
-			autoOpen: false, modal: true, height:'auto', width: 'auto'
-		});
-		
-		$('#edit_photo_dialog' ).dialog( 'option', 'buttons', [
-			{
-				text: "Ok",
-				click: function() {
-					OC.ContactsPlus.ContactPhoto.savePhoto(this);
-					$('#coords input').val('');
-					$('#cropbox').attr('src','');
-					$(this).dialog('close');
-				}
-			},
-			{
-				text: "Cancel",
-				click: function() { $(this).dialog('close'); }
-			}
-		] );
+   
 		//FIXME
 		$(document).on('click', '#new-contact, #edit-contact', function(evt) {
 			
@@ -2621,7 +2599,7 @@ $(document).ready(function(){
 		});
 	//FIXME
 	
-			
+		 $('link[rel="shortcut icon"]').attr('href', OC.filePath(OC.ContactsPlus.appName, 'img', 'favicon.png'));	
 });
 $(window).bind('hashchange', function() {
 	OC.ContactsPlus.checkShowEventHash();
